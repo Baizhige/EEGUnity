@@ -13,7 +13,11 @@ class EEGCorrection(UDatasetSharedAttributes):
         self._shared_attr = main_instance._shared_attr
 
     def report(self):
-
+        """
+           Generate a statistical report on the dataset, including file type proportions, sampling rates,
+           channel configurations, and completeness checks. This report can be generated for individual
+           groups within the dataset or for the dataset as a whole.
+           """
         def percentage(part, whole):
             return round(100 * float(part) / float(whole), 2)
 
@@ -29,18 +33,21 @@ class EEGCorrection(UDatasetSharedAttributes):
                     data = grouped_df.get_group(domain_tag)
 
                 total_count = len(data)
-
+                # Calculate the percentage of each file type in the dataset/group
                 file_type_counts = {k: percentage(v, total_count) for k, v in
                                     data['File Type'].value_counts().to_dict().items()}
+                # Calculate the percentage of each sampling rate in the dataset/group
                 sampling_rate_counts = {k: percentage(v, total_count) for k, v in
                                         data['Sampling Rate'].value_counts().to_dict().items()}
+                # Calculate the percentage of each channel configuration in the dataset/group
                 channel_configs = data['Channel Names'].apply(
                     lambda x: f'configuration {len(x.split(","))}' if pd.notna(x) else 'unknown').value_counts()
                 channel_configs_percentage = {k: percentage(v, total_count) for k, v in
                                               channel_configs.to_dict().items()}
+                # Calculate the percentage of each completeness check status in the dataset/group
                 completeness_check_counts = {k: percentage(v, total_count) for k, v in
                                              data['Completeness Check'].value_counts().to_dict().items()}
-
+                # Store the calculated statistics in the result dictionary
                 result[domain_tag] = {
                     'File Type Proportions (%)': file_type_counts,
                     'Sampling Rate Proportions (%)': sampling_rate_counts,
@@ -87,6 +94,23 @@ class EEGCorrection(UDatasetSharedAttributes):
         pprint.pprint(report)
 
     def visualization_frequency(self, max_sample=10):
+        """
+            Visualize the frequency spectrum for each domain in the dataset.
+
+            Parameters:
+            -----------
+            max_sample : int, optional
+                The maximum number of samples to visualize per domain. If the number of
+                samples in a domain exceeds this value, a random subset will be used.
+                Default is 10.
+
+            Returns:
+            --------
+            None
+                This function does not return any value. It displays frequency spectrum
+                plots for each domain in the dataset.
+
+            """
         def compute_amplitude_spectrum(data, sfreq):
             # Compute amplitude spectrum using scipy's welch method
             freqs, psd = welch(data, float(sfreq), window='hann', nperseg=1024, noverlap=512, nfft=2048, axis=-1)
@@ -150,6 +174,20 @@ class EEGCorrection(UDatasetSharedAttributes):
             plt.show()
 
     def visualization_channels_corr(self, max_sample=16):
+        """
+        Visualizes the correlation between EEG data channels for different domains.
+
+        Parameters:
+        -----------
+        max_sample : int, optional
+            Maximum number of samples to visualize per domain. Default is 16.
+
+        Returns:
+        --------
+        None
+            This function does not return a value. It displays a set of correlation matrix plots for each domain.
+
+        """
         def compute_channel_correlation(data):
             # Compute correlation matrix for EEG data channels
             corr_matrix = np.corrcoef(data)

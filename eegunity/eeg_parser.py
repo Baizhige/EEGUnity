@@ -13,12 +13,13 @@ import warnings
 import json
 import datetime
 import numpy as np
-with open('combined_montage.json', 'r') as file:
+
+
+current_dir = os.path.dirname(__file__)
+json_file_path = os.path.join(current_dir, 'combined_montage.json')
+with open(json_file_path, 'r') as file:
     data = json.load(file)
-
-# 获取键值并转化成列表
 STANDARD_EEG_CHANNELS = list(data.keys())
-
 EEG_PREFIXES_SUFFIXES = {"EEG", "FP", "REF", "LE", "RE"}
 
 class EEGParser(UDatasetSharedAttributes):
@@ -29,26 +30,24 @@ class EEGParser(UDatasetSharedAttributes):
         dataset_path = self.get_shared_attr()['dataset_path']
         locator_path = self.get_shared_attr()['locator_path']
         if dataset_path and locator_path:
-            raise ValueError("不能同时存在'datasets'和'locator'路径")
+            raise ValueError("The 'datasets' and 'locator' paths cannot both be provided simultaneously.")
         elif not dataset_path and not locator_path:
-            raise ValueError("必须提供'datasets'或'locator'路径之一")
+            raise ValueError("One of 'datasets' or 'locator' paths must be provided.")
 
-        if self.get_shared_attr()['locator_path']:  # 通过读取Locator地址构建UnifiedDataset
+        if self.get_shared_attr()['locator_path']:  # initiate UnifiedDataset via Locator
             if os.path.isfile(locator_path) and locator_path.endswith('.csv'):
-                print("已从现有CSV加载数据：")
                 self.locator_path = locator_path
                 self.set_shared_attr({'locator': self.check_locator(pd.read_csv(locator_path))})
             else:
-                raise ValueError("提供的'locator'路径不是有效的CSV文件")
-        elif self.get_shared_attr()['dataset_path']:  # 通过读取数据集地址构建UnifiedDataset
+                raise ValueError("The provided 'locator' path is not a valid CSV file.")
+        elif self.get_shared_attr()['dataset_path']:  # Construct UnifiedDataset by reading dataset path
             if os.path.isdir(dataset_path):
                 self._unzip_if_no_conflict(dataset_path)
                 self.set_shared_attr({'locator': self.check_locator(self._process_directory(dataset_path))})
             else:
-                raise ValueError("提供的'datasets'路径不是有效的目录")
+                raise ValueError("The provided 'datasets' path is not a valid directory.")
 
     def _process_directory(self, datasets_path):
-        # 递归搜索目录下的所有文件，直接更新self.files_locator
         files_info = []
         for filepath in glob.glob(datasets_path + '/**/*', recursive=True):
             if os.path.isfile(filepath):
@@ -65,17 +64,16 @@ class EEGParser(UDatasetSharedAttributes):
 
     def _unzip_if_no_conflict(self, datasets_path):
         if self.get_shared_attr()['is_unzip']:
-            print("已开启解压文件检索。当检测到zip文件时，会改变目录结构")
-            # 递归遍历目录中的所有文件和子目录
+            # Recursively traverse all files and subdirectories in the directory
             for root, dirs, files in os.walk(datasets_path):
                 for filename in files:
-                    # 检查文件是否是zip文件
+                    # Check if the file is a zip file
                     if filename.endswith('.zip'):
                         file_path = os.path.join(root, filename)
-                        # 检查zip文件解压后是否有同名文件存在
-                        # 通常是检查去掉.zip后缀的文件名是否存在
+                        # Check if there is a file with the same name after unzipping the zip file
+                        # Typically, this checks whether a file exists with the same name as the zip file but without the .zip extension
                         if not os.path.exists(os.path.splitext(file_path)[0]):
-                            # 没有同名文件，解压zip文件
+                            # No file with the same name exists, so unzip the zip file
                             try:
                                 with zipfile.ZipFile(file_path, 'r') as zip_ref:
                                     zip_ref.extractall(root)
@@ -147,7 +145,6 @@ class EEGParser(UDatasetSharedAttributes):
                 return ["Duration or sampling rate format error"]
             return []
 
-        # 遍历DataFrame的每一行
         for index, row in locator.iterrows():
             errors = []
             errors.extend(check_data_shape(row.get('Data Shape', '').strip()))
@@ -167,7 +164,7 @@ class EEGParser(UDatasetSharedAttributes):
             errors.extend(check_duration(row.get('Sampling Rate', '').strip(), row.get('Duration', '').strip(),
                                          row.get('Data Shape', '').strip()))
             errors.extend(check_channel_duplicates(row.get('Channel Names', '').strip()))
-            # 更新Check列
+            # update check column
             locator.at[index, 'Completeness Check'] = "Completed" if not errors else "Unavailable"
         return locator
 
@@ -176,7 +173,7 @@ class EEGParser(UDatasetSharedAttributes):
 def normalize_data(raw_data, mean_std_str, norm_type):
     mean_std_str = mean_std_str.replace('nan', 'None')
     mean_std_dict = ast.literal_eval(mean_std_str)
-    # 获取数据数组
+    # get content data
     data = raw_data.get_data()
     channel_names = raw_data.info['ch_names']
     if norm_type == "channel-wise":
@@ -190,7 +187,7 @@ def normalize_data(raw_data, mean_std_str, norm_type):
         for idx in range(data.shape[0]):
             data[idx] = (data[idx] - mean) / std
 
-    # 将标准化后的数据写回 Raw 对象
+    # return mne.io.raw data
     raw_data._data = data
     return raw_data
 
@@ -214,7 +211,6 @@ def create_montage_from_json(json_file):
 
 def set_channel_type(raw_data, channel_str):
     channel_info = [ch.split(':') for ch in channel_str.split(',')]
-    # 确保每个分割后的元素长度为2
     for ch in channel_info:
         if len(ch) != 2:
             raise ValueError(f"Invalid channel format: {ch}. Each channel must be in 'type:name' format.")
@@ -238,38 +234,36 @@ def set_channel_type(raw_data, channel_str):
 def get_data_row(row, norm_type=None, is_set_channel_type=True, is_set_montage=True, verbose='CRITICAL', pick_types=None, unit_convert=None):
     filepath = row['File Path']
     file_type = row['File Type']
-    # 读取mne.io.raw数据
-    if file_type == "standard_data": # 读取标准EEG数据
+    # get mne.io.raw data
+    if file_type == "standard_data": # read standard data, those supported by MNE-Python
         raw_data = mne.io.read_raw(filepath, verbose=verbose, preload=True)
         channel_names = [name.strip() for name in row['Channel Names'].split(',')]
         if len(channel_names) != len(raw_data.info['ch_names']):
-            raise ValueError(f"locator文件所标记通道数量与元数据通道数量不一致{filepath}")
+            raise ValueError(f"The number of channels marked in the locator file does not match the number of channels in the metadata: {filepath}")
         channel_mapping = {original: new for original, new in zip(raw_data.info['ch_names'], channel_names)}
         raw_data.rename_channels(channel_mapping)
-    else: # 处理非标准数据
+    else: # cope with non-standard data
         raw_data = handle_nonstandard_data(row, verbose)
-    # 根据locator重设通道名称与类型
+    # Reset channel names and types based on the locator
     if is_set_channel_type:
         raw_data = set_channel_type(raw_data, row['Channel Names'])
-    # 根据预设monatge，设置电极坐标
+    # Set electrode coordinates according to the preset montage
     if is_set_montage:
         raw_data = set_montage_any(raw_data)
-    # 归一化处理
+    # Apply normalization
     if norm_type and 'MEAN STD' in row:
         raw_data = normalize_data(raw_data, row['MEAN STD'], norm_type)
-    # 重新设置通道单位
+    # Reset channel units
     if unit_convert and 'Infer Unit' in row:
         raw_data = set_infer_unit(raw_data, row)
         raw_data = convert_unit(raw_data, unit_convert)
-
-    # 重建戳重设
+    # Reset when there are timestamp anomalies
     if raw_data.info['meas_date'] is not None and isinstance(raw_data.info['meas_date'],
                                                             datetime.datetime) and (
             raw_data.info['meas_date'].timestamp() < -2147483648 or raw_data.info[
         'meas_date'].timestamp() > 2147483647):
         # If the date is wrong, set None.
         raw_data.set_meas_date(None)
-
     return raw_data
 
 def set_infer_unit(raw_data, row):
@@ -284,19 +278,19 @@ def set_infer_unit(raw_data, row):
         raise ValueError(f"'Infer Unit' is not a valid dictionary: {row['Infer Unit']}")
 def format_channel_names(input_string):
 
-    # 定义检查是否为EOG通道的函数
+    # Define a function to check if a channel is an EOG channel
     def is_eog_channel(channel):
         return "eog" in channel.lower()
 
-    # 定义检查是否为MEG通道的函数
+    # Define a function to check if a channel is an MEG channel
     def is_meg_channel(channel):
         return "meg" in channel.lower()
 
-    # 定义检查是否为ECG通道的函数
+    # Define a function to check if a channel is an ECG channel
     def is_ecg_channel(channel):
         return "ecg" in channel.lower()
 
-    # 定义检查是否为双联通道的函数
+    # Define a function to check if a channel is an DOUBLE channel
     def is_double_channel(channel):
         if '-' not in channel:
             return False
@@ -313,17 +307,17 @@ def format_channel_names(input_string):
             return False
         return True
 
-    # 定义标准化EEG通道名称的函数
+    # Define a function to standardize channel names
     def standardize_eeg_channel(channel):
-        # 移除前缀
+        # remove prefix
         channel = channel.replace('EEG:', '').replace('EEG', '').replace('eeg', '')
         return f"EEG:{channel}"
 
     def remap_standard_name(channel):
-        # 移除前缀
+        # remove prefix
         channel = channel.replace('EEG:', '').replace('EEG', '').replace('eeg', '')
 
-        # 定义替换规则
+        # define rules for replacement
         replacements = {
             'FAF': 'AFF',
             'CFC': 'FCC',
@@ -332,7 +326,7 @@ def format_channel_names(input_string):
             'TPT': 'TTP',
             'TFT': 'FTT'
         }
-        # 执行替换并提出警告
+        # employ replacement and propose warnings
         for old, new in replacements.items():
             if old.lower() in channel.lower():
                 warnings.warn(
@@ -340,7 +334,7 @@ def format_channel_names(input_string):
                 channel = channel.lower().replace(old.lower(), new.lower())
         return channel
 
-    # 定义预处理通道名称的函数，去除前后空白及EEG相关前后缀
+    # Define a function to preprocess channel names by removing leading/trailing whitespace and EEG-related prefixes/suffixes
     def preprocess_channel(channel):
         channel = channel.replace(" ", "")
         for prefix_suffix in EEG_PREFIXES_SUFFIXES:
@@ -356,14 +350,14 @@ def format_channel_names(input_string):
                 channel = channel[:-len(prefix_suffix)].strip()
         return channel
 
-    # 拆分输入字符串为通道名称列表
+    # Split the input string into a list of channel names
     channels = input_string.split(',')
 
-    # 初始化格式化后的通道名称集合和已见通道名称集合
+    # Initialize a set for formatted channel names and a set for seen channel names
     formatted_channels = []
     seen_channels = set()
 
-    # 处理每个通道名称
+    # Process each channel name
     for channel in channels:
         channel = preprocess_channel(channel)
 
@@ -385,7 +379,7 @@ def format_channel_names(input_string):
                     break
             if not matched:
                 formatted_channel = f"Unknown:{channel.replace('Unknown:', '')}"
-        # 检查是否重复
+        # Check for duplicates
         if formatted_channel in seen_channels:
             warnings.warn(f"Duplicate formatted channel detected: {formatted_channel}")
             return input_string
@@ -393,14 +387,14 @@ def format_channel_names(input_string):
         formatted_channels.append(formatted_channel)
         seen_channels.add(formatted_channel)
 
-    # 拼接格式化后的通道名称为字符串
+    # Concatenate the formatted channel names into a string
     output_string = ', '.join(formatted_channels)
     return output_string
 def _clean_sampling_rate_(df):
 
-    # 将Sampling Rate列转换为字符串，并保留小数点和科学记数法中的'e'
+    # Convert the 'Sampling Rate' column to a string and retain only digits, decimal points, and the 'e' in scientific notation
     df['Sampling Rate'] = df['Sampling Rate'].astype(str).apply(lambda x: re.sub(r'[^0-9.eE+-]', '', x))
-    # 如果需要，可以将结果转回数值类型
+    # If necessary, convert the result back to a numeric type
     df['Sampling Rate'] = pd.to_numeric(df['Sampling Rate'], errors='coerce')
 
     return df
@@ -420,81 +414,76 @@ def handle_nonstandard_data(row, verbose='CRITICAL'):
         return raw
 
     elif (filepath.endswith('.csv') or filepath.endswith('.txt')) and row['File Type'] == 'csvData':
-        # 从 locator 获取 header 信息
-        # 检查是否有 header
+        # Retrieve header information from the locator
+        # Check if there is a header
         header_option = None if row.get('Header', 'infer') == 'None' else 'infer'
         df = pd.read_csv(filepath, header=header_option)
 
         if header_option is None:
-            # 如果文件没有列名，按照索引生成列名
+            # If the file has no column names, generate them
             df.columns = [str(i) for i in range(1, len(df.columns) + 1)]
 
-        # 获取通道名和采样率
+        # Retrieve channel names and sampling rate
         channel_names = row['Channel Names'].split(',')
         sfreq = float(row['Sampling Rate'])
 
-        # 检查所有通道名是否都在 DataFrame 的列中
+        # Check if all channel names are present in the DataFrame columns
         if not all(name in df.columns for name in channel_names):
-            raise(f"locator文件所标记通道数量与元数据通道不一致{filepath}")
-        # 提取 EEG 数据
+            raise(f"Number of channels marked in the locator file does not match the metadata channels {filepath}")
+        # Extract EEG data
         eeg_data = df[channel_names].values.T  # 转置以匹配 MNE 需要的格式 (通道数, 时间点数)
         info = mne.create_info(ch_names=channel_names, sfreq=sfreq, ch_types='eeg')
         raw = mne.io.RawArray(eeg_data, info)
         return raw
 
     else:
-        raise("当前不支持 .mat/.csv/.txt以外文件的解析")
-
+        raise("Parsing of files other than .mat/.csv/.txt is currently not supported")
 
 def extract_events(raw):
     """
-    从 mne.io.Raw 对象中提取事件。
+    Extract events from an mne.io.Raw object.
 
-    尝试使用 mne.find_events 提取事件，
-    如果失败则使用 mne.events_from_annotations 提取事件。
+    Attempt to extract events using mne.find_events.
+    If it fails, use mne.events_from_annotations to extract events.
 
-    参数:
+    Parameters:
     raw : mne.io.Raw
-        原始数据对象
+        The raw data object.
 
-    返回:
+    Returns:
     events : numpy.ndarray
-        事件数组，形状为 (n_events, 3)
+        The events array, shaped (n_events, 3).
     event_id : dict
-        事件ID字典
+        Dictionary of event IDs.
     """
     try:
-        # 尝试使用 mne.find_events 提取事件
+        # Attempt to extract events using mne.find_events
         events = mne.find_events(raw)
-        # 自动生成 event_id 字典，假设所有事件都是有效的
+        # Automatically generate the event_id dictionary, assuming all events are valid
         unique_event_ids = np.unique(events[:, 2])
         event_id = {f'event_{event_id}': event_id for event_id in unique_event_ids}
-        print("Events extracted using mne.find_events.")
     except ValueError as e:
-        print(f"find_events failed with error: {e}")
-        print("Trying to extract events from annotations.")
-        # 使用 mne.events_from_annotations 提取事件
+        # Extract events using mne.events_from_annotations
         events, event_id = mne.events_from_annotations(raw)
-        print("Events extracted using mne.events_from_annotations.")
-
     return events, event_id
 
 
 def infer_channel_unit(ch_name, ch_data, ch_type):
     """
-    推断通道单位类型。
+    Infer the unit type for a channel.
 
-    参数：
-    ch_name: 通道名称
-    ch_data: 通道数据
-    ch_type: 通道类型
+    Parameters:
+    ch_name: The name of the channel
+    ch_data: The data of the channel
+    ch_type: The type of the channel
 
-    返回值：
-    推断的单位类型，例如"uV"，"mV"，"V"等。
+    Returns:
+    The inferred unit type, such as "uV", "mV", "V", etc.
     """
+
     mean_val = abs(ch_data).mean()
 
-    # 根据通道类型和平均幅值推断单位
+    # Infer the unit based on the channel type and average amplitude
     if ch_type == 'eeg' or ch_type == 'eog':
         if mean_val > 1:
             return "uV"
@@ -510,7 +499,7 @@ def infer_channel_unit(ch_name, ch_data, ch_type):
         else:
             return "V"
     else:
-        # 对于misc和其他未知类型
+        # For misc and other unknown types
         if mean_val > 1:
             return "uV"
         elif mean_val > 0.001:
@@ -520,19 +509,19 @@ def infer_channel_unit(ch_name, ch_data, ch_type):
 
 
 def convert_unit(data: mne.io.Raw, unit: str) -> mne.io.Raw:
-    # 校验单位
+    # Validate the unit
     valid_units = ['V', 'mV', 'uV']
     if unit not in valid_units:
         raise ValueError(f"Invalid unit '{unit}'. Valid units are 'V', 'mV', 'uV'.")
 
-    # 获取通道数
+    # Get the number of channels
     n_channels = len(data.info['chs'])
 
-    # 定义单位换算关系
+    # Define unit conversion relationships
     unit_conversion = {'V': 1, 'mV': 1e-3, 'uV': 1e-6}
     target_multiplier = unit_conversion[unit]
 
-    # 遍历所有通道
+    # Iterate through all channels
     for i in range(n_channels):
         ch = data.info['chs'][i]
         current_unit = ch['eegunity_unit']
@@ -540,13 +529,13 @@ def convert_unit(data: mne.io.Raw, unit: str) -> mne.io.Raw:
         if current_unit in unit_conversion:
             current_multiplier = unit_conversion[current_unit]
             conversion_factor = current_multiplier / target_multiplier
-            # 换算数据
+            # Convert the data
             data._data[i] *= conversion_factor
 
-            # 更新单位
+            # Update the unit
             ch['eegunity'] = unit
 
-        # 标记已经进行过单位换算
+        # Mark that the unit conversion has been done
         data.info['chs'][i].update({"eegunity_unit_converted": unit})
 
     return data
@@ -562,7 +551,7 @@ def process_mne_files(files_locator, verbose):
             files_locator.at[index, 'Number of Channels'] = len(data.info['ch_names'])
             files_locator.at[index, 'Sampling Rate'] = data.info['sfreq']
             files_locator.at[index, 'Duration'] = data.times[-1]
-            print(f"检索到通道序列 {data.info['ch_names']}")
+            print(f"Retrieved channel sequence {data.info['ch_names']}")
         except Exception:
             files_locator.at[index, 'File Type'] = 'unknown'
     return files_locator
