@@ -10,10 +10,10 @@ import warnings
 import json
 import ast
 
-with open('combined_montage.json', 'r') as file:
+current_dir = os.path.dirname(__file__)
+json_file_path = os.path.join(current_dir, 'combined_montage.json')
+with open(json_file_path, 'r') as file:
     data = json.load(file)
-
-# 获取键值并转化成列表
 STANDARD_EEG_CHANNELS = list(data.keys())
 
 
@@ -252,7 +252,6 @@ class EEGBatch(UDatasetSharedAttributes):
             mean_std = get_mean_std(data)
             return mean_std
 
-        # 使用 batch_process 处理数据
         results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
 
         if domain_mean:
@@ -333,18 +332,15 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row, l_freq, h_freq, notch_freq, filter_type, output_path, auto_adjust_h_freq):
             try:
-                # 生成路径
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
-
-                # 使用 get_data_row(row) 获取 mne.io.Raw 对象
                 mne_raw = get_data_row(row)
 
-                # 获取数据采样率
+                # get sampling rate
                 sfreq = mne_raw.info['sfreq']
                 nyquist_freq = sfreq / 2.0
 
-                # 检查并自动调整高截止频率
+                # adjust high pass frequency based on nyquist frequency
                 if h_freq is not None and h_freq >= nyquist_freq:
                     if auto_adjust_h_freq:
                         warnings.warn(
@@ -354,7 +350,7 @@ class EEGBatch(UDatasetSharedAttributes):
                         raise ValueError(
                             f"High-pass frequency must be less than Nyquist frequency ({nyquist_freq} Hz).")
 
-                # 根据滤波类型进行滤波
+                # filter data by specified filter
                 if filter_type == 'lowpass':
                     mne_raw.filter(l_freq=None, h_freq=h_freq, fir_design='firwin', picks=picks)
                 elif filter_type == 'highpass':
@@ -369,7 +365,7 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise ValueError("Invalid filter_type. Must be 'lowpass', 'highpass', 'bandpass', or 'notch'.")
 
-                # 保存滤波后的数据
+                # save filtered data
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
 
@@ -397,16 +393,16 @@ class EEGBatch(UDatasetSharedAttributes):
     def ica(self, output_path, max_components=20, method='fastica', random_state=42, max_iter=1000, picks='eeg',
             miss_bad_data=False):
         """
-        对数据进行ICA处理并去噪。
+        Apply ICA (Independent Component Analysis) to the specified file in the dataset.
 
-        参数：
-        max_components: ICA组件的最大数量。
-        method: ICA方法，可以是 'fastica', 'infomax', 'extended-infomax' 等。
-        random_state: 随机状态，用于保证结果的可重复性。
-        max_iter: ICA的最大迭代次数。
-        output_path: 处理后的文件输出路径。
-        picks: 涉及ICA处理的通道。
-        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。
+        Parameters:
+        - max_components: The maximum number of components to retain in the ICA.
+        - method: The ICA method to use, such as 'fastica', 'infomax', 'extended-infomax', etc.
+        - random_state: The random state to ensure reproducibility of the results.
+        - max_iter: The maximum number of iterations for the ICA algorithm.
+        - output_path: The path where the processed file will be saved.
+        - picks: Channels to include in the ICA processing.
+        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
         """
 
         def con_func(row):
@@ -414,30 +410,26 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row, max_components, method, random_state, max_iter, output_path):
             try:
-                # 生成路径
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_ica_cleaned_raw.fif")
-
-                # 使用 get_data_row(row) 获取 mne.io.Raw 对象
                 mne_raw = get_data_row(row)
 
-                # 获取picks通道的数量
                 picks_channels = mne.pick_types(mne_raw.info, meg=False, eeg=(picks == 'eeg'), eog=False)
                 n_components = min(len(picks_channels), max_components)
                 if n_components == 0:
                     print(f"No EEG channels in file {row['File Path']}")
                     return ""
-                # 初始化ICA对象
+                # initialize ICA
                 ica = mne.preprocessing.ICA(n_components=n_components, method=method, random_state=random_state,
                                             max_iter=max_iter)
 
-                # 拟合ICA
+                # fit ICA
                 ica.fit(mne_raw, picks=picks)
 
-                # 应用ICA到原始数据
+                # apply ICA to raw data
                 ica.apply(mne_raw)
 
-                # 保存处理后的数据
+                # save file and modified path in locator
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
 
@@ -449,14 +441,13 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        # 使用 batch_process 处理数据
         new_path_list = self.batch_process(con_func,
                                            lambda row: app_func(row, max_components, method, random_state, max_iter,
                                                                 output_path),
                                            is_patch=False,
                                            result_type='value')
 
-        # 设置新的文件路径列，并移除路径为空的行
+        # update locator
         self.set_column("File Path", new_path_list)
         locator_df = self.get_shared_attr()['locator']
         locator_df = locator_df[locator_df['File Path'] != ""]
@@ -464,12 +455,13 @@ class EEGBatch(UDatasetSharedAttributes):
 
     def resample(self, output_path, new_sfreq, miss_bad_data=False):
         """
-        对数据进行重采样。
-        参数：
-        output_path: 重采样后的文件输出路径。
-        new_sfreq: 重采样后的新采样率。
-        picks: 涉及重采样的通道。
-        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。
+        Resample the data.
+
+        Parameters:
+        - output_path: The path where the resampled file will be saved.
+        - new_sfreq: The new sampling rate after resampling.
+        - picks: Channels to include in the resampling process.
+        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
         """
 
         def con_func(row):
@@ -477,28 +469,26 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row, new_sfreq, output_path):
             try:
-                # 生成路径
+
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_resampled_raw.fif")
 
-                # 使用 get_data_row(row) 获取 mne.io.Raw 对象
                 mne_raw = get_data_row(row)
 
-                # 对数据进行重采样
+                # resample
                 mne_raw.resample(sfreq=new_sfreq)
 
-                # 保存重采样后的数据
+                # save resampled data and update locator
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
                 row['Duration'] = str(
                     float(row['Sampling Rate'].strip()) * float(row['Duration'].strip()) / int(new_sfreq))
                 row['Sampling Rate'] = str(int(new_sfreq))
-                # 去掉括号并分割字符串
+
                 dimensions = row['Data Shape'].strip('()').split(',')
-                # 转换为整数列表
+
                 dimensions = [int(dim.strip()) for dim in dimensions]
                 dimensions[dimensions.index(max(dimensions))] = int(float(row['Duration'].strip()) * float(new_sfreq))
-                # 将列表重新转换为字符串并添加括号
                 row['Data Shape'] = f"({dimensions[0]}, {dimensions[1]})"
                 return row
             except Exception as e:
@@ -508,7 +498,6 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        # 使用 batch_process 处理数据
         new_locator = self.batch_process(con_func,
                                          lambda row: app_func(row, new_sfreq, output_path),
                                          is_patch=False,
@@ -517,17 +506,16 @@ class EEGBatch(UDatasetSharedAttributes):
 
     def align_channel(self, output_path, channel_order, min_num_channels=32, miss_bad_data=False):
         """
-        对数据进行通道顺序调整和插值。
+        Adjust the channel order and perform interpolation on the data.
 
-        参数：
-        output_path: 调整后文件输出路径。
-        channel_order: 需要对齐的通道顺序，列表形式。
-        min_num_channels: 最小匹配通道数。
-        picks: 涉及的通道。
-        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。
+        Parameters:
+        - output_path: The path where the adjusted file will be saved.
+        - channel_order: The desired order of channels, provided as a list.
+        - min_num_channels: The minimum number of channels required for alignment.
+        - picks: Channels involved in the adjustment process.
+        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
         """
 
-        # 检查channel_order是否合法
         invalid_channels = [ch for ch in channel_order if ch not in STANDARD_EEG_CHANNELS]
         if invalid_channels:
             raise ValueError(f"Invalid channels found: {invalid_channels}")
@@ -537,18 +525,14 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row, channel_order, output_path, min_num_channels):
             try:
-                # 生成路径
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_aligned_raw.fif")
 
-                # 使用 get_data_row(row) 获取 mne.io.Raw 对象
                 mne_raw = get_data_row(row, norm_type="channel-wise")
 
-                # 确保所有指定通道存在
                 existing_channels = mne_raw.ch_names
                 matched_channels = [ch for ch in channel_order if ch in existing_channels]
 
-                # 检查匹配的通道数
                 if len(matched_channels) < min_num_channels:
                     if miss_bad_data:
                         print(f"File {row['File Path']} skipped due to insufficient matching channels.")
@@ -557,7 +541,6 @@ class EEGBatch(UDatasetSharedAttributes):
                         raise ValueError(
                             f"File {row['File Path']} has insufficient matching channels. Required: {min_num_channels}, Found: {len(matched_channels)}")
 
-                # 排列通道顺序并进行插值
                 mne_raw.pick_channels(matched_channels, ordered=True)
                 if len(matched_channels) < len(channel_order):
                     missing_channels = [ch for ch in channel_order if ch not in existing_channels]
@@ -565,17 +548,13 @@ class EEGBatch(UDatasetSharedAttributes):
                         [mne.create_info(missing_channels, sfreq=mne_raw.info['sfreq'], ch_types='eeg')])
                     mne_raw.interpolate_bads(reset_bads=False, origin='auto')
 
-                # 保存调整后的数据
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
                 row['Channel Names'] = ', '.join(mne_raw.info['ch_names'])
                 row['Number of Channels'] = str(len(channel_order))
-                # 去掉括号并分割字符串
                 dimensions = row['Data Shape'].strip('()').split(',')
-                # 转换为整数列表
                 dimensions = [int(dim.strip()) for dim in dimensions]
                 dimensions[dimensions.index(min(dimensions))] = len(channel_order)
-                # 将列表重新转换为字符串并添加括号
                 row['Data Shape'] = f"({dimensions[0]}, {dimensions[1]})"
                 return row
             except Exception as e:
@@ -585,7 +564,6 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        # 使用 batch_process 处理数据
         new_locator = self.batch_process(con_func,
                                          lambda row: app_func(row, channel_order, output_path, min_num_channels),
                                          is_patch=False,
@@ -594,11 +572,12 @@ class EEGBatch(UDatasetSharedAttributes):
 
     def normalize(self, output_path, norm_type='sample-wise', miss_bad_data=False):
         """
-        对数据进行重采样。
-        参数：
-        output_path: 归一化后的文件输出路径。
-        norm_type：指定的归一化类型
-        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。
+        Normalize the data.
+
+        Parameters:
+        - output_path: The path where the normalized file will be saved.
+        - norm_type: The type of normalization to apply.
+        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
         """
 
         def con_func(row):
@@ -606,14 +585,9 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row, norm_type, output_path):
             try:
-                # 生成路径
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_normed_raw.fif")
-
-                # 使用 get_data_row(row) 获取 mne.io.Raw 对象
                 mne_raw = get_data_row(row, norm_type=norm_type)
-
-                # 保存重采样后的数据
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
                 row['File Type'] = "standard_data"
@@ -624,8 +598,6 @@ class EEGBatch(UDatasetSharedAttributes):
                     return None  # Return an empty path to indicate failure
                 else:
                     raise
-
-        # 使用 batch_process 处理数据
         new_locator = self.batch_process(con_func,
                                          lambda row: app_func(row, norm_type, output_path),
                                          is_patch=False,
@@ -672,7 +644,6 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        # 使用 batch_process 处理数据
         self.batch_process(con_func,
                            lambda row: app_func(row, output_path, seg_sec=seg_sec, resample=resample,
                                                 overlap=overlap, exclude_bad=exclude_bad,
@@ -682,11 +653,11 @@ class EEGBatch(UDatasetSharedAttributes):
 
     def get_events(self, miss_bad_data=False):
         """
-        提取事件并记录在数据行中。
+        Extract events and log them in the data rows.
 
-        参数：
-        output_path: 提取事件后的文件输出路径。
-        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。
+        Parameters:
+        - output_path: The path where the file with extracted events will be saved.
+        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
         """
 
         def con_func(row):
@@ -694,17 +665,12 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row):
             try:
-                # 生成路径
-                # 使用 get_data_row(row) 获取 mne.io.Raw 对象
                 mne_raw = get_data_row(row)
 
-                # 提取事件和事件ID
                 events, event_id = extract_events(mne_raw)
 
-                # 将事件ID字典转化为字符串存储在row["event_id"]列中
                 row["event_id"] = str(event_id)
 
-                # 记录每一个事件的数量
                 event_id_num = {key: sum(events[:, 2] == val) for key, val in event_id.items()}
                 row["event_id_num"] = str(event_id_num)
                 return row
@@ -715,7 +681,6 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        # 使用 batch_process 处理数据
         new_locator = self.batch_process(con_func,
                                          lambda row: app_func(row),
                                          is_patch=False,

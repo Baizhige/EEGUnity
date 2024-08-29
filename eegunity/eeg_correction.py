@@ -20,8 +20,6 @@ class EEGCorrection(UDatasetSharedAttributes):
            """
         def percentage(part, whole):
             return round(100 * float(part) / float(whole), 2)
-
-        # 统计报告
         def generate_statistics(grouped_df, overall=False):
             result = {}
             domain_tags = ['Overall'] if overall else grouped_df.groups.keys()
@@ -56,8 +54,6 @@ class EEGCorrection(UDatasetSharedAttributes):
                 }
 
             return result
-
-        # 诊断报告
         def generate_diagnostics(grouped_df):
             result = {}
             for domain_tag, data in grouped_df:

@@ -355,6 +355,22 @@ def calculate_eeg_quality_scores(mne_io_raw):
     Returns:
     list
         List of EEG scores corresponding to different metrics.
+    Usage:
+    -------
+    address = r'E:/test_dataset/test_sample_from_zenodo_saa.bdf'
+
+    raw = mne.io.read_raw(address, preload=True)
+
+    scores = calculate_eeg_quality_scores(raw)
+    score_names = [
+        "General Amplitude",
+        "Highest Amplitude",
+        "Dominant Frequency",
+        "Beta Sinusoidal",
+        "Beta Amplitude",
+        "Theta Amplitude"
+    ]
+    plot_radar_chart(scores, score_names)
     """
     # unit convertion
     data = mne_io_raw.get_data()
@@ -401,20 +417,3 @@ def calculate_eeg_quality_scores(mne_io_raw):
     print(scores)
 
     return scores
-
-
-if __name__ == "__main__":
-    address = r'E:/test_dataset/test_sample_from_zenodo_saa.bdf'
-
-    raw = mne.io.read_raw(address, preload=True)
-
-    scores = calculate_eeg_quality_scores(raw)
-    score_names = [
-        "General Amplitude",
-        "Highest Amplitude",
-        "Dominant Frequency",
-        "Beta Sinusoidal",
-        "Beta Amplitude",
-        "Theta Amplitude"
-    ]
-    plot_radar_chart(scores, score_names)

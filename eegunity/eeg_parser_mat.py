@@ -5,7 +5,7 @@ import numpy as np
 import re
 def process_mat_files(files_locator):
     def is_numeric(s):
-        # 匹配整数或浮点数
+        # Match integer or floating-point numbers
         pattern = r'^-?\d+(\.\d+)?$'
         return bool(re.match(pattern, s))
 
@@ -15,8 +15,8 @@ def process_mat_files(files_locator):
 
         if file_path.endswith('.mat') and file_type == 'unknown':
             file_size = os.path.getsize(file_path)
-            if file_size > 5 * 1024 * 1024:  # 大于5MB
-                data = loadmat(file_path, simplify_cells=True)  # 简化dict结构
+            if file_size > 5 * 1024 * 1024: # Greater than 5MB
+                data = loadmat(file_path, simplify_cells=True)  # Simplify dictionary structure
                 channel_name = _find_variables_by_condition(data, _condition_sampling_channel_name,
                                                                  max_depth=5, max_width=20)
                 sampling_rate = _find_variables_by_condition(data, _condition_sampling_rate,
@@ -26,13 +26,9 @@ def process_mat_files(files_locator):
                 source_data_3d = _find_variables_by_condition(data, _condition_source_data_3d,
                                                                    max_depth=5, max_width=20)
                 if isinstance(source_data[1], ndarray):
-                    print("正在尝试解析 ", file_path)
-                    print(f"解析到 source_data 形状：{source_data[1].shape}")
-                    print(f"解析到 sampling_rate 采样率{sampling_rate[1]}")
-                    print(f"解析到 channel_name 通道名称{channel_name[1]}")
                     files_locator.at[index, 'Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
                     if isinstance(channel_name[1], ndarray):
-                        # 如果 channel_name 是 ndarray，确保正确处理并转换为字符串
+                        # If channel_name is ndarray, ensure correct processing and conversion to string
                         print(','.join(str(x) for x in channel_name[1]))
                         files_locator.at[index, 'Channel Names'] = ','.join(str(x) for x in channel_name[1])
 
@@ -45,13 +41,10 @@ def process_mat_files(files_locator):
                     files_locator.at[index, 'File Type'] = "matRawData:" + str(source_data[0])
 
                 elif isinstance(source_data_3d[1], ndarray):
-                    print(f"解析到 Epoch Data 形状: {source_data_3d[1].shape}")
-                    print(f"解析到 sampling_rate 采样率: {sampling_rate[1]}")
-                    print(f"解析到 channel_name 通道名称: {channel_name[1]}")
                     files_locator.at[index, 'Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
 
                     if isinstance(channel_name[1], ndarray):
-                        # 如果 channel_name 是 ndarray，确保正确处理并转换为字符串
+                        # If channel_name is ndarray, ensure correct processing and conversion to string
                         print(','.join(str(x) for x in channel_name[1]))
                         files_locator.at[index, 'Channel Names'] = ','.join(str(x) for x in channel_name[1])
 
@@ -64,9 +57,11 @@ def process_mat_files(files_locator):
                         files_locator.at[index, 'Duration'] = ''
                     files_locator.at[index, 'File Type'] = "matEpochData:" + str(source_data_3d[0])
                 else:
-                    print(f"未检测到数据文件 在 {file_path}. 跳过解析")
+                    #"No data detected in file {file_path}. Skipping."
+                    pass
             else:
-                print(f"文件 {file_path}小于阈值，跳过解析")
+                #File {file_path} is below the size threshold. Skipping.
+                pass
     return files_locator
 
 def _find_variables_by_condition(data, condition_func, max_depth=5, max_width=5, debug=False):
@@ -121,11 +116,11 @@ def _search_data(data, path, condition_func, satisfying_variables, current_depth
     if ignore_keys is None:
         ignore_keys = ['__header__', '__version__', '__globals__']
     if debug:
-        print(f"正在搜索路径：{path}, 当前深度：{current_depth}")  # 打印当前搜索路径和深度
+        print(f"Searching path: {path}, Current depth: {current_depth}")
     if current_depth >= max_depth:
         if debug:
-            print(f"达到最大深度，停止搜索。当前路径：{path}")
-        return  # 达到最大深度，停止搜索
+            print(f"Reached maximum depth, stopping search. Current path: {path}")
+        return  # Stop search if maximum depth is reached
 
     if isinstance(data, dict):
         for key, value in list(data.items())[:max_width]:
@@ -156,7 +151,7 @@ def _search_data(data, path, condition_func, satisfying_variables, current_depth
                                       max_depth, max_width, ignore_keys, debug)
     if condition_func(path, data):
         if debug:
-            print(f"找到满足条件的变量：{path}")  # 打印满足条件的路径
+            print(f"Found a variable satisfying the condition: {path}")  # Print the path of the satisfying variable
         satisfying_variables.append((path, data))
     elif not isinstance(data, (ndarray, dict)) and debug:
-        print(f"非搜索目标类型（非ndarray或dict），停止搜索。当前路径：{path}")
+        print(f"Non-target type (not ndarray or dict), stopping search. Current path: {path}")

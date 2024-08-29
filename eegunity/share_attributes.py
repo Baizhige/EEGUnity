@@ -1,7 +1,6 @@
 class UDatasetSharedAttributes:
     def __init__(self):
-        self._shared_attr = {}  # 使用实例变量来存储共享属性
-
+        self._shared_attr = {}  # Use instance variables to store shared attributes
     def get_shared_attr(self):
         return self._shared_attr
 
