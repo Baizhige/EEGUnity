@@ -3,7 +3,7 @@ import pandas as pd
 import pprint
 import numpy as np
 import matplotlib.pyplot as plt
-from eegunity.eeg_parser.eeg_parser import get_data_row
+from eegunity.module_eeg_parser.eeg_parser import get_data_row
 from scipy.signal import welch
 from math import ceil, sqrt
 import os

@@ -6,8 +6,8 @@ import zipfile
 import re
 import scipy
 from eegunity.share_attributes import UDatasetSharedAttributes
-from eegunity.eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, _condition_source_data
-from eegunity.eeg_parser.eeg_parser_csv import process_csv_files
+from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, _condition_source_data
+from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
 import ast
 import warnings
 import json
