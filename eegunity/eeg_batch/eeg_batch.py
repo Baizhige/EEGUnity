@@ -4,8 +4,8 @@ import os
 import copy
 import mne
 import numpy as np
-from eegunity.eeg_parser import get_data_row, format_channel_names, extract_events, infer_channel_unit
-from eegunity.eeg_scores import calculate_eeg_quality_scores
+from eegunity.eeg_parser.eeg_parser import get_data_row, format_channel_names, extract_events, infer_channel_unit
+from eegunity.eeg_batch.eeg_scores import calculate_eeg_quality_scores
 import warnings
 import json
 import ast
