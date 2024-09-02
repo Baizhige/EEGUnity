@@ -314,17 +314,17 @@ class EEGBatch(UDatasetSharedAttributes):
     def filter(self, output_path, filter_type='bandpass', l_freq=None, h_freq=None, notch_freq=None,
                auto_adjust_h_freq=True, picks='all', miss_bad_data=False):
         """
-        对数据进行滤波，支持低通、高通、带通和陷波滤波器。
+        Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.
 
-        参数：
-        filter_type: 滤波类型，可以是 'lowpass', 'highpass', 'bandpass', 'notch'。
-        l_freq: 滤波的低截止频率（高通滤波或带通滤波的低频段）。
-        h_freq: 滤波的高截止频率（低通滤波或带通滤波的高频段）。
-        notch_freq: 陷波滤波器的频率。
-        output_path: 滤波后的文件输出路径。
-        auto_adjust_h_freq: 是否自动调整高截止频率以适应奈奎斯特频率。
-        picks: 涉及滤波使用的通道。
-        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。
+        Parameters:
+        filter_type: Type of filter, which can be 'lowpass', 'highpass', 'bandpass', or 'notch'.
+        l_freq: Low cutoff frequency for the filter (used in high-pass or low-frequency band-pass filters).
+        h_freq: High cutoff frequency for the filter (used in low-pass or high-frequency band-pass filters).
+        notch_freq: Frequency for the notch filter.
+        output_path: Path to save the filtered file.
+        auto_adjust_h_freq: Whether to automatically adjust the high cutoff frequency to fit the Nyquist frequency.
+        picks: Channels to be used for filtering.
+        miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
         """
 
         def con_func(row):
@@ -377,14 +377,12 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        # 使用 batch_process 处理数据
         new_path_list = self.batch_process(con_func,
                                            lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
                                                                 output_path, auto_adjust_h_freq),
                                            is_patch=False,
                                            result_type='value')
 
-        # 设置新的文件路径列，并移除路径为空的行
         self.set_column("File Path", new_path_list)
         locator_df = self.get_shared_attr()['locator']
         locator_df = locator_df[locator_df['File Path'] != ""]
