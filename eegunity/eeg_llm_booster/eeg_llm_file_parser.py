@@ -15,7 +15,7 @@ import mne
 from openai import AzureOpenAI
 
 
-def LLM_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iterations: int = 5):
+def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iterations: int = 5):
     """
     Parses and processes an EEG data file using Azure OpenAI to generate a function
     that reads the data, calculates the sampling frequency, and extracts channel names.

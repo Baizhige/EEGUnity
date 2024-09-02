@@ -1,6 +1,6 @@
-from eegunity.eeg_parser import EEGParser
-from eegunity.eeg_batch import EEGBatch
-from eegunity.eeg_correction import EEGCorrection
+from eegunity.eeg_parser.eeg_parser import EEGParser
+from eegunity.eeg_batch.eeg_batch import EEGBatch
+from eegunity.eeg_correction.eeg_correction import EEGCorrection
 from eegunity.share_attributes import UDatasetSharedAttributes
 import copy
 
@@ -15,7 +15,7 @@ class UnifiedDataset(UDatasetSharedAttributes):
         self.eeg_parser = EEGParser(self)
         self.eeg_batch = EEGBatch(self)
         self.eeg_correction = EEGCorrection(self)
-        # self.llm_booster = LLMBooster()
+        # self.eeg_llm_booster = LLMBooster()
 
     def copy(self):
         return copy.deepcopy(self)
