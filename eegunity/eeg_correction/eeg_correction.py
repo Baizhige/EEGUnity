@@ -17,7 +17,7 @@ class EEGCorrection(UDatasetSharedAttributes):
            Generate a statistical report on the dataset, including file type proportions, sampling rates,
            channel configurations, and completeness checks. This report can be generated for individual
            groups within the dataset or for the dataset as a whole.
-           """
+        """
         def percentage(part, whole):
             return round(100 * float(part) / float(whole), 2)
         def generate_statistics(grouped_df, overall=False):

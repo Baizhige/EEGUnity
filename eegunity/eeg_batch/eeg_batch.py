@@ -11,7 +11,7 @@ import json
 import ast
 
 current_dir = os.path.dirname(__file__)
-json_file_path = os.path.join(current_dir, 'combined_montage.json')
+json_file_path = os.path.join(current_dir, '..', 'eeg_parser', 'combined_montage.json')
 with open(json_file_path, 'r') as file:
     data = json.load(file)
 STANDARD_EEG_CHANNELS = list(data.keys())
@@ -598,6 +598,7 @@ class EEGBatch(UDatasetSharedAttributes):
                     return None  # Return an empty path to indicate failure
                 else:
                     raise
+
         new_locator = self.batch_process(con_func,
                                          lambda row: app_func(row, norm_type, output_path),
                                          is_patch=False,
@@ -724,7 +725,7 @@ class EEGBatch(UDatasetSharedAttributes):
                 # Convert event_id string to dictionary
                 events, _ = extract_events(raw_data)
                 event_id = ast.literal_eval(event_id_str)
-                if not event_id_str or len(event_id)==0:
+                if not event_id_str or len(event_id) == 0:
                     print(f"No event_id found for file {row['File Path']}")
                     return None
                 # Create epochs
@@ -752,7 +753,8 @@ class EEGBatch(UDatasetSharedAttributes):
 
         # Use batch_process to process data
         self.batch_process(con_func,
-                           app_func=lambda row: app_func(row, output_path, seg_sec=seg_sec, resample=resample, exclude_bad=exclude_bad, baseline=baseline),
+                           app_func=lambda row: app_func(row, output_path, seg_sec=seg_sec, resample=resample,
+                                                         exclude_bad=exclude_bad, baseline=baseline),
                            is_patch=False,
                            result_type=None)
 
@@ -822,6 +824,7 @@ class EEGBatch(UDatasetSharedAttributes):
                     return ""  # Return None to indicate failure
                 else:
                     raise
+
         # 使用 batch_process 处理数据
         results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
 
