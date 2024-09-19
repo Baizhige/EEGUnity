@@ -4,8 +4,8 @@ build:
   tools:
     python: "3.10"
 sphinx:
-   configuration: docs/source/conf.py  # sphinx配置文件路径
+  configuration: docs/source/conf.py  # sphinx配置文件路径
 python:
   install:
-  - pip: 
+    - pip:
         - sphinx_rtd_theme
