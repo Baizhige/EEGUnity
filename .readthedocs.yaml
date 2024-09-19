@@ -7,5 +7,4 @@ sphinx:
   configuration: docs/source/conf.py  # sphinx配置文件路径
 python:
   install:
-    - pip:
-        - sphinx_rtd_theme
+    - requirements: docs/requirements.txt
