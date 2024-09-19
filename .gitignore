@@ -1,19 +1,17 @@
-# 忽略 .idea 目录（PyCharm 的项目配置文件）
-.idea/
-
-# 忽略 PyCharm 的工作空间文件
+# ignore PyCharm workspace
 *.iml
 *.iws
 *.ipr
-
-# 忽略 Python 虚拟环境
+.idea/
+# ignore Python venv
 venv/
 env/
 
-# 忽略 .DS_Store 文件（macOS 生成的系统文件）
+
+# ignore .DS_Store for macOS
 .DS_Store
 
-# 忽略编译生成的文件
+# ignore pychache
 __pycache__/
 *.py[cod]
 *.so
@@ -24,11 +22,17 @@ build/
 *.pyo
 *.pyd
 
-# 忽略日志文件
+# ignore logs
 *.log
 *.log.*
 
-# 忽略其他一些可能不需要上传的文件
+# ignore
 *.swp
 *.swo
 *.swn
+
+
+# ignore——debug
+locator/
+debug_sheet.py
+generate_standard_eeg_channels.py
