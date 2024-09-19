@@ -188,19 +188,40 @@ class EEGBatch(UDatasetSharedAttributes):
         # Update the locator in shared attributes
         self.set_shared_attr({'locator': filtered_locator})
 
-    def save_as_other(self, output_path, domain_tag=None):
+    def save_as_other(self, output_path, domain_tag=None, format='fif'):
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
+
+        # Check for valid format
+        if format not in ['fif', 'csv']:
+            raise ValueError(f"Unsupported format: {format}. Only 'fif' and 'csv' are supported.")
 
         def con_func(row):
             return domain_tag is None or row['Domain Tag'] == domain_tag
 
         def app_func(row):
-            raw = get_data_row(row)
+            raw = get_data_row(row, is_set_channel_type=False)
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-            new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
-            print(row['File Path'])
-            raw.save(new_file_path, overwrite=True)
+
+            if format == 'fif':
+                # Saving as FIF format
+                new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
+                raw.save(new_file_path, overwrite=True)
+            elif format == 'csv':
+                # Saving as CSV format
+                new_file_path = os.path.join(output_path, f"{file_name}_raw.csv")
+
+                # Extract data and channel names from Raw object
+                data, times = raw.get_data(return_times=True)
+                channel_names = raw.info['ch_names']
+
+                # Create a DataFrame with 'date' column and channel data
+                df = pd.DataFrame(data.T, columns=channel_names)
+                df.insert(0, 'date', times)  # Add 'date' as the first column
+
+                # Save DataFrame to CSV
+                df.to_csv(new_file_path, index=False)
+
             row['File Path'] = new_file_path
             row['File Type'] = "standard_data"
             return row
@@ -665,11 +686,11 @@ class EEGBatch(UDatasetSharedAttributes):
         def app_func(row):
             try:
                 mne_raw = get_data_row(row)
-
+                # print(row)
                 events, event_id = extract_events(mne_raw)
 
                 row["event_id"] = str(event_id)
-
+                print(event_id)
                 event_id_num = {key: sum(events[:, 2] == val) for key, val in event_id.items()}
                 row["event_id_num"] = str(event_id_num)
                 return row
@@ -758,10 +779,10 @@ class EEGBatch(UDatasetSharedAttributes):
 
     def infer_units(self, miss_bad_data=False):
         """
-        推断每个通道的单位并记录在数据行中。
+        Infer the units of each channel and record them in the data line.
 
-        参数：
-        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。
+        Parameters:
+        miss_bad_data: Whether to skip the current file and continue processing the next file when an error occurs.
         """
 
         def con_func(row):
@@ -769,26 +790,18 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row):
             try:
-                # 生成路径
-                # 使用 get_data_row(row) 获取 mne.io.Raw 对象
                 mne_raw = get_data_row(row)
 
-                # 初始化单位字典
                 units = {}
 
-                # 获取通道信息
                 ch_names = mne_raw.info['ch_names']
                 ch_types = mne_raw.get_channel_types()
 
                 for ch_name, ch_type in zip(ch_names, ch_types):
-                    # 获取通道数据
                     ch_data = mne_raw.get_data(picks=[ch_name])
 
-                    # 使用静态函数推断单位
                     unit = infer_channel_unit(ch_name, ch_data, ch_type)
                     units[ch_name] = unit
-
-                # 将单位字典转化为字符串存储在row["Infer Unit"]列中
                 row["Infer Unit"] = str(units)
                 return row
             except Exception as e:
@@ -798,7 +811,6 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        # 使用 batch_process 处理数据
         new_locator = self.batch_process(con_func,
                                          lambda row: app_func(row),
                                          is_patch=False,
@@ -822,8 +834,6 @@ class EEGBatch(UDatasetSharedAttributes):
                     return ""  # Return None to indicate failure
                 else:
                     raise
-
-        # 使用 batch_process 处理数据
         results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
 
         self.set_column("Score", results)

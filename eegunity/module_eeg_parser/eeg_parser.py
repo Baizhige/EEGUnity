@@ -193,7 +193,9 @@ def normalize_data(raw_data, mean_std_str, norm_type):
 
 
 def set_montage_any(raw_data: mne.io.Raw, verbose='CRITICAL'):
-    montage = create_montage_from_json('combined_montage.json')
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    montage = create_montage_from_json(os.path.join(current_dir, 'combined_montage.json'))
     raw_data.set_montage(montage, on_missing= 'warn', verbose=verbose)
     return raw_data
 
@@ -231,7 +233,7 @@ def set_channel_type(raw_data, channel_str):
             ch['kind'] = mne.io.constants.FIFF.FIFFV_BIO_CH
     return raw_data
 
-def get_data_row(row, norm_type=None, is_set_channel_type=True, is_set_montage=True, verbose='CRITICAL', pick_types=None, unit_convert=None):
+def get_data_row(row, norm_type=None, is_set_channel_type=False, is_set_montage=False, verbose='CRITICAL', pick_types=None, unit_convert=None):
     filepath = row['File Path']
     file_type = row['File Type']
     # get mne.io.raw data

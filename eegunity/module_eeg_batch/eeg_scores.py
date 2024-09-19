@@ -5,7 +5,7 @@ import numpy as np
 from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
 
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 
 
 # Design a Butterworth bandpass filter

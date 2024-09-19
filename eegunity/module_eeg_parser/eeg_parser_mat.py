@@ -29,7 +29,7 @@ def process_mat_files(files_locator):
                     files_locator.at[index, 'Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
                     if isinstance(channel_name[1], ndarray):
                         # If channel_name is ndarray, ensure correct processing and conversion to string
-                        print(','.join(str(x) for x in channel_name[1]))
+                        # print(','.join(str(x) for x in channel_name[1]))
                         files_locator.at[index, 'Channel Names'] = ','.join(str(x) for x in channel_name[1])
 
                     files_locator.at[index, 'Number of Channels'] = str(min(source_data[1].shape))
