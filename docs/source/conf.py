@@ -22,7 +22,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
 ]
-autodoc_mock_imports = ["EEGParser", "EEGBatch", "EEGCorrection", "UDatasetSharedAttributes"]  # 替换为你项目中的无法安装的模块名
 
 
 templates_path = ['_templates']
@@ -37,4 +36,4 @@ html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # html_theme = 'alabaster'
-# html_static_path = ['_static']
+html_static_path = ['_static']
