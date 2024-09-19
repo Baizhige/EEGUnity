@@ -18,9 +18,9 @@ __pycache__/
 *.egg
 *.egg-info/
 dist/
-build/
 *.pyo
 *.pyd
+
 
 # ignore logs
 *.log

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eegunity.module_eeg_parser.eeg_parser &mdash; EEGUnity 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            EEGUnity
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">eegunity</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">EEGUnity</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">eegunity.module_eeg_parser.eeg_parser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for eegunity.module_eeg_parser.eeg_parser</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">mne</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_mat</span> <span class="kn">import</span> <span class="n">process_mat_files</span><span class="p">,</span> <span class="n">_find_variables_by_condition</span><span class="p">,</span> <span class="n">_condition_source_data</span>
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_csv</span> <span class="kn">import</span> <span class="n">process_csv_files</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">json_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s1">&#39;combined_montage.json&#39;</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="n">STANDARD_EEG_CHANNELS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">EEG_PREFIXES_SUFFIXES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;EEG&quot;</span><span class="p">,</span> <span class="s2">&quot;FP&quot;</span><span class="p">,</span> <span class="s2">&quot;REF&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="s2">&quot;RE&quot;</span><span class="p">}</span>
+
+<div class="viewcode-block" id="EEGParser">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.EEGParser">[docs]</a>
+<span class="k">class</span> <span class="nc">EEGParser</span><span class="p">(</span><span class="n">UDatasetSharedAttributes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_instance</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shared_attr</span> <span class="o">=</span> <span class="n">main_instance</span><span class="o">.</span><span class="n">_shared_attr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_channel_names</span> <span class="o">=</span> <span class="n">format_channel_names</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;dataset_path&#39;</span><span class="p">]</span>
+        <span class="n">locator_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator_path&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="n">locator_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The &#39;datasets&#39; and &#39;locator&#39; paths cannot both be provided simultaneously.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">locator_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One of &#39;datasets&#39; or &#39;locator&#39; paths must be provided.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator_path&#39;</span><span class="p">]:</span>  <span class="c1"># initiate UnifiedDataset via Locator</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">locator_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">locator_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">locator_path</span> <span class="o">=</span> <span class="n">locator_path</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_locator</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">locator_path</span><span class="p">))})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The provided &#39;locator&#39; path is not a valid CSV file.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;dataset_path&#39;</span><span class="p">]:</span>  <span class="c1"># Construct UnifiedDataset by reading dataset path</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unzip_if_no_conflict</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_locator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_directory</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">))})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The provided &#39;datasets&#39; path is not a valid directory.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasets_path</span><span class="p">):</span>
+        <span class="n">files_info</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">datasets_path</span> <span class="o">+</span> <span class="s1">&#39;/**/*&#39;</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+                <span class="n">files_info</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">filepath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;domain_tag&#39;</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">])</span>
+        <span class="n">files_locator</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">files_info</span><span class="p">,</span>
+                                     <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">,</span> <span class="s1">&#39;Domain Tag&#39;</span><span class="p">,</span> <span class="s1">&#39;File Type&#39;</span><span class="p">,</span> <span class="s1">&#39;Data Shape&#39;</span><span class="p">,</span> <span class="s1">&#39;Channel Names&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;Number of Channels&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;Sampling Rate&#39;</span><span class="p">,</span> <span class="s1">&#39;Duration&#39;</span><span class="p">,</span> <span class="s1">&#39;Completeness Check&#39;</span><span class="p">])</span>
+        <span class="n">files_locator</span> <span class="o">=</span> <span class="n">process_mne_files</span><span class="p">(</span><span class="n">files_locator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;verbose&#39;</span><span class="p">])</span>
+        <span class="n">files_locator</span> <span class="o">=</span> <span class="n">process_mat_files</span><span class="p">(</span><span class="n">files_locator</span><span class="p">)</span>
+        <span class="n">files_locator</span> <span class="o">=</span> <span class="n">process_csv_files</span><span class="p">(</span><span class="n">files_locator</span><span class="p">)</span>
+        <span class="n">files_locator</span> <span class="o">=</span> <span class="n">_clean_sampling_rate_</span><span class="p">(</span><span class="n">files_locator</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">files_locator</span>
+
+    <span class="k">def</span> <span class="nf">_unzip_if_no_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasets_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;is_unzip&#39;</span><span class="p">]:</span>
+            <span class="c1"># Recursively traverse all files and subdirectories in the directory</span>
+            <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">datasets_path</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="c1"># Check if the file is a zip file</span>
+                    <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.zip&#39;</span><span class="p">):</span>
+                        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                        <span class="c1"># Check if there is a file with the same name after unzipping the zip file</span>
+                        <span class="c1"># Typically, this checks whether a file exists with the same name as the zip file but without the .zip extension</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+                            <span class="c1"># No file with the same name exists, so unzip the zip file</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
+                                    <span class="n">zip_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">BadZipFile</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad zip file: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to extract </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipped </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">, conflict exists.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+<div class="viewcode-block" id="EEGParser.get_data">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.EEGParser.get_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit_convert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">data_idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">norm_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;verbose&#39;</span><span class="p">],</span> <span class="n">unit_convert</span><span class="o">=</span><span class="n">unit_convert</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EEGParser.check_locator">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.EEGParser.check_locator">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_locator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locator</span><span class="p">):</span>
+        <span class="n">locator</span> <span class="o">=</span> <span class="n">locator</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">check_data_shape</span><span class="p">(</span><span class="n">data_shape</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">data_shape</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Miss data in Data Shape&quot;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">data_shape</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Raw Data Shape is not two-dimensional&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Data Shape format error&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">check_channel_duplicates</span><span class="p">(</span><span class="n">channel_names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">channel_names</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Miss data in Channel Names&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">channel_names</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;nan&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;channel name is nan&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">channel_names</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;channel name is nan&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">channel_names</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;channel name is null&quot;</span><span class="p">]</span>
+
+            <span class="n">channel_names</span> <span class="o">=</span> <span class="n">channel_names</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">duplicates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">channel_names</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="n">duplicates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">duplicates</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Duplicate channels: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">duplicates</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">check_channel_counts</span><span class="p">(</span><span class="n">data_shape</span><span class="p">,</span> <span class="n">num_channels</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">data_shape</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">num_channels</span><span class="p">)):</span>
+                    <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Mismatch in reported and actual channel counts&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Channel count or data shape format error&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">check_duration</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">data_shape</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">data_shape</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;()&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+                <span class="n">calculated_duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">calculated_duration</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">duration</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Incorrect duration calculation&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Duration or sampling rate format error&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">locator</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">check_data_shape</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Data Shape&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;File Type&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Miss data in File Type&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;unidentified&quot;</span><span class="p">:</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;File Type is &#39;unidentified&#39;&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;File Path&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Miss data in File Path&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]):</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;File does not exist&quot;</span><span class="p">)</span>
+
+            <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">check_channel_counts</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Data Shape&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Number of Channels&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">check_duration</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Duration&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                                         <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Data Shape&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">check_channel_duplicates</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+            <span class="c1"># update check column</span>
+            <span class="n">locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;Completeness Check&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Completed&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">errors</span> <span class="k">else</span> <span class="s2">&quot;Unavailable&quot;</span>
+        <span class="k">return</span> <span class="n">locator</span></div>
+</div>
+
+
+
+<span class="c1"># static function defining</span>
+<div class="viewcode-block" id="normalize_data">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.normalize_data">[docs]</a>
+<span class="k">def</span> <span class="nf">normalize_data</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">mean_std_str</span><span class="p">,</span> <span class="n">norm_type</span><span class="p">):</span>
+    <span class="n">mean_std_str</span> <span class="o">=</span> <span class="n">mean_std_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span>
+    <span class="n">mean_std_dict</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">mean_std_str</span><span class="p">)</span>
+    <span class="c1"># get content data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">channel_names</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">norm_type</span> <span class="o">==</span> <span class="s2">&quot;channel-wise&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">channel_names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">mean_std_dict</span><span class="p">:</span>
+                <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">mean_std_dict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
+
+    <span class="k">elif</span> <span class="n">norm_type</span> <span class="o">==</span> <span class="s2">&quot;sample-wise&quot;</span><span class="p">:</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">mean_std_dict</span><span class="p">[</span><span class="s1">&#39;all_eeg&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
+
+    <span class="c1"># return mne.io.raw data</span>
+    <span class="n">raw_data</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="n">raw_data</span></div>
+
+
+
+<div class="viewcode-block" id="set_montage_any">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.set_montage_any">[docs]</a>
+<span class="k">def</span> <span class="nf">set_montage_any</span><span class="p">(</span><span class="n">raw_data</span><span class="p">:</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Raw</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">):</span>
+    <span class="n">montage</span> <span class="o">=</span> <span class="n">create_montage_from_json</span><span class="p">(</span><span class="s1">&#39;combined_montage.json&#39;</span><span class="p">)</span>
+    <span class="n">raw_data</span><span class="o">.</span><span class="n">set_montage</span><span class="p">(</span><span class="n">montage</span><span class="p">,</span> <span class="n">on_missing</span><span class="o">=</span> <span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">raw_data</span></div>
+
+
+
+<div class="viewcode-block" id="create_montage_from_json">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.create_montage_from_json">[docs]</a>
+<span class="k">def</span> <span class="nf">create_montage_from_json</span><span class="p">(</span><span class="n">json_file</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">montage_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">ch_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">montage_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">montage_data</span><span class="p">[</span><span class="n">ch_name</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch_name</span> <span class="ow">in</span> <span class="n">ch_names</span><span class="p">]</span>
+
+    <span class="n">montage</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">make_dig_montage</span><span class="p">(</span><span class="n">ch_pos</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ch_names</span><span class="p">,</span> <span class="n">pos</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">montage</span></div>
+
+
+<div class="viewcode-block" id="set_channel_type">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.set_channel_type">[docs]</a>
+<span class="k">def</span> <span class="nf">set_channel_type</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">channel_str</span><span class="p">):</span>
+    <span class="n">channel_info</span> <span class="o">=</span> <span class="p">[</span><span class="n">ch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channel_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channel_info</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid channel format: </span><span class="si">{</span><span class="n">ch</span><span class="si">}</span><span class="s2">. Each channel must be in &#39;type:name&#39; format.&quot;</span><span class="p">)</span>
+
+    <span class="n">channel_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">raw_channel</span><span class="p">:</span> <span class="n">new_channel</span> <span class="k">for</span> <span class="n">raw_channel</span><span class="p">,</span> <span class="n">new_channel</span> <span class="ow">in</span>
+                       <span class="nb">zip</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">ch</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channel_info</span><span class="p">])}</span>
+    <span class="n">raw_data</span><span class="o">.</span><span class="n">rename_channels</span><span class="p">(</span><span class="n">channel_mapping</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ch</span><span class="p">,</span> <span class="n">ch_info</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;chs&#39;</span><span class="p">],</span> <span class="n">channel_info</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ch_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;EEG&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FIFF</span><span class="o">.</span><span class="n">FIFFV_EEG_CH</span>
+        <span class="k">elif</span> <span class="n">ch_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;EMG&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FIFF</span><span class="o">.</span><span class="n">FIFFV_EMG_CH</span>
+        <span class="k">elif</span> <span class="n">ch_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ECG&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FIFF</span><span class="o">.</span><span class="n">FIFFV_ECG_CH</span>
+        <span class="k">elif</span> <span class="n">ch_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;EOG&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FIFF</span><span class="o">.</span><span class="n">FIFFV_EOG_CH</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ch</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FIFF</span><span class="o">.</span><span class="n">FIFFV_BIO_CH</span>
+    <span class="k">return</span> <span class="n">raw_data</span></div>
+
+
+<div class="viewcode-block" id="get_data_row">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.get_data_row">[docs]</a>
+<span class="k">def</span> <span class="nf">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_set_channel_type</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_set_montage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">,</span> <span class="n">pick_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span>
+    <span class="n">file_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span>
+    <span class="c1"># get mne.io.raw data</span>
+    <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;standard_data&quot;</span><span class="p">:</span> <span class="c1"># read standard data, those supported by MNE-Python</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">preload</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">channel_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of channels marked in the locator file does not match the number of channels in the metadata: </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">channel_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">original</span><span class="p">:</span> <span class="n">new</span> <span class="k">for</span> <span class="n">original</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">],</span> <span class="n">channel_names</span><span class="p">)}</span>
+        <span class="n">raw_data</span><span class="o">.</span><span class="n">rename_channels</span><span class="p">(</span><span class="n">channel_mapping</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># cope with non-standard data</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">handle_nonstandard_data</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="c1"># Reset channel names and types based on the locator</span>
+    <span class="k">if</span> <span class="n">is_set_channel_type</span><span class="p">:</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">set_channel_type</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">])</span>
+    <span class="c1"># Set electrode coordinates according to the preset montage</span>
+    <span class="k">if</span> <span class="n">is_set_montage</span><span class="p">:</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">set_montage_any</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+    <span class="c1"># Apply normalization</span>
+    <span class="k">if</span> <span class="n">norm_type</span> <span class="ow">and</span> <span class="s1">&#39;MEAN STD&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">normalize_data</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;MEAN STD&#39;</span><span class="p">],</span> <span class="n">norm_type</span><span class="p">)</span>
+    <span class="c1"># Reset channel units</span>
+    <span class="k">if</span> <span class="n">unit_convert</span> <span class="ow">and</span> <span class="s1">&#39;Infer Unit&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">set_infer_unit</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">unit_convert</span><span class="p">)</span>
+    <span class="c1"># Reset when there are timestamp anomalies</span>
+    <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">],</span>
+                                                            <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">2147483648</span> <span class="ow">or</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span>
+        <span class="s1">&#39;meas_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2147483647</span><span class="p">):</span>
+        <span class="c1"># If the date is wrong, set None.</span>
+        <span class="n">raw_data</span><span class="o">.</span><span class="n">set_meas_date</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">raw_data</span></div>
+
+
+<div class="viewcode-block" id="set_infer_unit">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.set_infer_unit">[docs]</a>
+<span class="k">def</span> <span class="nf">set_infer_unit</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+    <span class="n">infer_unit</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Infer Unit&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">infer_unit</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ch_name</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">infer_unit</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">ch_name</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">ch_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ch_name</span><span class="p">)</span>
+                <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;chs&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">][</span><span class="s1">&#39;eegunity_unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="k">return</span> <span class="n">raw_data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;Infer Unit&#39; is not a valid dictionary: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Infer Unit&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="format_channel_names">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.format_channel_names">[docs]</a>
+<span class="k">def</span> <span class="nf">format_channel_names</span><span class="p">(</span><span class="n">input_string</span><span class="p">):</span>
+
+    <span class="c1"># Define a function to check if a channel is an EOG channel</span>
+    <span class="k">def</span> <span class="nf">is_eog_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;eog&quot;</span> <span class="ow">in</span> <span class="n">channel</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># Define a function to check if a channel is an MEG channel</span>
+    <span class="k">def</span> <span class="nf">is_meg_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;meg&quot;</span> <span class="ow">in</span> <span class="n">channel</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># Define a function to check if a channel is an ECG channel</span>
+    <span class="k">def</span> <span class="nf">is_ecg_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;ecg&quot;</span> <span class="ow">in</span> <span class="n">channel</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c1"># Define a function to check if a channel is an DOUBLE channel</span>
+    <span class="k">def</span> <span class="nf">is_double_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">channel</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">valid_channels</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;REF&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="s2">&quot;EEG&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;EMG&quot;</span><span class="p">}</span>
+
+        <span class="c1"># Convert both parts to upper case for case-insensitive comparison</span>
+        <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">part1</span> <span class="ow">in</span> <span class="n">valid_channels</span> <span class="ow">or</span> <span class="n">part2</span> <span class="ow">in</span> <span class="n">valid_channels</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Define a function to standardize channel names</span>
+    <span class="k">def</span> <span class="nf">standardize_eeg_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+        <span class="c1"># remove prefix</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EEG:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EEG&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;eeg&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;EEG:</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span> <span class="nf">remap_standard_name</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+        <span class="c1"># remove prefix</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EEG:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EEG&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;eeg&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># define rules for replacement</span>
+        <span class="n">replacements</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;FAF&#39;</span><span class="p">:</span> <span class="s1">&#39;AFF&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CFC&#39;</span><span class="p">:</span> <span class="s1">&#39;FCC&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CPC&#39;</span><span class="p">:</span> <span class="s1">&#39;CCP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;POP&#39;</span><span class="p">:</span> <span class="s1">&#39;PPO&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TPT&#39;</span><span class="p">:</span> <span class="s1">&#39;TTP&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;TFT&#39;</span><span class="p">:</span> <span class="s1">&#39;FTT&#39;</span>
+        <span class="p">}</span>
+        <span class="c1"># employ replacement and propose warnings</span>
+        <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">replacements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">old</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">channel</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">old</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s1"> is an invalid 10-5 name and has been replaced with </span><span class="si">{</span><span class="n">new</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s1">. </span><span class="se">\n</span><span class="s1"> If mismatch happen, you should change locator manually.&#39;</span><span class="p">)</span>
+                <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">new</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">channel</span>
+
+    <span class="c1"># Define a function to preprocess channel names by removing leading/trailing whitespace and EEG-related prefixes/suffixes</span>
+    <span class="k">def</span> <span class="nf">preprocess_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">prefix_suffix</span> <span class="ow">in</span> <span class="n">EEG_PREFIXES_SUFFIXES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">channel</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix_suffix</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
+                <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix_suffix</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="p">):]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">channel</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix_suffix</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="p">):</span>
+                <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix_suffix</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="p">):]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">channel</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix_suffix</span><span class="p">):</span>
+                <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix_suffix</span><span class="p">):]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">channel</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">prefix_suffix</span><span class="p">):</span>
+                <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">prefix_suffix</span><span class="p">)]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">channel</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">prefix_suffix</span><span class="p">):</span>
+                <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix_suffix</span><span class="p">)]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">channel</span>
+
+    <span class="c1"># Split the input string into a list of channel names</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="n">input_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Initialize a set for formatted channel names and a set for seen channel names</span>
+    <span class="n">formatted_channels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen_channels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># Process each channel name</span>
+    <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">preprocess_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_eog_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+            <span class="n">formatted_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;EOG:</span><span class="si">{</span><span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EOG:&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EOG&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;eog&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">elif</span> <span class="n">is_meg_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+            <span class="n">formatted_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;MEG:</span><span class="si">{</span><span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MEG:&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;MEG&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;meg&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">elif</span> <span class="n">is_ecg_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+            <span class="n">formatted_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ECG:</span><span class="si">{</span><span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ECG:&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ECG&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ecg&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">elif</span> <span class="n">is_double_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
+            <span class="n">formatted_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;EEGDual:</span><span class="si">{</span><span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Dual:&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">re_channel</span> <span class="o">=</span> <span class="n">remap_standard_name</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+            <span class="n">matched</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">standard_name</span> <span class="ow">in</span> <span class="n">STANDARD_EEG_CHANNELS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">re_channel</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">standard_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">formatted_channel</span> <span class="o">=</span> <span class="n">standardize_eeg_channel</span><span class="p">(</span><span class="n">standard_name</span><span class="p">)</span>
+                    <span class="n">matched</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">matched</span><span class="p">:</span>
+                <span class="n">formatted_channel</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unknown:</span><span class="si">{</span><span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Unknown:&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="c1"># Check for duplicates</span>
+        <span class="k">if</span> <span class="n">formatted_channel</span> <span class="ow">in</span> <span class="n">seen_channels</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duplicate formatted channel detected: </span><span class="si">{</span><span class="n">formatted_channel</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">input_string</span>
+
+        <span class="n">formatted_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formatted_channel</span><span class="p">)</span>
+        <span class="n">seen_channels</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">formatted_channel</span><span class="p">)</span>
+
+    <span class="c1"># Concatenate the formatted channel names into a string</span>
+    <span class="n">output_string</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_channels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output_string</span></div>
+
+<span class="k">def</span> <span class="nf">_clean_sampling_rate_</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+
+    <span class="c1"># Convert the &#39;Sampling Rate&#39; column to a string and retain only digits, decimal points, and the &#39;e&#39; in scientific notation</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^0-9.eE+-]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+    <span class="c1"># If necessary, convert the result back to a numeric type</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span>
+
+<div class="viewcode-block" id="handle_nonstandard_data">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.handle_nonstandard_data">[docs]</a>
+<span class="k">def</span> <span class="nf">handle_nonstandard_data</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">):</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">):</span>
+        <span class="n">matdata</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="n">eeg_data</span> <span class="o">=</span> \
+            <span class="n">_find_variables_by_condition</span><span class="p">(</span><span class="n">matdata</span><span class="p">,</span> <span class="n">_condition_source_data</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="mi">20</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">eeg_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">eeg_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">eeg_data</span> <span class="o">=</span> <span class="n">eeg_data</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="n">channel_names</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">create_info</span><span class="p">(</span><span class="n">ch_names</span><span class="o">=</span><span class="n">channel_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]),</span> <span class="n">ch_types</span><span class="o">=</span><span class="s1">&#39;eeg&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">RawArray</span><span class="p">(</span><span class="n">eeg_data</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">raw</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;csvData&#39;</span><span class="p">:</span>
+        <span class="c1"># Retrieve header information from the locator</span>
+        <span class="c1"># Check if there is a header</span>
+        <span class="n">header_option</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Header&#39;</span><span class="p">,</span> <span class="s1">&#39;infer&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="k">else</span> <span class="s1">&#39;infer&#39;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header_option</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">header_option</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If the file has no column names, generate them</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="c1"># Retrieve channel names and sampling rate</span>
+        <span class="n">channel_names</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">sfreq</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Check if all channel names are present in the DataFrame columns</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">channel_names</span><span class="p">):</span>
+            <span class="k">raise</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of channels marked in the locator file does not match the metadata channels </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Extract EEG data</span>
+        <span class="n">eeg_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">channel_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># 转置以匹配 MNE 需要的格式 (通道数, 时间点数)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">create_info</span><span class="p">(</span><span class="n">ch_names</span><span class="o">=</span><span class="n">channel_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">ch_types</span><span class="o">=</span><span class="s1">&#39;eeg&#39;</span><span class="p">)</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">RawArray</span><span class="p">(</span><span class="n">eeg_data</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">raw</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span><span class="p">(</span><span class="s2">&quot;Parsing of files other than .mat/.csv/.txt is currently not supported&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="extract_events">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.extract_events">[docs]</a>
+<span class="k">def</span> <span class="nf">extract_events</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract events from an mne.io.Raw object.</span>
+
+<span class="sd">    Attempt to extract events using mne.find_events.</span>
+<span class="sd">    If it fails, use mne.events_from_annotations to extract events.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    raw : mne.io.Raw</span>
+<span class="sd">        The raw data object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    events : numpy.ndarray</span>
+<span class="sd">        The events array, shaped (n_events, 3).</span>
+<span class="sd">    event_id : dict</span>
+<span class="sd">        Dictionary of event IDs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Attempt to extract events using mne.find_events</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">find_events</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="c1"># Automatically generate the event_id dictionary, assuming all events are valid</span>
+        <span class="n">unique_event_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">event_id</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;event_</span><span class="si">{</span><span class="n">event_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">event_id</span> <span class="k">for</span> <span class="n">event_id</span> <span class="ow">in</span> <span class="n">unique_event_ids</span><span class="p">}</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># Extract events using mne.events_from_annotations</span>
+        <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">events_from_annotations</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span></div>
+
+
+
+<div class="viewcode-block" id="infer_channel_unit">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.infer_channel_unit">[docs]</a>
+<span class="k">def</span> <span class="nf">infer_channel_unit</span><span class="p">(</span><span class="n">ch_name</span><span class="p">,</span> <span class="n">ch_data</span><span class="p">,</span> <span class="n">ch_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Infer the unit type for a channel.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    ch_name: The name of the channel</span>
+<span class="sd">    ch_data: The data of the channel</span>
+<span class="sd">    ch_type: The type of the channel</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    The inferred unit type, such as &quot;uV&quot;, &quot;mV&quot;, &quot;V&quot;, etc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mean_val</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ch_data</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="c1"># Infer the unit based on the channel type and average amplitude</span>
+    <span class="k">if</span> <span class="n">ch_type</span> <span class="o">==</span> <span class="s1">&#39;eeg&#39;</span> <span class="ow">or</span> <span class="n">ch_type</span> <span class="o">==</span> <span class="s1">&#39;eog&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mean_val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;uV&quot;</span>
+        <span class="k">elif</span> <span class="n">mean_val</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;mV&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;V&quot;</span>
+    <span class="k">elif</span> <span class="n">ch_type</span> <span class="o">==</span> <span class="s1">&#39;ecg&#39;</span> <span class="ow">or</span> <span class="n">ch_type</span> <span class="o">==</span> <span class="s1">&#39;emg&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mean_val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;uV&quot;</span>
+        <span class="k">elif</span> <span class="n">mean_val</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;mV&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;V&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For misc and other unknown types</span>
+        <span class="k">if</span> <span class="n">mean_val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;uV&quot;</span>
+        <span class="k">elif</span> <span class="n">mean_val</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;mV&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;V&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="convert_unit">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.convert_unit">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_unit</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Raw</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Raw</span><span class="p">:</span>
+    <span class="c1"># Validate the unit</span>
+    <span class="n">valid_units</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="s1">&#39;mV&#39;</span><span class="p">,</span> <span class="s1">&#39;uV&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_units</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid unit &#39;</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&#39;. Valid units are &#39;V&#39;, &#39;mV&#39;, &#39;uV&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get the number of channels</span>
+    <span class="n">n_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;chs&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Define unit conversion relationships</span>
+    <span class="n">unit_conversion</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;mV&#39;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="s1">&#39;uV&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">}</span>
+    <span class="n">target_multiplier</span> <span class="o">=</span> <span class="n">unit_conversion</span><span class="p">[</span><span class="n">unit</span><span class="p">]</span>
+
+    <span class="c1"># Iterate through all channels</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_channels</span><span class="p">):</span>
+        <span class="n">ch</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;chs&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">current_unit</span> <span class="o">=</span> <span class="n">ch</span><span class="p">[</span><span class="s1">&#39;eegunity_unit&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">current_unit</span> <span class="ow">in</span> <span class="n">unit_conversion</span><span class="p">:</span>
+            <span class="n">current_multiplier</span> <span class="o">=</span> <span class="n">unit_conversion</span><span class="p">[</span><span class="n">current_unit</span><span class="p">]</span>
+            <span class="n">conversion_factor</span> <span class="o">=</span> <span class="n">current_multiplier</span> <span class="o">/</span> <span class="n">target_multiplier</span>
+            <span class="c1"># Convert the data</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">conversion_factor</span>
+
+            <span class="c1"># Update the unit</span>
+            <span class="n">ch</span><span class="p">[</span><span class="s1">&#39;eegunity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span>
+
+        <span class="c1"># Mark that the unit conversion has been done</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;chs&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;eegunity_unit_converted&quot;</span><span class="p">:</span> <span class="n">unit</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="process_mne_files">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.process_mne_files">[docs]</a>
+<span class="k">def</span> <span class="nf">process_mne_files</span><span class="p">(</span><span class="n">files_locator</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">files_locator</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">files_locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;standard_data&#39;</span>
+            <span class="n">files_locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;Data Shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;nchan&#39;</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">n_times</span><span class="p">))</span>
+            <span class="n">files_locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">])</span>
+            <span class="n">files_locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;Number of Channels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">])</span>
+            <span class="n">files_locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;sfreq&#39;</span><span class="p">]</span>
+            <span class="n">files_locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;Duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retrieved channel sequence </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">files_locator</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+    <span class="k">return</span> <span class="n">files_locator</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Wenlong You.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
