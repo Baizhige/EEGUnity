@@ -1,6 +1,8 @@
-# from eegunity.share_attributes import UDatasetSharedAttributes
-# from eegunity.module_eeg_llm_booster.eeg_llm_des_parser import llm_description_file_parser
-# from eegunity.module_eeg_llm_booster.eeg_llm_file_parser import llm_boost_parser
+from eegunity.module_eeg_llm_booster.eeg_llm_des_parser import llm_description_file_parser
+from eegunity.module_eeg_llm_booster.eeg_llm_file_parser import llm_boost_parser
+from eegunity.share_attributes import UDatasetSharedAttributes
+
+
 class EEGCorrection(UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()

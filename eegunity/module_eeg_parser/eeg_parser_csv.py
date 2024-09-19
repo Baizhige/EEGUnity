@@ -1,6 +1,9 @@
-# import pandas as pd
-# from datetime import datetime
-# import os
+import os
+from datetime import datetime
+
+import pandas as pd
+
+
 def calculate_interval(times):
     if isinstance(times.dtype, pd.core.dtypes.dtypes.DatetimeTZDtype) or isinstance(times.iloc[0], pd.Timestamp):
         intervals = [t2 - t1 for t1, t2 in zip(times[:-1], times[1:])]
@@ -21,6 +24,8 @@ def is_datetime_format(s):
             return True
         except ValueError:
             return False
+
+
 def identify_time_columns(df):
     time_columns = {}
     for column in df.columns:
@@ -42,6 +47,7 @@ def identify_time_columns(df):
         return list(time_columns.keys()), list(time_columns.values())[0]
 
     return None
+
 
 def process_csv_files(files_locator):
     def calculate_sampling_rate(time_series):

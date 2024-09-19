@@ -9,10 +9,11 @@ Last Modified: 2024-07-26
 Version: 1.0
 """
 # ----------------------------------------------------------------------
-# import os
-# import pandas as pd
-# import mne
-# from openai import AzureOpenAI
+import os
+
+import mne
+import pandas as pd
+from openai import AzureOpenAI
 
 
 def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iterations: int = 5):
@@ -95,8 +96,9 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
             local_vars = {}
             exec(function_code, globals(), local_vars)
             data, sfreq, ch_names = local_vars['read_data'](file_path)
-            if sfreq>2000:
-                raise ValueError(f"The sampling rate now is {sfreq}, which is too large. Please revide your code. Make sure computation of sampling rate is right")
+            if sfreq > 2000:
+                raise ValueError(
+                    f"The sampling rate now is {sfreq}, which is too large. Please revide your code. Make sure computation of sampling rate is right")
             info = mne.create_info(ch_names=ch_names, sfreq=sfreq)
             raw_data = mne.io.RawArray(data, info)
 
@@ -105,6 +107,6 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
         except Exception as e:
             # Update the conversation history with the encountered error
             print(f"Error encountered: {e}")
-            conversation_history = f"I have a CSV with description: \n {description}" + f"\n But there are some errors encountered: {e}\n The previous code was:\n{function_code} \n The expected returns should be 1. data: A ndarray with the shape (n_channels, n_times), containing the file data, without timestamp or string column. All columns must only contain float type data. \n 2. sfreq: A float representing the sampling frequency in Hz. \n 3. ch_names: A list of strings representing the channel names, must be same as columns name used in data. \n Please improve the code based on the above error and description."+f"\n Do not include any code block markers like ```python or other extra text. Return only the function code, without any additional text. This is program automatically request, the program will capture your code by function_code = response.choices[0].message.content.strip(), and employ it by exec(function_code, globals(), local_vars), data, sfreq, ch_names = local_vars['read_data'](file_path)"
+            conversation_history = f"I have a CSV with description: \n {description}" + f"\n But there are some errors encountered: {e}\n The previous code was:\n{function_code} \n The expected returns should be 1. data: A ndarray with the shape (n_channels, n_times), containing the file data, without timestamp or string column. All columns must only contain float type data. \n 2. sfreq: A float representing the sampling frequency in Hz. \n 3. ch_names: A list of strings representing the channel names, must be same as columns name used in data. \n Please improve the code based on the above error and description." + f"\n Do not include any code block markers like ```python or other extra text. Return only the function code, without any additional text. This is program automatically request, the program will capture your code by function_code = response.choices[0].message.content.strip(), and employ it by exec(function_code, globals(), local_vars), data, sfreq, ch_names = local_vars['read_data'](file_path)"
 
     raise RuntimeError("Failed to generate valid code within the maximum iteration limit")

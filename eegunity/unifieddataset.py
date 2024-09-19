@@ -1,8 +1,10 @@
-# from eegunity.module_eeg_parser.eeg_parser import EEGParser
-# from eegunity.module_eeg_batch.eeg_batch import EEGBatch
-# from eegunity.module_eeg_correction.eeg_correction import EEGCorrection
-# from eegunity.share_attributes import UDatasetSharedAttributes
-# import copy
+import copy
+
+from eegunity.module_eeg_batch.eeg_batch import EEGBatch
+from eegunity.module_eeg_correction.eeg_correction import EEGCorrection
+from eegunity.module_eeg_parser.eeg_parser import EEGParser
+from eegunity.share_attributes import UDatasetSharedAttributes
+
 
 class UnifiedDataset(UDatasetSharedAttributes):
     def __init__(self, domain_tag, dataset_path=None, locator_path=None, is_unzip=True, verbose='CRITICAL'):
@@ -28,4 +30,3 @@ class UnifiedDataset(UDatasetSharedAttributes):
 
     def set_locator(self, new_locator):
         self.get_shared_attr()['locator'] = new_locator
-

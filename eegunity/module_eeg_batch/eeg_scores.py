@@ -1,9 +1,8 @@
-# import matplotlib
-# import matplotlib.pyplot as plt
-# import mne
-# import numpy as np
-# from scipy.fftpack import fft, fftfreq
-# from scipy.signal import butter, filtfilt
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.fftpack import fft, fftfreq
+from scipy.signal import butter, filtfilt
+
 
 # matplotlib.use('TkAgg')
 

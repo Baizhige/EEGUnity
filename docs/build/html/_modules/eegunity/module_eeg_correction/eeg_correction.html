@@ -69,15 +69,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for eegunity.module_eeg_correction.eeg_correction</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pprint</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">get_data_row</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">welch</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">sqrt</span>
-<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">welch</span>
+
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">get_data_row</span>
+<span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
+
+
 <div class="viewcode-block" id="EEGCorrection">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_correction.html#eegunity.module_eeg_correction.eeg_correction.EEGCorrection">[docs]</a>
 <span class="k">class</span> <span class="nc">EEGCorrection</span><span class="p">(</span><span class="n">UDatasetSharedAttributes</span><span class="p">):</span>
@@ -93,8 +97,10 @@
 <span class="sd">           channel configurations, and completeness checks. This report can be generated for individual</span>
 <span class="sd">           groups within the dataset or for the dataset as a whole.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">def</span> <span class="nf">percentage</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">whole</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">whole</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
         <span class="k">def</span> <span class="nf">generate_statistics</span><span class="p">(</span><span class="n">grouped_df</span><span class="p">,</span> <span class="n">overall</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">domain_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Overall&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">overall</span> <span class="k">else</span> <span class="n">grouped_df</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
@@ -129,6 +135,7 @@
                 <span class="p">}</span>
 
             <span class="k">return</span> <span class="n">result</span>
+
         <span class="k">def</span> <span class="nf">generate_diagnostics</span><span class="p">(</span><span class="n">grouped_df</span><span class="p">):</span>
             <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">domain_tag</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">grouped_df</span><span class="p">:</span>
@@ -185,6 +192,7 @@
 <span class="sd">                plots for each domain in the dataset.</span>
 
 <span class="sd">            &quot;&quot;&quot;</span>
+
         <span class="k">def</span> <span class="nf">compute_amplitude_spectrum</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">):</span>
             <span class="c1"># Compute amplitude spectrum using scipy&#39;s welch method</span>
             <span class="n">freqs</span><span class="p">,</span> <span class="n">psd</span> <span class="o">=</span> <span class="n">welch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">sfreq</span><span class="p">),</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;hann&#39;</span><span class="p">,</span> <span class="n">nperseg</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -265,6 +273,7 @@
 <span class="sd">            This function does not return a value. It displays a set of correlation matrix plots for each domain.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">def</span> <span class="nf">compute_channel_correlation</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="c1"># Compute correlation matrix for EEG data channels</span>
             <span class="n">corr_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
