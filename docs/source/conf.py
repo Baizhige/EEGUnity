@@ -20,7 +20,9 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
 ]
+autodoc_mock_imports = ["EEGParser", "EEGBatch", "EEGCorrection", "UDatasetSharedAttributes"]  # 替换为你项目中的无法安装的模块名
 
 
 templates_path = ['_templates']
