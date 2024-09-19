@@ -1,26 +1,26 @@
-import os
-import pandas as pd
-import glob
-import mne
-import zipfile
-import re
-import scipy
-from eegunity.share_attributes import UDatasetSharedAttributes
-from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, _condition_source_data
-from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
-import ast
-import warnings
-import json
-import datetime
-import numpy as np
-
-
-current_dir = os.path.dirname(__file__)
-json_file_path = os.path.join(current_dir, 'combined_montage.json')
-with open(json_file_path, 'r') as file:
-    data = json.load(file)
-STANDARD_EEG_CHANNELS = list(data.keys())
-EEG_PREFIXES_SUFFIXES = {"EEG", "FP", "REF", "LE", "RE"}
+# import os
+# import pandas as pd
+# import glob
+# import mne
+# import zipfile
+# import re
+# import scipy
+# from eegunity.share_attributes import UDatasetSharedAttributes
+# from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, _condition_source_data
+# from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
+# import ast
+# import warnings
+# import json
+# import datetime
+# import numpy as np
+#
+#
+# current_dir = os.path.dirname(__file__)
+# json_file_path = os.path.join(current_dir, 'combined_montage.json')
+# with open(json_file_path, 'r') as file:
+#     data = json.load(file)
+# STANDARD_EEG_CHANNELS = list(data.keys())
+# EEG_PREFIXES_SUFFIXES = {"EEG", "FP", "REF", "LE", "RE"}
 
 class EEGParser(UDatasetSharedAttributes):
     def __init__(self, main_instance):

@@ -1,12 +1,12 @@
-from eegunity.share_attributes import UDatasetSharedAttributes
-import pandas as pd
-import pprint
-import numpy as np
-import matplotlib.pyplot as plt
-from eegunity.module_eeg_parser.eeg_parser import get_data_row
-from scipy.signal import welch
-from math import ceil, sqrt
-import os
+# from eegunity.share_attributes import UDatasetSharedAttributes
+# import pandas as pd
+# import pprint
+# import numpy as np
+# import matplotlib.pyplot as plt
+# from eegunity.module_eeg_parser.eeg_parser import get_data_row
+# from scipy.signal import welch
+# from math import ceil, sqrt
+# import os
 class EEGCorrection(UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()

@@ -10,14 +10,14 @@ Last Modified: 2024-07-26
 Version: 1.0
 """
 
-import json
-import csv
-import os
-import docx
-import pdfplumber
-import pandas as pd
-from openai import AzureOpenAI
-from scipy.io import loadmat
+# import json
+# import csv
+# import os
+# import docx
+# import pdfplumber
+# import pandas as pd
+# from openai import AzureOpenAI
+# from scipy.io import loadmat
 
 
 def read_files(directory):

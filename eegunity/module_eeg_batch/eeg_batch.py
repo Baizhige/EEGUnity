@@ -1,20 +1,20 @@
-from eegunity.share_attributes import UDatasetSharedAttributes
-import pandas as pd
-import os
-import copy
-import mne
-import numpy as np
-from eegunity.module_eeg_parser.eeg_parser import get_data_row, format_channel_names, extract_events, infer_channel_unit
-from eegunity.module_eeg_batch.eeg_scores import calculate_eeg_quality_scores
-import warnings
-import json
-import ast
-
-current_dir = os.path.dirname(__file__)
-json_file_path = os.path.join(current_dir, '..', 'module_eeg_parser', 'combined_montage.json')
-with open(json_file_path, 'r') as file:
-    data = json.load(file)
-STANDARD_EEG_CHANNELS = list(data.keys())
+# from eegunity.share_attributes import UDatasetSharedAttributes
+# import pandas as pd
+# import os
+# import copy
+# import mne
+# import numpy as np
+# from eegunity.module_eeg_parser.eeg_parser import get_data_row, format_channel_names, extract_events, infer_channel_unit
+# from eegunity.module_eeg_batch.eeg_scores import calculate_eeg_quality_scores
+# import warnings
+# import json
+# import ast
+#
+# current_dir = os.path.dirname(__file__)
+# json_file_path = os.path.join(current_dir, '..', 'module_eeg_parser', 'combined_montage.json')
+# with open(json_file_path, 'r') as file:
+#     data = json.load(file)
+# STANDARD_EEG_CHANNELS = list(data.keys())
 
 
 class EEGBatch(UDatasetSharedAttributes):
