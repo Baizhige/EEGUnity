@@ -69,22 +69,24 @@
            <div itemprop="articleBody">
              
   <h1>Source code for eegunity.module_eeg_parser.eeg_parser</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">mne</span>
-<span class="kn">import</span> <span class="nn">zipfile</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_mat</span> <span class="kn">import</span> <span class="n">process_mat_files</span><span class="p">,</span> <span class="n">_find_variables_by_condition</span><span class="p">,</span> <span class="n">_condition_source_data</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_csv</span> <span class="kn">import</span> <span class="n">process_csv_files</span>
-<span class="kn">import</span> <span class="nn">ast</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span></span><span class="kn">import</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
 
+<span class="kn">import</span> <span class="nn">mne</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_csv</span> <span class="kn">import</span> <span class="n">process_csv_files</span>
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_mat</span> <span class="kn">import</span> <span class="n">process_mat_files</span><span class="p">,</span> <span class="n">_find_variables_by_condition</span><span class="p">,</span> \
+    <span class="n">_condition_source_data</span>
+<span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
 
 <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="n">json_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s1">&#39;combined_montage.json&#39;</span><span class="p">)</span>
@@ -92,6 +94,7 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 <span class="n">STANDARD_EEG_CHANNELS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 <span class="n">EEG_PREFIXES_SUFFIXES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;EEG&quot;</span><span class="p">,</span> <span class="s2">&quot;FP&quot;</span><span class="p">,</span> <span class="s2">&quot;REF&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="s2">&quot;RE&quot;</span><span class="p">}</span>
+
 
 <div class="viewcode-block" id="EEGParser">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.EEGParser">[docs]</a>
@@ -171,6 +174,7 @@
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.EEGParser.check_locator">[docs]</a>
     <span class="k">def</span> <span class="nf">check_locator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locator</span><span class="p">):</span>
         <span class="n">locator</span> <span class="o">=</span> <span class="n">locator</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
         <span class="k">def</span> <span class="nf">check_data_shape</span><span class="p">(</span><span class="n">data_shape</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">data_shape</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Miss data in Data Shape&quot;</span><span class="p">]</span>
@@ -278,8 +282,10 @@
 <div class="viewcode-block" id="set_montage_any">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.set_montage_any">[docs]</a>
 <span class="k">def</span> <span class="nf">set_montage_any</span><span class="p">(</span><span class="n">raw_data</span><span class="p">:</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Raw</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">):</span>
-    <span class="n">montage</span> <span class="o">=</span> <span class="n">create_montage_from_json</span><span class="p">(</span><span class="s1">&#39;combined_montage.json&#39;</span><span class="p">)</span>
-    <span class="n">raw_data</span><span class="o">.</span><span class="n">set_montage</span><span class="p">(</span><span class="n">montage</span><span class="p">,</span> <span class="n">on_missing</span><span class="o">=</span> <span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+    <span class="n">montage</span> <span class="o">=</span> <span class="n">create_montage_from_json</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s1">&#39;combined_montage.json&#39;</span><span class="p">))</span>
+    <span class="n">raw_data</span><span class="o">.</span><span class="n">set_montage</span><span class="p">(</span><span class="n">montage</span><span class="p">,</span> <span class="n">on_missing</span><span class="o">=</span><span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">raw_data</span></div>
 
 
@@ -296,6 +302,7 @@
     <span class="n">montage</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">make_dig_montage</span><span class="p">(</span><span class="n">ch_pos</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ch_names</span><span class="p">,</span> <span class="n">pos</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">montage</span></div>
+
 
 
 <div class="viewcode-block" id="set_channel_type">
@@ -323,20 +330,23 @@
     <span class="k">return</span> <span class="n">raw_data</span></div>
 
 
+
 <div class="viewcode-block" id="get_data_row">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.get_data_row">[docs]</a>
-<span class="k">def</span> <span class="nf">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_set_channel_type</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_set_montage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">,</span> <span class="n">pick_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_set_channel_type</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_set_montage</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">,</span>
+                 <span class="n">pick_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">filepath</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span>
     <span class="n">file_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span>
     <span class="c1"># get mne.io.raw data</span>
-    <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;standard_data&quot;</span><span class="p">:</span> <span class="c1"># read standard data, those supported by MNE-Python</span>
+    <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;standard_data&quot;</span><span class="p">:</span>  <span class="c1"># read standard data, those supported by MNE-Python</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">preload</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">channel_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of channels marked in the locator file does not match the number of channels in the metadata: </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The number of channels marked in the locator file does not match the number of channels in the metadata: </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">channel_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">original</span><span class="p">:</span> <span class="n">new</span> <span class="k">for</span> <span class="n">original</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">],</span> <span class="n">channel_names</span><span class="p">)}</span>
         <span class="n">raw_data</span><span class="o">.</span><span class="n">rename_channels</span><span class="p">(</span><span class="n">channel_mapping</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span> <span class="c1"># cope with non-standard data</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># cope with non-standard data</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">handle_nonstandard_data</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
     <span class="c1"># Reset channel names and types based on the locator</span>
     <span class="k">if</span> <span class="n">is_set_channel_type</span><span class="p">:</span>
@@ -353,12 +363,13 @@
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">unit_convert</span><span class="p">)</span>
     <span class="c1"># Reset when there are timestamp anomalies</span>
     <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">],</span>
-                                                            <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                                                             <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">2147483648</span> <span class="ow">or</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span>
         <span class="s1">&#39;meas_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2147483647</span><span class="p">):</span>
         <span class="c1"># If the date is wrong, set None.</span>
         <span class="n">raw_data</span><span class="o">.</span><span class="n">set_meas_date</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">raw_data</span></div>
+
 
 
 <div class="viewcode-block" id="set_infer_unit">
@@ -374,10 +385,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;Infer Unit&#39; is not a valid dictionary: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Infer Unit&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
+
+
 <div class="viewcode-block" id="format_channel_names">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.format_channel_names">[docs]</a>
 <span class="k">def</span> <span class="nf">format_channel_names</span><span class="p">(</span><span class="n">input_string</span><span class="p">):</span>
-
     <span class="c1"># Define a function to check if a channel is an EOG channel</span>
     <span class="k">def</span> <span class="nf">is_eog_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;eog&quot;</span> <span class="ow">in</span> <span class="n">channel</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -491,14 +503,16 @@
     <span class="n">output_string</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">formatted_channels</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">output_string</span></div>
 
-<span class="k">def</span> <span class="nf">_clean_sampling_rate_</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
 
+
+<span class="k">def</span> <span class="nf">_clean_sampling_rate_</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="c1"># Convert the &#39;Sampling Rate&#39; column to a string and retain only digits, decimal points, and the &#39;e&#39; in scientific notation</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^0-9.eE+-]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
     <span class="c1"># If necessary, convert the result back to a numeric type</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">df</span>
+
 
 <div class="viewcode-block" id="handle_nonstandard_data">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.handle_nonstandard_data">[docs]</a>
@@ -512,7 +526,8 @@
             <span class="n">eeg_data</span> <span class="o">=</span> <span class="n">eeg_data</span><span class="o">.</span><span class="n">T</span>
 
         <span class="n">channel_names</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">create_info</span><span class="p">(</span><span class="n">ch_names</span><span class="o">=</span><span class="n">channel_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]),</span> <span class="n">ch_types</span><span class="o">=</span><span class="s1">&#39;eeg&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">create_info</span><span class="p">(</span><span class="n">ch_names</span><span class="o">=</span><span class="n">channel_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]),</span> <span class="n">ch_types</span><span class="o">=</span><span class="s1">&#39;eeg&#39;</span><span class="p">,</span>
+                               <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">RawArray</span><span class="p">(</span><span class="n">eeg_data</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">raw</span>
 
@@ -532,7 +547,7 @@
 
         <span class="c1"># Check if all channel names are present in the DataFrame columns</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">channel_names</span><span class="p">):</span>
-            <span class="k">raise</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of channels marked in the locator file does not match the metadata channels </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of channels marked in the locator file does not match the metadata channels </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="c1"># Extract EEG data</span>
         <span class="n">eeg_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">channel_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># 转置以匹配 MNE 需要的格式 (通道数, 时间点数)</span>
         <span class="n">info</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">create_info</span><span class="p">(</span><span class="n">ch_names</span><span class="o">=</span><span class="n">channel_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">ch_types</span><span class="o">=</span><span class="s1">&#39;eeg&#39;</span><span class="p">)</span>
@@ -540,7 +555,8 @@
         <span class="k">return</span> <span class="n">raw</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span><span class="p">(</span><span class="s2">&quot;Parsing of files other than .mat/.csv/.txt is currently not supported&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="p">(</span><span class="s2">&quot;Parsing of files other than .mat/.csv/.txt is currently not supported&quot;</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="extract_events">
@@ -651,6 +667,7 @@
         <span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;chs&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;eegunity_unit_converted&quot;</span><span class="p">:</span> <span class="n">unit</span><span class="p">})</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
 
 
 <div class="viewcode-block" id="process_mne_files">

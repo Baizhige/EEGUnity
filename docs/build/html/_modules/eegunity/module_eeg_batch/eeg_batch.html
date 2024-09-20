@@ -69,17 +69,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for eegunity.module_eeg_batch.eeg_batch</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
 <span class="kn">import</span> <span class="nn">mne</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">get_data_row</span><span class="p">,</span> <span class="n">format_channel_names</span><span class="p">,</span> <span class="n">extract_events</span><span class="p">,</span> <span class="n">infer_channel_unit</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_batch.eeg_scores</span> <span class="kn">import</span> <span class="n">calculate_eeg_quality_scores</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">get_data_row</span><span class="p">,</span> <span class="n">format_channel_names</span><span class="p">,</span> <span class="n">extract_events</span><span class="p">,</span> <span class="n">infer_channel_unit</span>
+<span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
 
 <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="n">json_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;module_eeg_parser&#39;</span><span class="p">,</span> <span class="s1">&#39;combined_montage.json&#39;</span><span class="p">)</span>
@@ -272,19 +274,40 @@
 
 <div class="viewcode-block" id="EEGBatch.save_as_other">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.save_as_other">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_as_other</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">domain_tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save_as_other</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">domain_tag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fif&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_path</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output path does not exist: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check for valid format</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;fif&#39;</span><span class="p">,</span> <span class="s1">&#39;csv&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported format: </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">. Only &#39;fif&#39; and &#39;csv&#39; are supported.&quot;</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">con_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">domain_tag</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Domain Tag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">domain_tag</span>
 
         <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-            <span class="n">raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">is_set_channel_type</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_raw.fif&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">])</span>
-            <span class="n">raw</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">new_file_path</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;fif&#39;</span><span class="p">:</span>
+                <span class="c1"># Saving as FIF format</span>
+                <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_raw.fif&quot;</span><span class="p">)</span>
+                <span class="n">raw</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">new_file_path</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+                <span class="c1"># Saving as CSV format</span>
+                <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_raw.csv&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Extract data and channel names from Raw object</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">times</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">return_times</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">channel_names</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]</span>
+
+                <span class="c1"># Create a DataFrame with &#39;date&#39; column and channel data</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">channel_names</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">times</span><span class="p">)</span>  <span class="c1"># Add &#39;date&#39; as the first column</span>
+
+                <span class="c1"># Save DataFrame to CSV</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">new_file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
             <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file_path</span>
             <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_data&quot;</span>
             <span class="k">return</span> <span class="n">row</span>
@@ -776,11 +799,11 @@
         <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">mne_raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-
+                <span class="c1"># print(row)</span>
                 <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span> <span class="o">=</span> <span class="n">extract_events</span><span class="p">(</span><span class="n">mne_raw</span><span class="p">)</span>
 
                 <span class="n">row</span><span class="p">[</span><span class="s2">&quot;event_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_id</span><span class="p">)</span>
-
+                <span class="nb">print</span><span class="p">(</span><span class="n">event_id</span><span class="p">)</span>
                 <span class="n">event_id_num</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">events</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">event_id</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
                 <span class="n">row</span><span class="p">[</span><span class="s2">&quot;event_id_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_id_num</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">row</span>
@@ -875,10 +898,10 @@
 <a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.infer_units">[docs]</a>
     <span class="k">def</span> <span class="nf">infer_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">miss_bad_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        推断每个通道的单位并记录在数据行中。</span>
+<span class="sd">        Infer the units of each channel and record them in the data line.</span>
 
-<span class="sd">        参数：</span>
-<span class="sd">        miss_bad_data: 是否在处理出错时跳过当前文件继续处理下一个文件。</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        miss_bad_data: Whether to skip the current file and continue processing the next file when an error occurs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">con_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
@@ -886,26 +909,18 @@
 
         <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># 生成路径</span>
-                <span class="c1"># 使用 get_data_row(row) 获取 mne.io.Raw 对象</span>
                 <span class="n">mne_raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
-                <span class="c1"># 初始化单位字典</span>
                 <span class="n">units</span> <span class="o">=</span> <span class="p">{}</span>
 
-                <span class="c1"># 获取通道信息</span>
                 <span class="n">ch_names</span> <span class="o">=</span> <span class="n">mne_raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]</span>
                 <span class="n">ch_types</span> <span class="o">=</span> <span class="n">mne_raw</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">()</span>
 
                 <span class="k">for</span> <span class="n">ch_name</span><span class="p">,</span> <span class="n">ch_type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ch_names</span><span class="p">,</span> <span class="n">ch_types</span><span class="p">):</span>
-                    <span class="c1"># 获取通道数据</span>
                     <span class="n">ch_data</span> <span class="o">=</span> <span class="n">mne_raw</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">picks</span><span class="o">=</span><span class="p">[</span><span class="n">ch_name</span><span class="p">])</span>
 
-                    <span class="c1"># 使用静态函数推断单位</span>
                     <span class="n">unit</span> <span class="o">=</span> <span class="n">infer_channel_unit</span><span class="p">(</span><span class="n">ch_name</span><span class="p">,</span> <span class="n">ch_data</span><span class="p">,</span> <span class="n">ch_type</span><span class="p">)</span>
                     <span class="n">units</span><span class="p">[</span><span class="n">ch_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span>
-
-                <span class="c1"># 将单位字典转化为字符串存储在row[&quot;Infer Unit&quot;]列中</span>
                 <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Infer Unit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">row</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -915,7 +930,6 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span>
 
-        <span class="c1"># 使用 batch_process 处理数据</span>
         <span class="n">new_locator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span>
                                          <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">),</span>
                                          <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -943,7 +957,6 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span>
 
-        <span class="c1"># 使用 batch_process 处理数据</span>
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span> <span class="n">app_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s2">&quot;Score&quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></div>

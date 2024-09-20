@@ -69,9 +69,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for eegunity.module_eeg_parser.eeg_parser_csv</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
 <div class="viewcode-block" id="calculate_interval">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser_csv.calculate_interval">[docs]</a>
 <span class="k">def</span> <span class="nf">calculate_interval</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
@@ -98,6 +101,8 @@
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
+
+
 <div class="viewcode-block" id="identify_time_columns">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser_csv.identify_time_columns">[docs]</a>
 <span class="k">def</span> <span class="nf">identify_time_columns</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
@@ -121,6 +126,7 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">time_columns</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">time_columns</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="kc">None</span></div>
+
 
 
 <div class="viewcode-block" id="process_csv_files">

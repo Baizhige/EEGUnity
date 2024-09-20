@@ -115,18 +115,30 @@ Version: 1.0</p>
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_llm_booster.eeg_llm_file_parser.</span></span><span class="sig-name descname"><span class="pre">llm_boost_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azure_endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_llm_booster/eeg_llm_file_parser.html#llm_boost_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_llm_booster.eeg_llm_file_parser.llm_boost_parser" title="Link to this definition">¶</a></dt>
 <dd><p>Parses and processes an EEG data file using Azure OpenAI to generate a function
 that reads the data, calculates the sampling frequency, and extracts channel names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – Path to the CSV or TXT file</p></li>
+<li><p><strong>api_key</strong> (<em>str</em>) – API key for Azure OpenAI.</p></li>
+<li><p><strong>azure_endpoint</strong> (<em>str</em>) – Endpoint URL for Azure OpenAI.</p></li>
+<li><p><strong>max_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of iterations to refine the generated function code. Default is 5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An MNE RawArray object containing the processed EEG data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the file extension is not supported.</p></li>
+<li><p><strong>FileNotFoundError</strong> – If the specified file is not found.</p></li>
+<li><p><strong>RuntimeError</strong> – If the function code cannot be generated within the maximum iteration limit.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="simple">
-<dt>Parameters:</dt><dd><p>file_path (str): Path to the CSV or TXT file
-api_key (str): API key for Azure OpenAI.
-azure_endpoint (str): Endpoint URL for Azure OpenAI.
-max_iterations (int, optional): Maximum number of iterations to refine the generated function code. Default is 5.</p>
-</dd>
-<dt>Returns:</dt><dd><p>mne.io.Raw: An MNE RawArray object containing the processed EEG data.</p>
-</dd>
-<dt>Raises:</dt><dd><p>ValueError: If the file extension is not supported.
-FileNotFoundError: If the specified file is not found.
-RuntimeError: If the function code cannot be generated within the maximum iteration limit.</p>
-</dd>
 <dt>Usage:</dt><dd><p>api_key = (“your api key here”)
 azure_endpoint = “<a class="reference external" href="https://your_endpoint">https://your_endpoint</a>”
 file_path = “data_file”

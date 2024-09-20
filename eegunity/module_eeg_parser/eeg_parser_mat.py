@@ -1,8 +1,11 @@
+import os
+import re
+
+import numpy as np
 from numpy import ndarray
 from scipy.io import loadmat
-import os
-import numpy as np
-import re
+
+
 def process_mat_files(files_locator):
     def is_numeric(s):
         # Match integer or floating-point numbers
@@ -15,16 +18,16 @@ def process_mat_files(files_locator):
 
         if file_path.endswith('.mat') and file_type == 'unknown':
             file_size = os.path.getsize(file_path)
-            if file_size > 5 * 1024 * 1024: # Greater than 5MB
+            if file_size > 5 * 1024 * 1024:  # Greater than 5MB
                 data = loadmat(file_path, simplify_cells=True)  # Simplify dictionary structure
                 channel_name = _find_variables_by_condition(data, _condition_sampling_channel_name,
-                                                                 max_depth=5, max_width=20)
+                                                            max_depth=5, max_width=20)
                 sampling_rate = _find_variables_by_condition(data, _condition_sampling_rate,
-                                                                  max_depth=5, max_width=20)
+                                                             max_depth=5, max_width=20)
                 source_data = _find_variables_by_condition(data, _condition_source_data,
-                                                                max_depth=5, max_width=20)
+                                                           max_depth=5, max_width=20)
                 source_data_3d = _find_variables_by_condition(data, _condition_source_data_3d,
-                                                                   max_depth=5, max_width=20)
+                                                              max_depth=5, max_width=20)
                 if isinstance(source_data[1], ndarray):
                     files_locator.at[index, 'Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
                     if isinstance(channel_name[1], ndarray):
@@ -35,7 +38,8 @@ def process_mat_files(files_locator):
                     files_locator.at[index, 'Number of Channels'] = str(min(source_data[1].shape))
                     files_locator.at[index, 'Data Shape'] = str(source_data[1].shape)
                     if is_numeric(files_locator.at[index, 'Sampling Rate']):
-                        files_locator.at[index, 'Duration'] = str(max(source_data[1].shape) / float(files_locator.at[index, 'Sampling Rate']))
+                        files_locator.at[index, 'Duration'] = str(
+                            max(source_data[1].shape) / float(files_locator.at[index, 'Sampling Rate']))
                     else:
                         files_locator.at[index, 'Duration'] = ''
                     files_locator.at[index, 'File Type'] = "matRawData:" + str(source_data[0])
@@ -57,12 +61,13 @@ def process_mat_files(files_locator):
                         files_locator.at[index, 'Duration'] = ''
                     files_locator.at[index, 'File Type'] = "matEpochData:" + str(source_data_3d[0])
                 else:
-                    #"No data detected in file {file_path}. Skipping."
+                    # "No data detected in file {file_path}. Skipping."
                     pass
             else:
-                #File {file_path} is below the size threshold. Skipping.
+                # File {file_path} is below the size threshold. Skipping.
                 pass
     return files_locator
+
 
 def _find_variables_by_condition(data, condition_func, max_depth=5, max_width=5, debug=False):
     satisfying_variables = []
@@ -72,15 +77,18 @@ def _find_variables_by_condition(data, condition_func, max_depth=5, max_width=5,
     else:
         return satisfying_variables[0]
 
+
 def _condition_source_data(var_path, var_value):
     if isinstance(var_value, ndarray) and var_value.ndim == 2 and var_value.nbytes > 5 * 1024 * 1024:
         return True
     return False
 
+
 def _condition_source_data_3d(var_path, var_value):
     if isinstance(var_value, ndarray) and var_value.ndim == 3 and var_value.nbytes > 5 * 1024 * 1024:
         return True
     return False
+
 
 def _condition_sampling_rate(var_path, var_value):
     """
@@ -96,6 +104,7 @@ def _condition_sampling_rate(var_path, var_value):
     var_path = var_path.lower()
     return 'fs' in var_path or 'fre' in var_path
 
+
 def _condition_sampling_channel_name(var_path, var_value):
     """
     Condition function that checks if the variable path contains 'chan'.
@@ -110,6 +119,7 @@ def _condition_sampling_channel_name(var_path, var_value):
     var_path = var_path.lower()
     return ('chan' in var_path or 'chname' in var_path or 'clab' in var_path) and (
         isinstance(var_value, ndarray)) and var_value.shape[0] > 2
+
 
 def _search_data(data, path, condition_func, satisfying_variables, current_depth=0, max_depth=5, max_width=5,
                  ignore_keys=None, debug=False):
@@ -128,7 +138,7 @@ def _search_data(data, path, condition_func, satisfying_variables, current_depth
                 continue
             new_path = f"{path}.{key}" if path else key
             _search_data(value, new_path, condition_func, satisfying_variables, current_depth + 1, max_depth,
-                              max_width, ignore_keys, debug)
+                         max_width, ignore_keys, debug)
     elif isinstance(data, ndarray):
         if data.dtype.names is not None:  # Structured array
             for name in list(data.dtype.names)[:max_width]:
@@ -138,7 +148,7 @@ def _search_data(data, path, condition_func, satisfying_variables, current_depth
                     nested_value = data[name]  # Handle potential access to non-ndarray types
                 new_path = f"{path}.{name}" if path else name
                 _search_data(nested_value, new_path, condition_func, satisfying_variables, current_depth + 1,
-                                  max_depth, max_width, ignore_keys, debug)
+                             max_depth, max_width, ignore_keys, debug)
         else:  # Regular ndarray
             if current_depth < max_depth:
                 for i, item in enumerate(data[:max_width]):
@@ -148,7 +158,7 @@ def _search_data(data, path, condition_func, satisfying_variables, current_depth
                         pass  # item may not be an ndarray
                     new_path = f"{path}[{i}]" if path else f"[{i}]"
                     _search_data(item, new_path, condition_func, satisfying_variables, current_depth + 1,
-                                      max_depth, max_width, ignore_keys, debug)
+                                 max_depth, max_width, ignore_keys, debug)
     if condition_func(path, data):
         if debug:
             print(f"Found a variable satisfying the condition: {path}")  # Print the path of the satisfying variable

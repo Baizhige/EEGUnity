@@ -1,12 +1,16 @@
-from eegunity.share_attributes import UDatasetSharedAttributes
-import pandas as pd
-import pprint
-import numpy as np
-import matplotlib.pyplot as plt
-from eegunity.module_eeg_parser.eeg_parser import get_data_row
-from scipy.signal import welch
-from math import ceil, sqrt
 import os
+import pprint
+from math import ceil, sqrt
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from scipy.signal import welch
+
+from eegunity.module_eeg_parser.eeg_parser import get_data_row
+from eegunity.share_attributes import UDatasetSharedAttributes
+
+
 class EEGCorrection(UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()
@@ -18,8 +22,10 @@ class EEGCorrection(UDatasetSharedAttributes):
            channel configurations, and completeness checks. This report can be generated for individual
            groups within the dataset or for the dataset as a whole.
         """
+
         def percentage(part, whole):
             return round(100 * float(part) / float(whole), 2)
+
         def generate_statistics(grouped_df, overall=False):
             result = {}
             domain_tags = ['Overall'] if overall else grouped_df.groups.keys()
@@ -54,6 +60,7 @@ class EEGCorrection(UDatasetSharedAttributes):
                 }
 
             return result
+
         def generate_diagnostics(grouped_df):
             result = {}
             for domain_tag, data in grouped_df:
@@ -107,6 +114,7 @@ class EEGCorrection(UDatasetSharedAttributes):
                 plots for each domain in the dataset.
 
             """
+
         def compute_amplitude_spectrum(data, sfreq):
             # Compute amplitude spectrum using scipy's welch method
             freqs, psd = welch(data, float(sfreq), window='hann', nperseg=1024, noverlap=512, nfft=2048, axis=-1)
@@ -184,6 +192,7 @@ class EEGCorrection(UDatasetSharedAttributes):
             This function does not return a value. It displays a set of correlation matrix plots for each domain.
 
         """
+
         def compute_channel_correlation(data):
             # Compute correlation matrix for EEG data channels
             corr_matrix = np.corrcoef(data)

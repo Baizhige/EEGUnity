@@ -1,19 +1,21 @@
-import os
-import pandas as pd
-import glob
-import mne
-import zipfile
-import re
-import scipy
-from eegunity.share_attributes import UDatasetSharedAttributes
-from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, _condition_source_data
-from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
 import ast
-import warnings
-import json
 import datetime
-import numpy as np
+import glob
+import json
+import os
+import re
+import warnings
+import zipfile
 
+import mne
+import numpy as np
+import pandas as pd
+import scipy
+
+from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
+from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
+    _condition_source_data
+from eegunity.share_attributes import UDatasetSharedAttributes
 
 current_dir = os.path.dirname(__file__)
 json_file_path = os.path.join(current_dir, 'combined_montage.json')
@@ -21,6 +23,7 @@ with open(json_file_path, 'r') as file:
     data = json.load(file)
 STANDARD_EEG_CHANNELS = list(data.keys())
 EEG_PREFIXES_SUFFIXES = {"EEG", "FP", "REF", "LE", "RE"}
+
 
 class EEGParser(UDatasetSharedAttributes):
     def __init__(self, main_instance):
@@ -93,6 +96,7 @@ class EEGParser(UDatasetSharedAttributes):
 
     def check_locator(self, locator):
         locator = locator.astype(str)
+
         def check_data_shape(data_shape):
             if data_shape.strip() == '':
                 return ["Miss data in Data Shape"]
@@ -196,7 +200,7 @@ def set_montage_any(raw_data: mne.io.Raw, verbose='CRITICAL'):
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     montage = create_montage_from_json(os.path.join(current_dir, 'combined_montage.json'))
-    raw_data.set_montage(montage, on_missing= 'warn', verbose=verbose)
+    raw_data.set_montage(montage, on_missing='warn', verbose=verbose)
     return raw_data
 
 
@@ -210,6 +214,7 @@ def create_montage_from_json(json_file):
     montage = mne.channels.make_dig_montage(ch_pos=dict(zip(ch_names, pos)))
 
     return montage
+
 
 def set_channel_type(raw_data, channel_str):
     channel_info = [ch.split(':') for ch in channel_str.split(',')]
@@ -233,18 +238,21 @@ def set_channel_type(raw_data, channel_str):
             ch['kind'] = mne.io.constants.FIFF.FIFFV_BIO_CH
     return raw_data
 
-def get_data_row(row, norm_type=None, is_set_channel_type=False, is_set_montage=False, verbose='CRITICAL', pick_types=None, unit_convert=None):
+
+def get_data_row(row, norm_type=None, is_set_channel_type=False, is_set_montage=False, verbose='CRITICAL',
+                 pick_types=None, unit_convert=None):
     filepath = row['File Path']
     file_type = row['File Type']
     # get mne.io.raw data
-    if file_type == "standard_data": # read standard data, those supported by MNE-Python
+    if file_type == "standard_data":  # read standard data, those supported by MNE-Python
         raw_data = mne.io.read_raw(filepath, verbose=verbose, preload=True)
         channel_names = [name.strip() for name in row['Channel Names'].split(',')]
         if len(channel_names) != len(raw_data.info['ch_names']):
-            raise ValueError(f"The number of channels marked in the locator file does not match the number of channels in the metadata: {filepath}")
+            raise ValueError(
+                f"The number of channels marked in the locator file does not match the number of channels in the metadata: {filepath}")
         channel_mapping = {original: new for original, new in zip(raw_data.info['ch_names'], channel_names)}
         raw_data.rename_channels(channel_mapping)
-    else: # cope with non-standard data
+    else:  # cope with non-standard data
         raw_data = handle_nonstandard_data(row, verbose)
     # Reset channel names and types based on the locator
     if is_set_channel_type:
@@ -261,12 +269,13 @@ def get_data_row(row, norm_type=None, is_set_channel_type=False, is_set_montage=
         raw_data = convert_unit(raw_data, unit_convert)
     # Reset when there are timestamp anomalies
     if raw_data.info['meas_date'] is not None and isinstance(raw_data.info['meas_date'],
-                                                            datetime.datetime) and (
+                                                             datetime.datetime) and (
             raw_data.info['meas_date'].timestamp() < -2147483648 or raw_data.info[
         'meas_date'].timestamp() > 2147483647):
         # If the date is wrong, set None.
         raw_data.set_meas_date(None)
     return raw_data
+
 
 def set_infer_unit(raw_data, row):
     infer_unit = ast.literal_eval(row['Infer Unit'])
@@ -278,8 +287,9 @@ def set_infer_unit(raw_data, row):
         return raw_data
     else:
         raise ValueError(f"'Infer Unit' is not a valid dictionary: {row['Infer Unit']}")
-def format_channel_names(input_string):
 
+
+def format_channel_names(input_string):
     # Define a function to check if a channel is an EOG channel
     def is_eog_channel(channel):
         return "eog" in channel.lower()
@@ -392,14 +402,16 @@ def format_channel_names(input_string):
     # Concatenate the formatted channel names into a string
     output_string = ', '.join(formatted_channels)
     return output_string
-def _clean_sampling_rate_(df):
 
+
+def _clean_sampling_rate_(df):
     # Convert the 'Sampling Rate' column to a string and retain only digits, decimal points, and the 'e' in scientific notation
     df['Sampling Rate'] = df['Sampling Rate'].astype(str).apply(lambda x: re.sub(r'[^0-9.eE+-]', '', x))
     # If necessary, convert the result back to a numeric type
     df['Sampling Rate'] = pd.to_numeric(df['Sampling Rate'], errors='coerce')
 
     return df
+
 
 def handle_nonstandard_data(row, verbose='CRITICAL'):
     filepath = row['File Path']
@@ -411,7 +423,8 @@ def handle_nonstandard_data(row, verbose='CRITICAL'):
             eeg_data = eeg_data.T
 
         channel_names = row['Channel Names'].split(',')
-        info = mne.create_info(ch_names=channel_names, sfreq=float(row['Sampling Rate']), ch_types='eeg',verbose=verbose)
+        info = mne.create_info(ch_names=channel_names, sfreq=float(row['Sampling Rate']), ch_types='eeg',
+                               verbose=verbose)
         raw = mne.io.RawArray(eeg_data, info)
         return raw
 
@@ -431,7 +444,7 @@ def handle_nonstandard_data(row, verbose='CRITICAL'):
 
         # Check if all channel names are present in the DataFrame columns
         if not all(name in df.columns for name in channel_names):
-            raise(f"Number of channels marked in the locator file does not match the metadata channels {filepath}")
+            raise (f"Number of channels marked in the locator file does not match the metadata channels {filepath}")
         # Extract EEG data
         eeg_data = df[channel_names].values.T  # 转置以匹配 MNE 需要的格式 (通道数, 时间点数)
         info = mne.create_info(ch_names=channel_names, sfreq=sfreq, ch_types='eeg')
@@ -439,7 +452,8 @@ def handle_nonstandard_data(row, verbose='CRITICAL'):
         return raw
 
     else:
-        raise("Parsing of files other than .mat/.csv/.txt is currently not supported")
+        raise ("Parsing of files other than .mat/.csv/.txt is currently not supported")
+
 
 def extract_events(raw):
     """
@@ -541,6 +555,7 @@ def convert_unit(data: mne.io.Raw, unit: str) -> mne.io.Raw:
         data.info['chs'][i].update({"eegunity_unit_converted": unit})
 
     return data
+
 
 def process_mne_files(files_locator, verbose):
     for index, row in files_locator.iterrows():
