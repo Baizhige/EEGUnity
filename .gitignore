@@ -34,5 +34,4 @@ dist/
 
 # ignore——debug
 locator/
-debug_sheet.py
-generate_standard_eeg_channels.py
+debug/
