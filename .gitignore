@@ -33,5 +33,5 @@ dist/
 
 
 # ignore——debug
-locator/
-debug/
+/locator/
+/debug/
