@@ -137,11 +137,10 @@
                     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">result_type</span> <span class="o">==</span> <span class="s2">&quot;series&quot;</span><span class="p">:</span>
             <span class="c1"># Combine results into a DataFrame if app_func returns Series</span>
             <span class="n">combined_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">res</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">combined_results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># 重置索引并删除原来的索引列</span>
+            <span class="n">combined_results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">combined_results</span>
         <span class="k">elif</span> <span class="n">result_type</span> <span class="o">==</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span>
             <span class="c1"># Collect results into a list if app_func returns values</span>
@@ -204,17 +203,16 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filters the &#39;locator&#39; dataframe based on the given criteria.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        channel_number (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the</span>
+<span class="sd">        :param (tuple/list/array-like, optional) channel_number: A tuple or list with (min, max) values to filter the</span>
 <span class="sd">            &quot;Number of Channels&quot; column. If None, this criterion is ignored. Default is None.</span>
-<span class="sd">        sampling_rate (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the</span>
+<span class="sd">        :param (tuple/list/array-like, optional) sampling_rate : A tuple or list with (min, max) values to filter the</span>
 <span class="sd">            &quot;Sampling Rate&quot; column. If None, this criterion is ignored. Default is None.</span>
-<span class="sd">        duration (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the</span>
+<span class="sd">        :param (tuple/list/array-like, optional) duration: A tuple or list with (min, max) values to filter the</span>
 <span class="sd">            &quot;Duration&quot; column. If None, this criterion is ignored. Default is None.</span>
-<span class="sd">        completeness_check (str, optional): A string that can be &#39;Completed&#39;, &#39;Unavailable&#39;, or &#39;Acceptable&#39; to filter the</span>
+<span class="sd">        :param (str, optional) completeness_check: A string that can be &#39;Completed&#39;, &#39;Unavailable&#39;, or &#39;Acceptable&#39; to filter the</span>
 <span class="sd">            &quot;Completeness Check&quot; column. The check is case-insensitive. If None, this criterion is ignored. Default is None.</span>
-<span class="sd">        domain_tag (str, optional): A string to filter the &quot;Domain Tag&quot; column. If None, this criterion is ignored. Default is None.</span>
-<span class="sd">        file_type (str, optional): A string to filter the &quot;File Type&quot; column. If None, this criterion is ignored. Default is None.</span>
+<span class="sd">        :param (str, optional) domain_tag: A string to filter the &quot;Domain Tag&quot; column. If None, this criterion is ignored. Default is None.</span>
+<span class="sd">        :param (str, optional) file_type: A string to filter the &quot;File Type&quot; column. If None, this criterion is ignored. Default is None.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">        None. The function updates the &#39;locator&#39; dataframe in the shared attributes.</span>
@@ -280,7 +278,7 @@
 
         <span class="c1"># Check for valid format</span>
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;fif&#39;</span><span class="p">,</span> <span class="s1">&#39;csv&#39;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported format: </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">. Only &#39;fif&#39; and &#39;csv&#39; are supported.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported format: </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">. Currently, only &#39;fif&#39; and &#39;csv&#39; are supported.&quot;</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">con_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">domain_tag</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Domain Tag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">domain_tag</span>
@@ -291,11 +289,14 @@
 
             <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;fif&#39;</span><span class="p">:</span>
                 <span class="c1"># Saving as FIF format</span>
-                <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_raw.fif&quot;</span><span class="p">)</span>
+                <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.fif&quot;</span><span class="p">)</span>
                 <span class="n">raw</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">new_file_path</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file_path</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_data&quot;</span>
+
             <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
                 <span class="c1"># Saving as CSV format</span>
-                <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_raw.csv&quot;</span><span class="p">)</span>
+                <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
 
                 <span class="c1"># Extract data and channel names from Raw object</span>
                 <span class="n">data</span><span class="p">,</span> <span class="n">times</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">return_times</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -305,18 +306,29 @@
                 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">channel_names</span><span class="p">)</span>
                 <span class="n">df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">times</span><span class="p">)</span>  <span class="c1"># Add &#39;date&#39; as the first column</span>
 
+                <span class="c1"># Extract events from raw data</span>
+                <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span> <span class="o">=</span> <span class="n">extract_events</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+
+                <span class="c1"># Create an empty &#39;marker&#39; column initialized with NaNs</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+                <span class="c1"># Map event onsets to timepoints and set the corresponding marker</span>
+                <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+                    <span class="n">onset_sample</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">event_code</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="c1"># Find the closest timestamp for the onset sample</span>
+                    <span class="n">closest_time_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">times</span> <span class="o">-</span> <span class="n">raw</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="n">onset_sample</span><span class="p">]))</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">closest_time_idx</span><span class="p">,</span> <span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_code</span>  <span class="c1"># Mark event code in the &#39;marker&#39; column</span>
                 <span class="c1"># Save DataFrame to CSV</span>
                 <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">new_file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file_path</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;csv_data&quot;</span>
 
-            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file_path</span>
-            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_data&quot;</span>
             <span class="k">return</span> <span class="n">row</span>
-
         <span class="n">copied_instance</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">new_locator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span> <span class="n">app_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">)</span>
         <span class="n">copied_instance</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator&#39;</span><span class="p">:</span> <span class="n">new_locator</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">copied_instance</span></div>
-
 
 <div class="viewcode-block" id="EEGBatch.process_mean_std">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.process_mean_std">[docs]</a>
@@ -799,11 +811,8 @@
         <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">mne_raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-                <span class="c1"># print(row)</span>
                 <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span> <span class="o">=</span> <span class="n">extract_events</span><span class="p">(</span><span class="n">mne_raw</span><span class="p">)</span>
-
                 <span class="n">row</span><span class="p">[</span><span class="s2">&quot;event_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_id</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">event_id</span><span class="p">)</span>
                 <span class="n">event_id_num</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">events</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">event_id</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
                 <span class="n">row</span><span class="p">[</span><span class="s2">&quot;event_id_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_id_num</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">row</span>
@@ -823,8 +832,8 @@
 
 <div class="viewcode-block" id="EEGBatch.epoch_by_event">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.epoch_by_event">[docs]</a>
-    <span class="k">def</span> <span class="nf">epoch_by_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seg_sec</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                       <span class="n">exclude_bad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">baseline</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span> <span class="n">miss_bad_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">epoch_by_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">exclude_bad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">miss_bad_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Batch process EEG data to create epochs based on events specified in event_id column.</span>
 
@@ -833,10 +842,9 @@
 <span class="sd">        output_path (str): Directory to save the processed epochs.</span>
 <span class="sd">        seg_sec (float): Length of each epoch in seconds.</span>
 <span class="sd">        resample (int): Resample rate for the raw data. If None, no resampling is performed.</span>
-<span class="sd">        overlap (float): Fraction of overlap between consecutive epochs. Range is 0 to 1.</span>
 <span class="sd">        exclude_bad (bool): Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs.</span>
-<span class="sd">        baseline (tuple): Time interval to use for baseline correction. If (None, 0), uses the pre-stimulus interval.</span>
 <span class="sd">        miss_bad_data (bool): Whether to skip files with processing errors.</span>
+<span class="sd">        **epoch_params: Additional parameters for mne.Epochs, excluding raw_data, events, event_id.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">        None</span>
@@ -845,8 +853,8 @@
         <span class="k">def</span> <span class="nf">con_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seg_sec</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">exclude_bad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">baseline</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">event_repeated</span><span class="o">=</span><span class="s2">&quot;merge&quot;</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">exclude_bad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Load raw data</span>
                 <span class="n">raw_data</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
@@ -863,9 +871,10 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">event_id_str</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_id</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No event_id found for file </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">return</span> <span class="kc">None</span>
-                <span class="c1"># Create epochs</span>
-                <span class="n">epochs</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Epochs</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span> <span class="n">tmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tmax</span><span class="o">=</span><span class="n">seg_sec</span><span class="p">,</span>
-                                    <span class="n">baseline</span><span class="o">=</span><span class="n">baseline</span><span class="p">,</span> <span class="n">preload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">event_repeated</span><span class="o">=</span><span class="n">event_repeated</span><span class="p">)</span>
+
+                <span class="c1"># Create epochs with the passed epoch_params</span>
+                <span class="n">epochs</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Epochs</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">)</span>
+
                 <span class="c1"># Exclude bad epochs</span>
                 <span class="k">if</span> <span class="n">exclude_bad</span><span class="p">:</span>
                     <span class="n">epochs</span><span class="o">.</span><span class="n">drop_bad</span><span class="p">()</span>
@@ -888,8 +897,8 @@
 
         <span class="c1"># Use batch_process to process data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span>
-                           <span class="n">app_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">seg_sec</span><span class="o">=</span><span class="n">seg_sec</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
-                                                         <span class="n">exclude_bad</span><span class="o">=</span><span class="n">exclude_bad</span><span class="p">,</span> <span class="n">baseline</span><span class="o">=</span><span class="n">baseline</span><span class="p">),</span>
+                           <span class="n">app_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
+                                                         <span class="n">exclude_bad</span><span class="o">=</span><span class="n">exclude_bad</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">),</span>
                            <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                            <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
 
@@ -960,6 +969,38 @@
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span> <span class="n">app_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s2">&quot;Score&quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="EEGBatch.replace_paths">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.replace_paths">[docs]</a>
+    <span class="k">def</span> <span class="nf">replace_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_prefix</span><span class="p">,</span> <span class="n">new_prefix</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replace the prefix of file paths in the dataset according to the provided mapping.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        - path_mapping (dict): A dictionary where the keys are the old path prefixes and the values are the new prefixes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        - A new instance with updated file paths.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">replace_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">original_path</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="n">original_path</span>
+            <span class="c1"># Replace the path prefix based on the provided mapping</span>
+            <span class="k">if</span> <span class="n">original_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">old_prefix</span><span class="p">):</span>
+                <span class="n">new_path</span> <span class="o">=</span> <span class="n">original_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old_prefix</span><span class="p">,</span> <span class="n">new_prefix</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Only replace the first occurrence</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_path</span>
+            <span class="k">return</span> <span class="n">row</span>
+
+        <span class="n">copied_instance</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Process the dataset, applying the path replacement function to each row</span>
+        <span class="n">updated_locator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="n">replace_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">)</span>
+
+        <span class="n">copied_instance</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator&#39;</span><span class="p">:</span> <span class="n">updated_locator</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">copied_instance</span></div>
 </div>
 
 </pre></div>

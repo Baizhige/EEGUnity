@@ -124,7 +124,11 @@ class EEGBatch(UDatasetSharedAttributes):
 
         :param (tuple/list/array-like, optional) channel_number: A tuple or list with (min, max) values to filter the
             "Number of Channels" column. If None, this criterion is ignored. Default is None.
+<<<<<<< HEAD
         :param (tuple/list/array-like, optional) sampling_rate: A tuple or list with (min, max) values to filter the
+=======
+        :param (tuple/list/array-like, optional) sampling_rate : A tuple or list with (min, max) values to filter the
+>>>>>>> main
             "Sampling Rate" column. If None, this criterion is ignored. Default is None.
         :param (tuple/list/array-like, optional) duration: A tuple or list with (min, max) values to filter the
             "Duration" column. If None, this criterion is ignored. Default is None.
