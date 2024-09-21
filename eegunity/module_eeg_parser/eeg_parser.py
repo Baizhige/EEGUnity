@@ -50,8 +50,10 @@ class EEGParser(UDatasetSharedAttributes):
             else:
                 raise ValueError("The provided 'datasets' path is not a valid directory.")
 
-    def _process_directory(self, datasets_path):
+    def _process_directory(self, datasets_path, use_relative_path=False):
         files_info = []
+        datasets_path = os.path.abspath(datasets_path) if not use_relative_path else os.path.relpath(datasets_path)
+
         for filepath in glob.glob(datasets_path + '/**/*', recursive=True):
             if os.path.isfile(filepath):
                 files_info.append([filepath, self.get_shared_attr()['domain_tag'], '', '', '', '', '', '', ''])

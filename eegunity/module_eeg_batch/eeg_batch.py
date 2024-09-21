@@ -62,11 +62,10 @@ class EEGBatch(UDatasetSharedAttributes):
                     result = None
 
             results.append(result)
-
         if result_type == "series":
             # Combine results into a DataFrame if app_func returns Series
             combined_results = pd.concat([res for res in results if res is not None], axis=1).T
-            combined_results.reset_index(drop=True, inplace=True)  # 重置索引并删除原来的索引列
+            combined_results.reset_index(drop=True, inplace=True)
             return combined_results
         elif result_type == "value":
             # Collect results into a list if app_func returns values
@@ -123,17 +122,16 @@ class EEGBatch(UDatasetSharedAttributes):
         """
         Filters the 'locator' dataframe based on the given criteria.
 
-        Parameters:
-        channel_number (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the
+        :param (tuple/list/array-like, optional) channel_number: A tuple or list with (min, max) values to filter the
             "Number of Channels" column. If None, this criterion is ignored. Default is None.
-        sampling_rate (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the
+        :param (tuple/list/array-like, optional) sampling_rate : A tuple or list with (min, max) values to filter the
             "Sampling Rate" column. If None, this criterion is ignored. Default is None.
-        duration (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the
+        :param (tuple/list/array-like, optional) duration: A tuple or list with (min, max) values to filter the
             "Duration" column. If None, this criterion is ignored. Default is None.
-        completeness_check (str, optional): A string that can be 'Completed', 'Unavailable', or 'Acceptable' to filter the
+        :param (str, optional) completeness_check: A string that can be 'Completed', 'Unavailable', or 'Acceptable' to filter the
             "Completeness Check" column. The check is case-insensitive. If None, this criterion is ignored. Default is None.
-        domain_tag (str, optional): A string to filter the "Domain Tag" column. If None, this criterion is ignored. Default is None.
-        file_type (str, optional): A string to filter the "File Type" column. If None, this criterion is ignored. Default is None.
+        :param (str, optional) domain_tag: A string to filter the "Domain Tag" column. If None, this criterion is ignored. Default is None.
+        :param (str, optional) file_type: A string to filter the "File Type" column. If None, this criterion is ignored. Default is None.
 
         Returns:
         None. The function updates the 'locator' dataframe in the shared attributes.
@@ -196,7 +194,7 @@ class EEGBatch(UDatasetSharedAttributes):
 
         # Check for valid format
         if format not in ['fif', 'csv']:
-            raise ValueError(f"Unsupported format: {format}. Only 'fif' and 'csv' are supported.")
+            raise ValueError(f"Unsupported format: {format}. Currently, only 'fif' and 'csv' are supported.")
 
         def con_func(row):
             return domain_tag is None or row['Domain Tag'] == domain_tag
@@ -207,11 +205,14 @@ class EEGBatch(UDatasetSharedAttributes):
 
             if format == 'fif':
                 # Saving as FIF format
-                new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
+                new_file_path = os.path.join(output_path, f"{file_name}.fif")
                 raw.save(new_file_path, overwrite=True)
+                row['File Path'] = new_file_path
+                row['File Type'] = "standard_data"
+
             elif format == 'csv':
                 # Saving as CSV format
-                new_file_path = os.path.join(output_path, f"{file_name}_raw.csv")
+                new_file_path = os.path.join(output_path, f"{file_name}.csv")
 
                 # Extract data and channel names from Raw object
                 data, times = raw.get_data(return_times=True)
@@ -221,18 +222,29 @@ class EEGBatch(UDatasetSharedAttributes):
                 df = pd.DataFrame(data.T, columns=channel_names)
                 df.insert(0, 'date', times)  # Add 'date' as the first column
 
+                # Extract events from raw data
+                events, event_id = extract_events(raw)
+
+                # Create an empty 'marker' column initialized with NaNs
+                df['marker'] = np.nan
+
+                # Map event onsets to timepoints and set the corresponding marker
+                for event in events:
+                    onset_sample = event[0]
+                    event_code = event[2]
+                    # Find the closest timestamp for the onset sample
+                    closest_time_idx = np.argmin(np.abs(times - raw.times[onset_sample]))
+                    df.at[closest_time_idx, 'marker'] = event_code  # Mark event code in the 'marker' column
                 # Save DataFrame to CSV
                 df.to_csv(new_file_path, index=False)
+                row['File Path'] = new_file_path
+                row['File Type'] = "csv_data"
 
-            row['File Path'] = new_file_path
-            row['File Type'] = "standard_data"
             return row
-
         copied_instance = copy.deepcopy(self)
         new_locator = self.batch_process(con_func, app_func, is_patch=False, result_type='series')
         copied_instance.set_shared_attr({'locator': new_locator})
         return copied_instance
-
     def process_mean_std(self, domain_mean=True):
         def get_mean_std(data: mne.io.Raw):
             """
@@ -688,11 +700,8 @@ class EEGBatch(UDatasetSharedAttributes):
         def app_func(row):
             try:
                 mne_raw = get_data_row(row)
-                # print(row)
                 events, event_id = extract_events(mne_raw)
-
                 row["event_id"] = str(event_id)
-                print(event_id)
                 event_id_num = {key: sum(events[:, 2] == val) for key, val in event_id.items()}
                 row["event_id_num"] = str(event_id_num)
                 return row
@@ -709,8 +718,8 @@ class EEGBatch(UDatasetSharedAttributes):
                                          result_type='series')
         self.get_shared_attr()['locator'] = new_locator
 
-    def epoch_by_event(self, output_path: str, seg_sec: float, resample: int = None,
-                       exclude_bad=True, baseline=(0, 0.2), miss_bad_data=False):
+    def epoch_by_event(self, output_path: str, resample: int = None,
+                       exclude_bad=True, miss_bad_data=False, **epoch_params):
         """
         Batch process EEG data to create epochs based on events specified in event_id column.
 
@@ -719,10 +728,9 @@ class EEGBatch(UDatasetSharedAttributes):
         output_path (str): Directory to save the processed epochs.
         seg_sec (float): Length of each epoch in seconds.
         resample (int): Resample rate for the raw data. If None, no resampling is performed.
-        overlap (float): Fraction of overlap between consecutive epochs. Range is 0 to 1.
         exclude_bad (bool): Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs.
-        baseline (tuple): Time interval to use for baseline correction. If (None, 0), uses the pre-stimulus interval.
         miss_bad_data (bool): Whether to skip files with processing errors.
+        **epoch_params: Additional parameters for mne.Epochs, excluding raw_data, events, event_id.
 
         Returns:
         None
@@ -731,8 +739,8 @@ class EEGBatch(UDatasetSharedAttributes):
         def con_func(row):
             return True
 
-        def app_func(row, output_path: str, seg_sec: float, resample: int = None,
-                     exclude_bad=True, baseline=(None, 0), event_repeated="merge"):
+        def app_func(row, output_path: str, resample: int = None,
+                     exclude_bad=True, **epoch_params):
             try:
                 # Load raw data
                 raw_data = get_data_row(row)
@@ -749,9 +757,10 @@ class EEGBatch(UDatasetSharedAttributes):
                 if not event_id_str or len(event_id) == 0:
                     print(f"No event_id found for file {row['File Path']}")
                     return None
-                # Create epochs
-                epochs = mne.Epochs(raw_data, events, event_id, tmin=0, tmax=seg_sec,
-                                    baseline=baseline, preload=True, event_repeated=event_repeated)
+
+                # Create epochs with the passed epoch_params
+                epochs = mne.Epochs(raw_data, events, event_id, **epoch_params)
+
                 # Exclude bad epochs
                 if exclude_bad:
                     epochs.drop_bad()
@@ -774,8 +783,8 @@ class EEGBatch(UDatasetSharedAttributes):
 
         # Use batch_process to process data
         self.batch_process(con_func,
-                           app_func=lambda row: app_func(row, output_path, seg_sec=seg_sec, resample=resample,
-                                                         exclude_bad=exclude_bad, baseline=baseline),
+                           app_func=lambda row: app_func(row, output_path, resample=resample,
+                                                         exclude_bad=exclude_bad, **epoch_params),
                            is_patch=False,
                            result_type=None)
 
@@ -840,3 +849,32 @@ class EEGBatch(UDatasetSharedAttributes):
         results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
 
         self.set_column("Score", results)
+
+
+    def replace_paths(self, old_prefix, new_prefix):
+        """
+        Replace the prefix of file paths in the dataset according to the provided mapping.
+
+        Parameters:
+        - path_mapping (dict): A dictionary where the keys are the old path prefixes and the values are the new prefixes.
+
+        Returns:
+        - A new instance with updated file paths.
+        """
+
+        def replace_func(row):
+            original_path = row['File Path']
+            new_path = original_path
+            # Replace the path prefix based on the provided mapping
+            if original_path.startswith(old_prefix):
+                new_path = original_path.replace(old_prefix, new_prefix, 1)  # Only replace the first occurrence
+            row['File Path'] = new_path
+            return row
+
+        copied_instance = copy.deepcopy(self)
+
+        # Process the dataset, applying the path replacement function to each row
+        updated_locator = self.batch_process(lambda row: True, replace_func, is_patch=False, result_type='series')
+
+        copied_instance.set_shared_attr({'locator': updated_locator})
+        return copied_instance
