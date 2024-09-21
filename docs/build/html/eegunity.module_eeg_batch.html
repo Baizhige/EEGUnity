@@ -143,17 +143,16 @@ Returns None if result_type is None.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.epoch_by_event">
-<span class="sig-name descname"><span class="pre">epoch_by_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seg_sec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0.2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.epoch_by_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.epoch_by_event" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">epoch_by_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">epoch_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.epoch_by_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.epoch_by_event" title="Link to this definition">¶</a></dt>
 <dd><p>Batch process EEG data to create epochs based on events specified in event_id column.</p>
 <p>Parameters:
 df (pd.DataFrame): DataFrame containing paths to raw EEG data and event_id information.
 output_path (str): Directory to save the processed epochs.
 seg_sec (float): Length of each epoch in seconds.
 resample (int): Resample rate for the raw data. If None, no resampling is performed.
-overlap (float): Fraction of overlap between consecutive epochs. Range is 0 to 1.
 exclude_bad (bool): Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs.
-baseline (tuple): Time interval to use for baseline correction. If (None, 0), uses the pre-stimulus interval.
-miss_bad_data (bool): Whether to skip files with processing errors.</p>
+miss_bad_data (bool): Whether to skip files with processing errors.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>epoch_params: Additional parameters for mne.Epochs, excluding raw_data, events, event_id.</p>
 <p>Returns:
 None</p>
 </dd></dl>
@@ -235,6 +234,16 @@ miss_bad_data: Whether to skip the current file and continue processing the next
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.replace_paths">
+<span class="sig-name descname"><span class="pre">replace_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_prefix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.replace_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.replace_paths" title="Link to this definition">¶</a></dt>
+<dd><p>Replace the prefix of file paths in the dataset according to the provided mapping.</p>
+<p>Parameters:
+- path_mapping (dict): A dictionary where the keys are the old path prefixes and the values are the new prefixes.</p>
+<p>Returns:
+- A new instance with updated file paths.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.resample">
 <span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_sfreq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.resample" title="Link to this definition">¶</a></dt>
 <dd><p>Resample the data.</p>
@@ -249,21 +258,28 @@ miss_bad_data: Whether to skip the current file and continue processing the next
 <dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.sample_filter">
 <span class="sig-name descname"><span class="pre">sample_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completeness_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.sample_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.sample_filter" title="Link to this definition">¶</a></dt>
 <dd><p>Filters the ‘locator’ dataframe based on the given criteria.</p>
-<p>Parameters:
-channel_number (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the</p>
-<blockquote>
-<div><p>“Number of Channels” column. If None, this criterion is ignored. Default is None.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>sampling_rate (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the</dt><dd><p>“Sampling Rate” column. If None, this criterion is ignored. Default is None.</p>
-</dd>
-<dt>duration (tuple/list/array-like, optional): A tuple or list with (min, max) values to filter the</dt><dd><p>“Duration” column. If None, this criterion is ignored. Default is None.</p>
-</dd>
-<dt>completeness_check (str, optional): A string that can be ‘Completed’, ‘Unavailable’, or ‘Acceptable’ to filter the</dt><dd><p>“Completeness Check” column. The check is case-insensitive. If None, this criterion is ignored. Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channel_number</strong> (<em>(</em><em>tuple/list/array-like</em><em>, </em><em>optional</em><em>)</em>) – A tuple or list with (min, max) values to filter the
+“Number of Channels” column. If None, this criterion is ignored. Default is None.</p>
 </dd>
 </dl>
-<p>domain_tag (str, optional): A string to filter the “Domain Tag” column. If None, this criterion is ignored. Default is None.
-file_type (str, optional): A string to filter the “File Type” column. If None, this criterion is ignored. Default is None.</p>
+<dl class="simple">
+<dt>:param (tuple/list/array-like, optional) sampling_rate<span class="classifier">A tuple or list with (min, max) values to filter the</span></dt><dd><p>“Sampling Rate” column. If None, this criterion is ignored. Default is None.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration</strong> (<em>(</em><em>tuple/list/array-like</em><em>, </em><em>optional</em><em>)</em>) – A tuple or list with (min, max) values to filter the
+“Duration” column. If None, this criterion is ignored. Default is None.</p></li>
+<li><p><strong>completeness_check</strong> (<em>(</em><em>str</em><em>, </em><em>optional</em><em>)</em>) – A string that can be ‘Completed’, ‘Unavailable’, or ‘Acceptable’ to filter the
+“Completeness Check” column. The check is case-insensitive. If None, this criterion is ignored. Default is None.</p></li>
+<li><p><strong>domain_tag</strong> (<em>(</em><em>str</em><em>, </em><em>optional</em><em>)</em>) – A string to filter the “Domain Tag” column. If None, this criterion is ignored. Default is None.</p></li>
+<li><p><strong>file_type</strong> (<em>(</em><em>str</em><em>, </em><em>optional</em><em>)</em>) – A string to filter the “File Type” column. If None, this criterion is ignored. Default is None.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Returns:
 None. The function updates the ‘locator’ dataframe in the shared attributes.</p>
 </dd></dl>
