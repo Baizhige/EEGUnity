@@ -35,17 +35,25 @@ class EEGBatch(UDatasetSharedAttributes):
                       is_patch: bool,
                       result_type: Union[str, None] = None):
         """
-        Process each row of the given dataframe `locator` based on the conditions
-        specified in `con_func` and apply `app_func` accordingly. The function handles both
-        list and dataframe return types and ensures the result aligns with the original `locator`'s rows
-        based on the `is_patch` flag.
+        Process each row of the given dataframe locator based on the conditions
+        specified in con_func and apply app_func accordingly. The function handles both
+        list and dataframe return types and ensures the result aligns with the original locator's rows
+        based on the is_patch flag.
 
-        :param (function) con_func: A function that takes a row of `locator` and returns True or False to determine if `app_func` should be applied to that row.
-        :param (function) app_func: A function that processes a row of `locator` and returns the result.
-        :param (bool) is_patch: If True, the returned list length or dataframe rows will match `locator`'s row count, using placeholder elements as needed.
-        :param (str, optional) result_type: Specifies the expected return type of `app_func` results. Can be "series", "value", or None (case insensitive). Defaults to None.
-        :return (None or list or pd.DataFrame): The processed results, either as a list or dataframe, depending on the `result_type`
-                 and `app_func` return type and consistency. Returns None if `result_type` is None.
+        Parameters:
+        con_func : function
+            A function that takes a row of locator and returns True or False to determine if app_func should be applied to that row.
+        app_func : function
+            A function that processes a row of locator and returns the result.
+        is_patch : bool
+            If True, the returned list length or dataframe rows will match locator's row count, using placeholder elements as needed.
+        result_type : str, optional
+            Specifies the expected return type of app_func results. Can be "series", "value", or None (case insensitive). Defaults to None.
+
+        Returns:
+        None or list or pd.DataFrame
+            The processed results, either as a list or dataframe, depending on the result_type
+            and app_func return type and consistency. Returns None if result_type is None.
         """
 
         if result_type is not None:
@@ -90,14 +98,20 @@ class EEGBatch(UDatasetSharedAttributes):
         """
         Set the specified column in the locator with the given list of values.
 
-        :param (str) col_name: The name of the column to be set.
-        :param (list) value: The list of values to set in the column.
+        Parameters:
+        col_name : str
+            The name of the column to be set.
+        value : list
+            The list of values to set in the column.
 
-        :returns None:
+        Returns:
+        None
 
         Raises:
-        ValueError: If the length of the value list does not match the number of rows in the dataframe.
-        TypeError: If the input types are not as expected.
+        ValueError
+            If the length of the value list does not match the number of rows in the dataframe.
+        TypeError
+            If the input types are not as expected.
         """
         # Check if locator is a DataFrame
         if not isinstance(self.get_shared_attr()['locator'], pd.DataFrame):
@@ -128,15 +142,29 @@ class EEGBatch(UDatasetSharedAttributes):
             file_type: Union[str, None] = None
     ) -> None:
         """
-        Filters the 'locator' dataframe based on the given criteria. Typically, this function used to select the data file based on your requirements. If you need advanced filtering, you should read "batch_process()" method.
+        Filters the 'locator' dataframe based on the given criteria. This function is typically used to select the data file
+        according to specified requirements. For advanced filtering, refer to the "batch_process()" method.
 
-        :param (tuple/list/array-like, optional) channel_number: A tuple or list with (min, max) values to filter the "Number of Channels" column. If None, this criterion is ignored. Default is None.
-        :param (tuple/list/array-like, optional) sampling_rate: A tuple or list with (min, max) values to filter the "Sampling Rate" column. If None, this criterion is ignored. Default is None.
-        :param (tuple/list/array-like, optional) duration: A tuple or list with (min, max) values to filter the "Duration" column. If None, this criterion is ignored. Default is None.
-        :param (str, optional) completeness_check: A string that can be 'Completed', 'Unavailable', or 'Acceptable' to filter the "Completeness Check" column. The check is case-insensitive. If None, this criterion is ignored. Default is None.
-        :param (str, optional) domain_tag: A string to filter the "Domain Tag" column. If None, this criterion is ignored. Default is None.
-        :param (str, optional) file_type: A string to filter the "File Type" column. If None, this criterion is ignored. Default is None.
-        :return (None): None
+        Parameters:
+        channel_number : tuple/list/array-like, optional
+            A tuple or list with (min, max) values to filter the "Number of Channels" column.
+            If None, this criterion is ignored. Default is None.
+        sampling_rate : tuple/list/array-like, optional
+            A tuple or list with (min, max) values to filter the "Sampling Rate" column.
+            If None, this criterion is ignored. Default is None.
+        duration : tuple/list/array-like, optional
+            A tuple or list with (min, max) values to filter the "Duration" column.
+            If None, this criterion is ignored. Default is None.
+        completeness_check : str, optional
+            A string that can be 'Completed', 'Unavailable', or 'Acceptable' to filter the "Completeness Check" column.
+            The check is case-insensitive. If None, this criterion is ignored. Default is None.
+        domain_tag : str, optional
+            A string to filter the "Domain Tag" column. If None, this criterion is ignored. Default is None.
+        file_type : str, optional
+            A string to filter the "File Type" column. If None, this criterion is ignored. Default is None.
+
+        Returns:
+        None
         """
 
         def con_func(row):
@@ -189,31 +217,29 @@ class EEGBatch(UDatasetSharedAttributes):
         """
         Save data in the specified format ('fif' or 'csv') to the given output path.
 
-        :param (str) output_path:
+        Parameters:
+        output_path : str
             The directory path where the converted files will be saved.
             If the path does not exist, a FileNotFoundError is raised.
-
-        :param (str, optional) domain_tag:
+        domain_tag : str, optional
             Optional filter to save only the files with a matching 'Domain Tag'.
             If None, all files are processed.
-
-        :param (str, optional (default: 'fif')) format:
+        format : str, optional
             The format to save the data in. Supported formats are 'fif' and 'csv'.
-            If an unsupported format is provided, a ValueError is raised.
+            If an unsupported format is provided, a ValueError is raised. Default is 'fif'.
+        preserve_events : bool, optional
+            If True, event markers will be included in the CSV file and metadata adjusted. Default is True.
 
-        :param (bool, optional (default: True)) preserve_events:
-            If True, event markers will be included in the CSV file and metadata adjusted.
-
-        :raises FileNotFoundError:
+        Raises:
+        FileNotFoundError
             If the output path does not exist.
-
-        :raises ValueError:
+        ValueError
             If the format is not 'fif' or 'csv'.
 
-        :return:
+        Returns:
+        instance of the same class
             A copied instance of the class with updated file paths and formats
             after the batch processing is complete.
-        :rtype: instance of the same class
         """
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
@@ -299,7 +325,7 @@ class EEGBatch(UDatasetSharedAttributes):
         -------
         None
             The function updates the instance by setting the "MEAN STD" column with the calculated mean and
-            standard deviation values. If `domain_mean` is True, it computes domain-aggregated statistics, otherwise
+            standard deviation values. If `domain_mean` is True, it computes domain-aggregated statistics; otherwise,
             it stores per-channel results.
 
         Raises
@@ -400,12 +426,16 @@ class EEGBatch(UDatasetSharedAttributes):
         The function uses the `batch_process` method to apply the formatting to each
         row. The updated channel names are then saved back to the 'Channel Names' column.
 
-        :raises KeyError: If the 'Channel Names' column is missing from the dataset.
+        Raises:
+        KeyError
+            If the 'Channel Names' column is missing from the dataset.
 
-        :return: None. The function modifies the dataset in place by updating the
-                 'Channel Names' column.
-        :rtype: None
+        Returns:
+        None
+            The function modifies the dataset in place by updating the
+            'Channel Names' column.
         """
+
         cache = {}
 
         def con_func(row):
@@ -437,26 +467,29 @@ class EEGBatch(UDatasetSharedAttributes):
         """
         Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.
 
-        :param output_path: Path to save the filtered file.
-        :type output_path: str
-        :param filter_type: Type of filter, which can be 'lowpass', 'highpass', 'bandpass', or 'notch'.
-        :type filter_type: str
-        :param l_freq: Low cutoff frequency for the filter (used in high-pass or low-frequency band-pass filters). Default is None.
-        :type l_freq: float or None
-        :param h_freq: High cutoff frequency for the filter (used in low-pass or high-frequency band-pass filters). Default is None.
-        :type h_freq: float or None
-        :param notch_freq: Frequency for the notch filter. Default is None.
-        :type notch_freq: float or None
-        :param auto_adjust_h_freq: Whether to automatically adjust the high cutoff frequency to fit the Nyquist frequency. Default is True.
-        :type auto_adjust_h_freq: bool
-        :param picks: Channels to be used for filtering. Default is 'all'.
-        :type picks: str
-        :param miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs. Default is False.
-        :type miss_bad_data: bool
-        :param kwargs: Additional keyword arguments for mne_raw.filter() and mne_raw.notch_filter().
-        :type kwargs: dict
-        :return: None
-        :rtype: None
+        Parameters:
+        output_path : str
+            Path to save the filtered file.
+        filter_type : str
+            Type of filter, which can be 'lowpass', 'highpass', 'bandpass', or 'notch'.
+        l_freq : float or None
+            Low cutoff frequency for the filter (used in high-pass or low-frequency band-pass filters). Default is None.
+        h_freq : float or None
+            High cutoff frequency for the filter (used in low-pass or high-frequency band-pass filters). Default is None.
+        notch_freq : float or None
+            Frequency for the notch filter. Default is None.
+        auto_adjust_h_freq : bool
+            Whether to automatically adjust the high cutoff frequency to fit the Nyquist frequency. Default is True.
+        picks : str
+            Channels to be used for filtering. Default is 'all'.
+        miss_bad_data : bool
+            Whether to skip the current file and continue processing the next one if an error occurs. Default is False.
+        kwargs : dict
+            Additional keyword arguments for mne_raw.filter() and mne_raw.notch_filter().
+
+        Returns:
+        None
+            The function modifies the dataset in place.
         """
 
         def con_func(row):
@@ -535,15 +568,20 @@ class EEGBatch(UDatasetSharedAttributes):
         Documentation links:
         - `mne.preprocessing.ICA`: [https://mne.tools/stable/generated/mne.preprocessing.ICA.html]
 
-        :param output_path: Path to save the processed file.
-        :type output_path: str
-        :param miss_bad_data: Whether to skip bad data files and continue processing the next one. Defaults to False.
-        :type miss_bad_data: bool
-        :param kwargs: Additional parameters passed to `mne.preprocessing.ICA`, `ica.fit()`, and other MNE functions.
-                              This includes `picks`, `n_components`, `method`, `random_state`, etc.
-        :type kwargs: dict
-        :return: Updates the file path in the dataset locator after ICA is applied.
-        :rtype: None
+        Parameters:
+        ----------
+        output_path : str
+            Path to save the processed file.
+        miss_bad_data : bool, optional
+            Whether to skip bad data files and continue processing the next one. Defaults to False.
+        kwargs : dict
+            Additional parameters passed to `mne.preprocessing.ICA`, `ica.fit()`, and other MNE functions.
+            This includes `picks`, `n_components`, `method`, `random_state`, etc.
+
+        Returns:
+        -------
+        None
+            Updates the file path in the dataset locator after ICA is applied.
         """
 
         def con_func(row):
@@ -592,18 +630,18 @@ class EEGBatch(UDatasetSharedAttributes):
         Resample the data using MNE's resampling functionality and save the processed data.
 
         Parameters:
-        -----------
+        ----------
         output_path : str
             The path where the resampled file will be saved.
         miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs. Defaults to False.
-        **kwargs : dict
+        kwargs : dict
             Additional parameters to be passed to the `mne_raw.resample()` function. For detailed information about
             these parameters, refer to the MNE documentation:
             https://mne.tools/stable/generated/mne.io.Raw.html#mne.io.Raw.resample
 
         Raises:
-        -------
+        ------
         Exception
             If an error occurs during resampling and `miss_bad_data` is set to False, the error will be raised.
         """
@@ -657,20 +695,24 @@ class EEGBatch(UDatasetSharedAttributes):
         via `**kwargs`. For more information on available options, refer to the
         :func:`get_data_row` function in this documentation.
 
-        :param output_path: str
+        Parameters:
+        ----------
+        output_path : str
             The path where the adjusted file will be saved.
-        :param channel_order: list
+        channel_order : list
             The desired order of channels, provided as a list.
-        :param min_num_channels: int, optional
-            The minimum number of channels required for alignment. Default is 32.
-        :param miss_bad_data: bool, optional
+        min_num_channels : int, optional
+            The minimum number of channels required for alignment. Default is 1.
+        miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs.
             Default is False.
-        :param **kwargs:
-            Additional keyword arguments to be passed to :func:`get_data_row` for data fetching. This
-            allows fine-tuning the data retrieval process.
+        kwargs : dict, optional
+            Additional keyword arguments to be passed to :func:`get_data_row` for data fetching.
+            This allows fine-tuning the data retrieval process.
 
-        :raises ValueError:
+        Raises:
+        ------
+        ValueError
             If any invalid channels are found in the provided `channel_order` or if the number of
             matching channels is below `min_num_channels`.
         """
@@ -746,22 +788,30 @@ class EEGBatch(UDatasetSharedAttributes):
         """
         Normalize the data.
 
-        :param output_path: str
+        This method normalizes the EEG data based on the specified normalization type. It can either
+        perform sample-wise normalization or aggregate by domain mean, depending on the provided parameters.
+
+        Parameters:
+        ----------
+        output_path : str
             The path where the normalized file will be saved.
-        :param norm_type: str, optional
+        norm_type : str, optional
             The type of normalization to apply. Default is 'sample-wise'.
-        :param miss_bad_data: bool, optional
-            Whether to skip the current file and continue processing the next one if an error occurs. Default is False.
-        :param domain_mean: bool, optional
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one if an error occurs.
+            Default is False.
+        domain_mean : bool, optional
             If True (default), the function aggregates the results by domain tags. Each domain contains the
             mean and standard deviation across all related EEG channels. If False, the function calculates
             and stores individual mean and standard deviation for each EEG recording.
-        :param **kwargs: dict, optional
+        kwargs : dict, optional
             Additional keyword arguments passed to :func:`get_data_row`. This allows users to pass extra parameters
             required by the `get_data_row` function seamlessly. For details on the parameters, refer to the
             :func:`get_data_row()` function in this documentation.
 
-        :returns: None
+        Returns:
+        -------
+        None
         """
 
         # Check if 'MEAN STD' column exists, if not process mean and std
@@ -807,16 +857,29 @@ class EEGBatch(UDatasetSharedAttributes):
         Processes data by creating epochs for pretraining from raw EEG data, applying optional resampling and event
         segmentation.
 
-        :param output_path: Path to save the preprocessed epoch data in .npy format.
-        :param seg_sec: Segment length in seconds for each epoch.
-        :param resample: Optional new sampling rate. If specified, raw data will be resampled.
-        :param overlap: Fraction of overlap between consecutive segments (0.0 means no overlap).
-        :param exclude_bad: If True, drops epochs marked as bad.
-        :param baseline: Baseline correction period, represented as a tuple (start, end). Default is (None, 0).
-        :param miss_bad_data: If True, skips files with errors instead of raising an exception.
-        :param kwargs: Additional keyword arguments passed to `mne.Epochs()` and `raw_data.resample()`
-                              for further filtering options. Refer to the respective functions' documentation for details.
-        :return: None
+        Parameters:
+        ----------
+        output_path : str
+            Path to save the preprocessed epoch data in .npy format.
+        seg_sec : float
+            Segment length in seconds for each epoch.
+        resample : Optional[int], optional
+            New sampling rate. If specified, raw data will be resampled.
+        overlap : float, optional
+            Fraction of overlap between consecutive segments (0.0 means no overlap).
+        exclude_bad : bool, optional
+            If True, drops epochs marked as bad.
+        baseline : Tuple[Optional[float], float], optional
+            Baseline correction period, represented as a tuple (start, end). Default is (None, 0).
+        miss_bad_data : bool, optional
+            If True, skips files with errors instead of raising an exception.
+        kwargs : dict, optional
+            Additional keyword arguments passed to `mne.Epochs()` and `raw_data.resample()`
+            for further filtering options. Refer to the respective functions' documentation for details.
+
+        Returns:
+        -------
+        None
         """
 
         def con_func(row) -> bool:
@@ -897,18 +960,23 @@ class EEGBatch(UDatasetSharedAttributes):
         functions. The `**kwargs` parameters are passed seamlessly to both functions
         to allow customization of data extraction and event handling.
 
-        :param miss_bad_data: Whether to skip the current file and continue processing
-            the next one if an error occurs. Defaults to False.
-        :type miss_bad_data: bool
-        :param kwargs: Additional keyword arguments that are passed to both `get_data_row()`
-            and `extract_events()` for advanced filtering and event extraction.
-        :type kwargs: dict
-        :raises Exception: If `miss_bad_data` is False, an exception is raised on processing errors.
+        Parameters:
+        ----------
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to False.
+        kwargs : dict, optional
+            Additional keyword arguments that are passed to both `get_data_row()` and `extract_events()`
+            for advanced filtering and event extraction.
+
+        Raises:
+        ------
+        Exception
+            If `miss_bad_data` is False, an exception is raised on processing errors.
 
         Note:
-            Please refer to the documentation of `get_data_row()` and `extract_events()`
-            for detailed descriptions of the available `kwargs` parameters.
-
+        -----
+        Please refer to the documentation of `get_data_row()` and `extract_events()`
+        for detailed descriptions of the available `kwargs` parameters.
         """
 
         def con_func(row):
@@ -943,19 +1011,25 @@ class EEGBatch(UDatasetSharedAttributes):
     def epoch_by_event(self, output_path: str, resample: int = None,
                        exclude_bad=True, miss_bad_data=False, **epoch_params):
         """
-        Batch process EEG data to create epochs based on events specified in event_id column.
+        Batch process EEG data to create epochs based on events specified in the event_id column.
 
         Parameters:
-        df (pd.DataFrame): DataFrame containing paths to raw EEG data and event_id information.
-        output_path (str): Directory to save the processed epochs.
-        seg_sec (float): Length of each epoch in seconds.
-        resample (int): Resample rate for the raw data. If None, no resampling is performed.
-        exclude_bad (bool): Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs.
-        miss_bad_data (bool): Whether to skip files with processing errors.
-        **epoch_params: Additional parameters for mne.Epochs, excluding raw_data, events, event_id.
+        ----------
+        output_path : str
+            Directory to save the processed epochs.
+        resample : int, optional
+            Resample rate for the raw data. If None, no resampling is performed.
+        exclude_bad : bool, optional
+            Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is True.
+        miss_bad_data : bool, optional
+            Whether to skip files with processing errors. Default is False.
+        epoch_params : dict, optional
+            Additional parameters for mne.Epochs, excluding raw_data, events, and event_id.
 
         Returns:
+        -------
         None
+            The function modifies the dataset in place by creating and saving the epochs.
         """
 
         def con_func(row):
@@ -1078,14 +1152,20 @@ class EEGBatch(UDatasetSharedAttributes):
         """
         Process the data quality of EEG files by calculating quality scores for each row in the dataset.
 
-        :param miss_bad_data: If True, skips rows that contain bad data without raising an error.
-                              If False, raises an exception when encountering bad data.
-        :type miss_bad_data: bool
-        :param kwargs: Additional keyword arguments passed to the `get_data_row()` function.
-                       This allows fine-tuning of parameters such as unit conversion, data normalization, etc.
-                       For details, refer to the `get_data_row()` function documentation.
-        :type kwargs: dict
-        :return: None
+        Parameters
+        ----------
+        miss_bad_data : bool, optional
+            If True, skips rows that contain bad data without raising an error.
+            If False, raises an exception when encountering bad data.
+
+        **kwargs : dict
+            Additional keyword arguments passed to the `get_data_row()` function.
+            This allows fine-tuning of parameters such as unit conversion, data normalization, etc.
+            For details, refer to the `get_data_row()` function documentation.
+
+        Returns
+        -------
+        None
         """
 
         def con_func(row):
@@ -1112,12 +1192,18 @@ class EEGBatch(UDatasetSharedAttributes):
         """
         Replace the prefix of file paths in the dataset according to the provided mapping.
 
-        :param old_prefix: The old path prefixes want to be replaced.
-        :type old_prefix: str
-        :param old_prefix: The new path prefixes
-        :type old_prefix: str
-        :return: A new UnifiedDataset with updated Locator.
-        :rtype: object
+        Parameters
+        ----------
+        old_prefix : str
+            The old path prefix to be replaced.
+
+        new_prefix : str
+            The new path prefix to replace the old one.
+
+        Returns
+        -------
+        object
+            A new UnifiedDataset with updated Locator.
         """
 
         def replace_func(row):
