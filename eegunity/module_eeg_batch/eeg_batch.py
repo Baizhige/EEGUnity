@@ -741,7 +741,8 @@ class EEGBatch(UDatasetSharedAttributes):
                                          result_type='series')
         self.get_shared_attr()['locator'] = new_locator
 
-    def normalize(self, output_path: str, norm_type: str = 'sample-wise', miss_bad_data: bool = False, **kwargs):
+    def normalize(self, output_path: str, norm_type: str = 'sample-wise', miss_bad_data: bool = False,
+                  domain_mean: bool = True, **kwargs):
         """
         Normalize the data.
 
@@ -751,6 +752,10 @@ class EEGBatch(UDatasetSharedAttributes):
             The type of normalization to apply. Default is 'sample-wise'.
         :param miss_bad_data: bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs. Default is False.
+        :param domain_mean: bool, optional
+            If True (default), the function aggregates the results by domain tags. Each domain contains the
+            mean and standard deviation across all related EEG channels. If False, the function calculates
+            and stores individual mean and standard deviation for each EEG recording.
         :param **kwargs: dict, optional
             Additional keyword arguments passed to :func:`get_data_row`. This allows users to pass extra parameters
             required by the `get_data_row` function seamlessly. For details on the parameters, refer to the
@@ -759,13 +764,18 @@ class EEGBatch(UDatasetSharedAttributes):
         :returns: None
         """
 
+        # Check if 'MEAN STD' column exists, if not process mean and std
+        locator = self.get_shared_attr()['locator']
+        if 'MEAN STD' not in locator.columns:
+            self.process_mean_std(domain_mean=domain_mean)
+
         def con_func(row):
             return True
 
         def app_func(row, norm_type, output_path):
             try:
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-                new_file_path = os.path.join(output_path, f"{file_name}_normed_raw.fif")
+                new_file_path = os.path.join(output_path, f"{file_name}_normed.fif")
                 mne_raw = get_data_row(row, norm_type=norm_type, **kwargs)
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path

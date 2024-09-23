@@ -11,6 +11,7 @@ import mne
 import numpy as np
 import pandas as pd
 import scipy
+from typing import Union, Dict
 
 from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
 from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
@@ -176,25 +177,67 @@ class EEGParser(UDatasetSharedAttributes):
 
 
 # static function defining
-def normalize_data(raw_data, mean_std_str, norm_type):
-    mean_std_str = mean_std_str.replace('nan', 'None')
-    mean_std_dict = ast.literal_eval(mean_std_str)
-    # get content data
+def normalize_data(raw_data, mean_std_str: Union[str, Dict], norm_type: str):
+    """
+    Normalize EEG data based on provided mean and standard deviation values.
+
+    Parameters
+    ----------
+    raw_data : mne.io.Raw
+        The raw EEG data to be normalized. The data should be in MNE Raw format.
+    mean_std_str : Union[str, Dict]
+        A dictionary or string that contains mean and standard deviation values.
+        If it's a string, it will be evaluated into a dictionary.
+        The dictionary keys should be channel names (for channel-wise normalization)
+        or 'all_eeg' (for sample-wise normalization).
+    norm_type : str
+        The type of normalization to perform. It can be:
+        - 'channel-wise': Normalize each channel individually based on its mean and standard deviation.
+        - 'sample-wise': Normalize all channels based on a common mean and standard deviation.
+
+    Returns
+    -------
+    mne.io.Raw
+        The normalized raw EEG data.
+
+    Raises
+    ------
+    ValueError
+        If `norm_type` is not 'channel-wise' or 'sample-wise'.
+    """
+
+    # If mean_std_str is a string, process it accordingly
+    if isinstance(mean_std_str, str):
+        mean_std_str = mean_std_str.replace('nan', 'None')
+        mean_std_dict = ast.literal_eval(mean_std_str)
+    else:
+        mean_std_dict = mean_std_str
+
+    # Get EEG data and channel names
     data = raw_data.get_data()
     channel_names = raw_data.info['ch_names']
+
     if norm_type == "channel-wise":
+        # Normalize each channel based on its individual mean and std
         for idx, channel in enumerate(channel_names):
             if channel in mean_std_dict:
                 mean, std = mean_std_dict[channel]
                 data[idx] = (data[idx] - mean) / std
 
     elif norm_type == "sample-wise":
-        mean, std = mean_std_dict['all_eeg']
+        # Normalize all channels based on the common mean and std
+        mean, std = mean_std_dict.get('all_eeg', (None, None))
+        if mean is None or std is None:
+            raise ValueError("Mean and std for 'all_eeg' are required for sample-wise normalization.")
         for idx in range(data.shape[0]):
             data[idx] = (data[idx] - mean) / std
 
-    # return mne.io.raw data
+    else:
+        raise ValueError(f"Invalid norm_type: {norm_type}. Must be 'channel-wise' or 'sample-wise'.")
+
+    # Set the normalized data back to raw_data
     raw_data._data = data
+
     return raw_data
 
 
