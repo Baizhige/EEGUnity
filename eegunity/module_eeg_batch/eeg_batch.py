@@ -27,12 +27,13 @@ class EEGBatch(UDatasetSharedAttributes):
     def batch_process(self, con_func, app_func, is_patch, result_type=None):
         """
         Process each row of the given dataframe `locator` based on the conditions
-        specified in `con_func` and apply `app_func` accordingly.
+        specified in `con_func` and applies `app_func` accordingly.
 
         This function handles both list and dataframe return types and ensures the
         result aligns with the `locator`'s rows based on the `is_patch` flag.
 
-        Parameters:
+        Parameters
+        ----------
         con_func : function
             A function that takes a row of `locator` and returns True or False
             to determine if `app_func` should be applied to that row.
@@ -45,11 +46,12 @@ class EEGBatch(UDatasetSharedAttributes):
             Specifies the expected return type of `app_func` results.
             Can be "series", "value", or None (case insensitive). Defaults to None.
 
-        Returns:
+        Returns
+        -------
         None or list or pd.DataFrame
             The processed results, either as a list or dataframe,
             depending on the `result_type` and `app_func` return type
-            and consistency. Returns None if result_type is None.
+            and consistency. Returns None if `result_type` is None.
         """
 
         if result_type is not None:
