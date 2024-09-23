@@ -42,7 +42,7 @@ class EEGParser(UDatasetSharedAttributes):
                 self.locator_path = locator_path
                 self.set_shared_attr({'locator': self.check_locator(pd.read_csv(locator_path))})
             else:
-                raise ValueError("The provided 'locator' path is not a valid CSV file.")
+                raise ValueError(f"The provided 'locator' path {locator_path} is not a valid CSV file.")
         elif self.get_shared_attr()['dataset_path']:  # Construct UnifiedDataset by reading dataset path
             if os.path.isdir(dataset_path):
                 self._unzip_if_no_conflict(dataset_path)
@@ -241,41 +241,73 @@ def set_channel_type(raw_data, channel_str):
     return raw_data
 
 
-def get_data_row(row, norm_type=None, is_set_channel_type=False, is_set_montage=False, verbose='CRITICAL',
-                 pick_types=None, unit_convert=None):
-    filepath = row['File Path']
-    file_type = row['File Type']
-    # get mne.io.raw data
-    if file_type == "standard_data":  # read standard data, those supported by MNE-Python
+def get_data_row(row: dict,
+                 norm_type: str = None,
+                 is_set_channel_type: bool = False,
+                 is_set_montage: bool = False,
+                 verbose: str = 'CRITICAL',
+                 pick_types: dict = None,
+                 unit_convert: str = None,
+                 **kwargs) -> mne.io.BaseRaw:
+    """
+    Process and return raw EEG data based on the input row information. Allows handling of standard and non-standard data.
+
+    :param row: Dictionary containing data attributes, such as file paths, file types, and channel names.
+    :type row: dict
+    :param norm_type: Type of normalization to apply, if any, defaults to None.
+    :type norm_type: str, optional
+    :param is_set_channel_type: Flag to set channel types based on the locator, defaults to False.
+    :type is_set_channel_type: bool, optional
+    :param is_set_montage: Flag to set montage (electrode coordinates), defaults to False.
+    :type is_set_montage: bool, optional
+    :param verbose: Verbosity level for MNE functions, defaults to 'CRITICAL'.
+    :type verbose: str, optional
+    :param pick_types: Channel picking parameters for MNE, defaults to None.
+    :type pick_types: dict, optional
+    :param unit_convert: Conversion type for resetting channel units, defaults to None.
+    :type unit_convert: str, optional
+    :param kwargs: Additional keyword arguments to enhance flexibility and robustness.
+    :type kwargs: Any
+    :return: Processed MNE raw data object.
+    :rtype: mne.io.BaseRaw
+    """
+    filepath = row.get('File Path')
+    file_type = row.get('File Type')
+
+    # Handle standard or non-standard data loading based on file type
+    if file_type == "standard_data":  # Read standard data supported by MNE-Python
         raw_data = mne.io.read_raw(filepath, verbose=verbose, preload=True)
-        channel_names = [name.strip() for name in row['Channel Names'].split(',')]
+        channel_names = [name.strip() for name in row.get('Channel Names', '').split(',')]
         if len(channel_names) != len(raw_data.info['ch_names']):
-            raise ValueError(
-                f"The number of channels marked in the locator file does not match the number of channels in the metadata: {filepath}")
+            raise ValueError(f"The number of channels marked in the locator file does not match the metadata: {filepath}")
         channel_mapping = {original: new for original, new in zip(raw_data.info['ch_names'], channel_names)}
         raw_data.rename_channels(channel_mapping)
-    else:  # cope with non-standard data
-        raw_data = handle_nonstandard_data(row, verbose)
-    # Reset channel names and types based on the locator
+    else:  # Handle non-standard data
+        raw_data = handle_nonstandard_data(row, verbose=verbose, **kwargs)
+
+    # Set channel types if required
     if is_set_channel_type:
         raw_data = set_channel_type(raw_data, row['Channel Names'])
-    # Set electrode coordinates according to the preset montage
+
+    # Set montage if required
     if is_set_montage:
         raw_data = set_montage_any(raw_data)
-    # Apply normalization
+
+    # Apply normalization if requested
     if norm_type and 'MEAN STD' in row:
         raw_data = normalize_data(raw_data, row['MEAN STD'], norm_type)
-    # Reset channel units
+
+    # Convert units if required
     if unit_convert and 'Infer Unit' in row:
         raw_data = set_infer_unit(raw_data, row)
         raw_data = convert_unit(raw_data, unit_convert)
-    # Reset when there are timestamp anomalies
-    if raw_data.info['meas_date'] is not None and isinstance(raw_data.info['meas_date'],
-                                                             datetime.datetime) and (
-            raw_data.info['meas_date'].timestamp() < -2147483648 or raw_data.info[
-        'meas_date'].timestamp() > 2147483647):
-        # If the date is wrong, set None.
-        raw_data.set_meas_date(None)
+
+    # Check and reset incorrect timestamps if needed
+    if raw_data.info['meas_date'] is not None and isinstance(raw_data.info['meas_date'], datetime.datetime):
+        timestamp = raw_data.info['meas_date'].timestamp()
+        if timestamp < -2147483648 or timestamp > 2147483647:
+            raw_data.set_meas_date(None)
+
     return raw_data
 
 
@@ -441,14 +473,14 @@ def handle_nonstandard_data(row, verbose='CRITICAL'):
             df.columns = [str(i) for i in range(1, len(df.columns) + 1)]
 
         # Retrieve channel names and sampling rate
-        channel_names = row['Channel Names'].split(',')
+        channel_names = [name.strip() for name in row['Channel Names'].split(',')]
         sfreq = float(row['Sampling Rate'])
 
         # Check if all channel names are present in the DataFrame columns
         if not all(name in df.columns for name in channel_names):
             raise (f"Number of channels marked in the locator file does not match the metadata channels {filepath}")
         # Extract EEG data
-        eeg_data = df[channel_names].values.T  # 转置以匹配 MNE 需要的格式 (通道数, 时间点数)
+        eeg_data = df[channel_names].values.T  # transpose for MNE
         info = mne.create_info(ch_names=channel_names, sfreq=sfreq, ch_types='eeg')
         raw = mne.io.RawArray(eeg_data, info)
         return raw

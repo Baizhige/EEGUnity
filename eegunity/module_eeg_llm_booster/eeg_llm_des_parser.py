@@ -172,28 +172,23 @@ def llm_description_file_parser(api_key, endpoint, directory):
     Parses files in a specified directory using an LLM (Large Language Model) API to identify and extract sampling rate
     and channel information.
 
-    Parameters:
-    -----------
-    api_key : str
-        The API key used to authenticate with the LLM service.
-    endpoint : str
-        The endpoint URL for the LLM API.
-    directory : str
-        The directory path where the files to be processed are located.
+    :param str api_key: The API key used to authenticate with the LLM service.
+    :param str endpoint: The endpoint URL for the LLM API.
+    :param str directory: The directory path where the files to be processed are located.
 
-    Returns:
-    --------
-    dict
-        A dictionary containing the parsed sampling rate and channel information. If no files are selected for further
-        analysis or if all data is discarded due to conflicts, an error message is returned.
+    :returns: A dictionary containing the parsed sampling rate and channel information. If no files are selected for
+              further analysis or if all data is discarded due to conflicts, an error message is returned.
+    :rtype: dict
 
-    Usage:
-    ------
-    api_key = "you_api_key"
-    azure_endpoint = "https://your/end/point"
-    directory = 'path/to/description/file'
-    result = llm_description_file_parser(api_key, azure_endpoint, directory)
-    print("The end result:", json.dumps(result, indent=4, ensure_ascii=False))
+    **Usage:**
+
+    .. code-block:: python
+
+        api_key = "your_api_key"
+        azure_endpoint = "https://your/end/point"
+        directory = 'path/to/description/file'
+        result = llm_description_file_parser(api_key, azure_endpoint, directory)
+        print("The end result:", json.dumps(result, indent=4, ensure_ascii=False))
     """
     files = read_files(directory)
     processed_files = filter_files_with_gpt(files, api_key, endpoint)
