@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eegunity.module_eeg_parser.eeg_parser &mdash; EEGUnity 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -82,6 +82,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
 
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_csv</span> <span class="kn">import</span> <span class="n">process_csv_files</span>
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_mat</span> <span class="kn">import</span> <span class="n">process_mat_files</span><span class="p">,</span> <span class="n">_find_variables_by_condition</span><span class="p">,</span> \
@@ -115,7 +116,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">locator_path</span> <span class="o">=</span> <span class="n">locator_path</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_locator</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">locator_path</span><span class="p">))})</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The provided &#39;locator&#39; path is not a valid CSV file.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The provided &#39;locator&#39; path </span><span class="si">{</span><span class="n">locator_path</span><span class="si">}</span><span class="s2"> is not a valid CSV file.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;dataset_path&#39;</span><span class="p">]:</span>  <span class="c1"># Construct UnifiedDataset by reading dataset path</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_unzip_if_no_conflict</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
@@ -258,25 +259,67 @@
 <span class="c1"># static function defining</span>
 <div class="viewcode-block" id="normalize_data">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.normalize_data">[docs]</a>
-<span class="k">def</span> <span class="nf">normalize_data</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">mean_std_str</span><span class="p">,</span> <span class="n">norm_type</span><span class="p">):</span>
-    <span class="n">mean_std_str</span> <span class="o">=</span> <span class="n">mean_std_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span>
-    <span class="n">mean_std_dict</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">mean_std_str</span><span class="p">)</span>
-    <span class="c1"># get content data</span>
+<span class="k">def</span> <span class="nf">normalize_data</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">mean_std_str</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">norm_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize EEG data based on provided mean and standard deviation values.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    raw_data : mne.io.Raw</span>
+<span class="sd">        The raw EEG data to be normalized. The data should be in MNE Raw format.</span>
+<span class="sd">    mean_std_str : Union[str, Dict]</span>
+<span class="sd">        A dictionary or string that contains mean and standard deviation values.</span>
+<span class="sd">        If it&#39;s a string, it will be evaluated into a dictionary.</span>
+<span class="sd">        The dictionary keys should be channel names (for channel-wise normalization)</span>
+<span class="sd">        or &#39;all_eeg&#39; (for sample-wise normalization).</span>
+<span class="sd">    norm_type : str</span>
+<span class="sd">        The type of normalization to perform. It can be:</span>
+<span class="sd">        - &#39;channel-wise&#39;: Normalize each channel individually based on its mean and standard deviation.</span>
+<span class="sd">        - &#39;sample-wise&#39;: Normalize all channels based on a common mean and standard deviation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mne.io.Raw</span>
+<span class="sd">        The normalized raw EEG data.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If `norm_type` is not &#39;channel-wise&#39; or &#39;sample-wise&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If mean_std_str is a string, process it accordingly</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mean_std_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">mean_std_str</span> <span class="o">=</span> <span class="n">mean_std_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span>
+        <span class="n">mean_std_dict</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">mean_std_str</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mean_std_dict</span> <span class="o">=</span> <span class="n">mean_std_str</span>
+
+    <span class="c1"># Get EEG data and channel names</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
     <span class="n">channel_names</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">norm_type</span> <span class="o">==</span> <span class="s2">&quot;channel-wise&quot;</span><span class="p">:</span>
+        <span class="c1"># Normalize each channel based on its individual mean and std</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">channel_names</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">mean_std_dict</span><span class="p">:</span>
                 <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">mean_std_dict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
 
     <span class="k">elif</span> <span class="n">norm_type</span> <span class="o">==</span> <span class="s2">&quot;sample-wise&quot;</span><span class="p">:</span>
-        <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">mean_std_dict</span><span class="p">[</span><span class="s1">&#39;all_eeg&#39;</span><span class="p">]</span>
+        <span class="c1"># Normalize all channels based on the common mean and std</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">mean_std_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;all_eeg&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">std</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mean and std for &#39;all_eeg&#39; are required for sample-wise normalization.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
 
-    <span class="c1"># return mne.io.raw data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid norm_type: </span><span class="si">{</span><span class="n">norm_type</span><span class="si">}</span><span class="s2">. Must be &#39;channel-wise&#39; or &#39;sample-wise&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Set the normalized data back to raw_data</span>
     <span class="n">raw_data</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+
     <span class="k">return</span> <span class="n">raw_data</span></div>
 
 
@@ -335,41 +378,73 @@
 
 <div class="viewcode-block" id="get_data_row">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.get_data_row">[docs]</a>
-<span class="k">def</span> <span class="nf">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_set_channel_type</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_set_montage</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">,</span>
-                 <span class="n">pick_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit_convert</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">filepath</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span>
-    <span class="n">file_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Type&#39;</span><span class="p">]</span>
-    <span class="c1"># get mne.io.raw data</span>
-    <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;standard_data&quot;</span><span class="p">:</span>  <span class="c1"># read standard data, those supported by MNE-Python</span>
+<span class="k">def</span> <span class="nf">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">norm_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">is_set_channel_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">is_set_montage</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;CRITICAL&#39;</span><span class="p">,</span>
+                 <span class="n">pick_types</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">unit_convert</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">BaseRaw</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process and return raw EEG data based on the input row information. Allows handling of standard and non-standard data.</span>
+
+<span class="sd">    :param row: Dictionary containing data attributes, such as file paths, file types, and channel names.</span>
+<span class="sd">    :type row: dict</span>
+<span class="sd">    :param norm_type: Type of normalization to apply, if any, defaults to None.</span>
+<span class="sd">    :type norm_type: str, optional</span>
+<span class="sd">    :param is_set_channel_type: Flag to set channel types based on the locator, defaults to False.</span>
+<span class="sd">    :type is_set_channel_type: bool, optional</span>
+<span class="sd">    :param is_set_montage: Flag to set montage (electrode coordinates), defaults to False.</span>
+<span class="sd">    :type is_set_montage: bool, optional</span>
+<span class="sd">    :param verbose: Verbosity level for MNE functions, defaults to &#39;CRITICAL&#39;.</span>
+<span class="sd">    :type verbose: str, optional</span>
+<span class="sd">    :param pick_types: Channel picking parameters for MNE, defaults to None.</span>
+<span class="sd">    :type pick_types: dict, optional</span>
+<span class="sd">    :param unit_convert: Conversion type for resetting channel units, defaults to None.</span>
+<span class="sd">    :type unit_convert: str, optional</span>
+<span class="sd">    :param kwargs: Additional keyword arguments to enhance flexibility and robustness.</span>
+<span class="sd">    :type kwargs: Any</span>
+<span class="sd">    :return: Processed MNE raw data object.</span>
+<span class="sd">    :rtype: mne.io.BaseRaw</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;File Path&#39;</span><span class="p">)</span>
+    <span class="n">file_type</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;File Type&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Handle standard or non-standard data loading based on file type</span>
+    <span class="k">if</span> <span class="n">file_type</span> <span class="o">==</span> <span class="s2">&quot;standard_data&quot;</span><span class="p">:</span>  <span class="c1"># Read standard data supported by MNE-Python</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">preload</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">channel_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="n">channel_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The number of channels marked in the locator file does not match the number of channels in the metadata: </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of channels marked in the locator file does not match the metadata: </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">channel_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">original</span><span class="p">:</span> <span class="n">new</span> <span class="k">for</span> <span class="n">original</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">],</span> <span class="n">channel_names</span><span class="p">)}</span>
         <span class="n">raw_data</span><span class="o">.</span><span class="n">rename_channels</span><span class="p">(</span><span class="n">channel_mapping</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># cope with non-standard data</span>
-        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">handle_nonstandard_data</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-    <span class="c1"># Reset channel names and types based on the locator</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Handle non-standard data</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">handle_nonstandard_data</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Set channel types if required</span>
     <span class="k">if</span> <span class="n">is_set_channel_type</span><span class="p">:</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">set_channel_type</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">])</span>
-    <span class="c1"># Set electrode coordinates according to the preset montage</span>
+
+    <span class="c1"># Set montage if required</span>
     <span class="k">if</span> <span class="n">is_set_montage</span><span class="p">:</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">set_montage_any</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
-    <span class="c1"># Apply normalization</span>
+
+    <span class="c1"># Apply normalization if requested</span>
     <span class="k">if</span> <span class="n">norm_type</span> <span class="ow">and</span> <span class="s1">&#39;MEAN STD&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">normalize_data</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;MEAN STD&#39;</span><span class="p">],</span> <span class="n">norm_type</span><span class="p">)</span>
-    <span class="c1"># Reset channel units</span>
+
+    <span class="c1"># Convert units if required</span>
     <span class="k">if</span> <span class="n">unit_convert</span> <span class="ow">and</span> <span class="s1">&#39;Infer Unit&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">set_infer_unit</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">convert_unit</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">unit_convert</span><span class="p">)</span>
-    <span class="c1"># Reset when there are timestamp anomalies</span>
-    <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">],</span>
-                                                             <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">2147483648</span> <span class="ow">or</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span>
-        <span class="s1">&#39;meas_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2147483647</span><span class="p">):</span>
-        <span class="c1"># If the date is wrong, set None.</span>
-        <span class="n">raw_data</span><span class="o">.</span><span class="n">set_meas_date</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Check and reset incorrect timestamps if needed</span>
+    <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;meas_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">2147483648</span> <span class="ow">or</span> <span class="n">timestamp</span> <span class="o">&gt;</span> <span class="mi">2147483647</span><span class="p">:</span>
+            <span class="n">raw_data</span><span class="o">.</span><span class="n">set_meas_date</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">raw_data</span></div>
 
 
@@ -544,14 +619,14 @@
             <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
         <span class="c1"># Retrieve channel names and sampling rate</span>
-        <span class="n">channel_names</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">channel_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
         <span class="n">sfreq</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">])</span>
 
         <span class="c1"># Check if all channel names are present in the DataFrame columns</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">channel_names</span><span class="p">):</span>
             <span class="k">raise</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of channels marked in the locator file does not match the metadata channels </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="c1"># Extract EEG data</span>
-        <span class="n">eeg_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">channel_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># 转置以匹配 MNE 需要的格式 (通道数, 时间点数)</span>
+        <span class="n">eeg_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">channel_names</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># transpose for MNE</span>
         <span class="n">info</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">create_info</span><span class="p">(</span><span class="n">ch_names</span><span class="o">=</span><span class="n">channel_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">ch_types</span><span class="o">=</span><span class="s1">&#39;eeg&#39;</span><span class="p">)</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">RawArray</span><span class="p">(</span><span class="n">eeg_data</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">raw</span>

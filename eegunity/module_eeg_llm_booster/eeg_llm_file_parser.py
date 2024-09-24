@@ -1,13 +1,3 @@
-"""
-Title: LLM Boost Parser using gpt4.0
-Description: his project provides a Python script to parse and process EEG data files (CSV or TXT) using Azure OpenAI's GPT model to generate a function that reads the data, calculates the sampling frequency, and extracts channel names.
-Author: Ziyi Jia
-Email: Ziyi.Jia21@student.xjtlu.edu.cn
-GitHub: [Ziyi-Jia05](https://github.com/1232353124)
-Date Created: 2024-06-17
-Last Modified: 2024-07-26
-Version: 1.0
-"""
 # ----------------------------------------------------------------------
 import os
 
@@ -21,26 +11,44 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
     Parses and processes an EEG data file using Azure OpenAI to generate a function
     that reads the data, calculates the sampling frequency, and extracts channel names.
 
-    Parameters:
-        file_path (str): Path to the CSV or TXT file
-        api_key (str): API key for Azure OpenAI.
-        azure_endpoint (str): Endpoint URL for Azure OpenAI.
-        max_iterations (int, optional): Maximum number of iterations to refine the generated function code. Default is 5.
+    This function interacts with Azure OpenAI to automatically generate and refine a Python
+    function that reads EEG data from a CSV or TXT file, determines the sampling frequency
+    from timestamp columns, and extracts the relevant channel names. The function iterates
+    through the process up to `max_iterations` times to refine the generated code in case
+    of errors or unsatisfactory outputs.
 
-    Returns:
+    Parameters
+    ----------
+    file_path : str
+        Path to the CSV or TXT file.
+    api_key : str
+        API key for Azure OpenAI.
+    azure_endpoint : str
+        Endpoint URL for Azure OpenAI.
+    max_iterations : (int, optional)
+        Maximum number of iterations to refine the generated function code. Default is 5.
+
+    Returns
+    -------
         mne.io.Raw: An MNE RawArray object containing the processed EEG data.
 
-    Raises:
+    Raises
+    ------
         ValueError: If the file extension is not supported.
         FileNotFoundError: If the specified file is not found.
         RuntimeError: If the function code cannot be generated within the maximum iteration limit.
-    Usage:
-        api_key = ("your api key here")
-        azure_endpoint = "https://your_endpoint"
-        file_path = "data_file"
-        raw_data = LLM_boost_parser(file_path, api_key, azure_endpoint)
-        print("Extracted Data:")
-        print(raw_data)
+
+    Example
+    -------
+    >>> api_key = "your_api_key"
+    >>> azure_endpoint = "https://your_endpoint"
+    >>> locator_path = "data_file.csv"
+    >>> raw_data = llm_boost_parser(locator_path, api_key, azure_endpoint)
+    >>> print("Extracted Data:", raw_data)
+
+    Contributor
+    -----------
+    Ziyi Jia (Ziyi.Jia21@student.xjtlu.edu.cn), on 2024-07-26.
     """
     file_extension = os.path.splitext(file_path)[1]
     # Check if the file is a CSV or TXT file

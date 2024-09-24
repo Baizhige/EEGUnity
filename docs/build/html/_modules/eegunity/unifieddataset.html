@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eegunity.unifieddataset &mdash; EEGUnity 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
   
@@ -74,6 +74,7 @@
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_batch.eeg_batch</span> <span class="kn">import</span> <span class="n">EEGBatch</span>
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_correction.eeg_correction</span> <span class="kn">import</span> <span class="n">EEGCorrection</span>
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">EEGParser</span>
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_llm_booster.eeg_llm_booster</span> <span class="kn">import</span> <span class="n">EEGLLMBooster</span>
 <span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
 
 
@@ -90,7 +91,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">eeg_parser</span> <span class="o">=</span> <span class="n">EEGParser</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eeg_batch</span> <span class="o">=</span> <span class="n">EEGBatch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eeg_correction</span> <span class="o">=</span> <span class="n">EEGCorrection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="c1"># self.module_eeg_llm_booster = LLMBooster()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_eeg_llm_booster</span> <span class="o">=</span> <span class="n">EEGLLMBooster</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="UnifiedDataset.copy">
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset.copy">[docs]</a>
@@ -115,6 +116,7 @@
     <span class="k">def</span> <span class="nf">set_locator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_locator</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_locator</span></div>
 </div>
+
 
 </pre></div>
 

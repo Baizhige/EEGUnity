@@ -10,21 +10,33 @@ from scipy.signal import butter, filtfilt
 # Design a Butterworth bandpass filter
 def butter_bandpass(lowcut, highcut, fs, order=4):
     """
-    Create a Butterworth bandpass filter.
+    Design a Butterworth bandpass filter.
 
-    Parameters:
-    lowcut : float
-        The low frequency cut-off for the filter.
-    highcut : float
-        The high frequency cut-off for the filter.
-    fs : int
-        The sampling frequency of the data.
-    order : int
-        The order of the filter.
+    Parameters
+    ----------
+    low_cut : float
+        The lower cutoff frequency of the filter.
+    high_cut : float
+        The upper cutoff frequency of the filter.
+    sampling_freq : float
+        The sampling frequency of the input signal.
+    order : int, optional
+        The order of the Butterworth filter (default is 4).
 
-    Returns:
-    b, a : ndarray, ndarray
-        Numerator (b) and denominator (a) polynomials of the IIR filter.
+    Returns
+    -------
+    b : ndarray
+        The numerator (b) coefficients of the IIR filter.
+    a : ndarray
+        The denominator (a) coefficients of the IIR filter.
+
+    Note
+    ----
+    This function designs a bandpass filter using a Butterworth design.
+    The cutoff frequencies are normalized by the Nyquist frequency,
+    which is half the sampling frequency. The filter coefficients are
+    returned as arrays suitable for use with `scipy.signal.lfilter` or
+    similar filtering functions.
     """
     nyq = 0.5 * fs  # Nyquist frequency
     low = lowcut / nyq
@@ -38,7 +50,8 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
     """
     Apply a bandpass filter to the data array.
 
-    Parameters:
+    Parameters
+    ----------
     data : ndarray
         Data to filter, with channels as rows.
     lowcut : float
@@ -47,12 +60,20 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=4):
         The high frequency cut-off for the filter.
     fs : int
         The sampling frequency of the data.
-    order : int
-        The order of the filter.
+    order : int, optional
+        The order of the filter (default is 4).
 
-    Returns:
+    Returns
+    -------
     y : ndarray
         The filtered data.
+
+    Note
+    ----
+    This function uses a Butterworth bandpass filter designed with the
+    specified cut-off frequencies and order. The filter is applied using
+    zero-phase filtering with `scipy.signal.filtfilt`, which ensures
+    that the filtered signal is not phase-shifted.
     """
     b, a = butter_bandpass(lowcut, highcut, fs, order)
     y = filtfilt(b, a, data, axis=1)  # Apply the filter along the second dimension (time)
@@ -64,13 +85,23 @@ def plot_radar_chart(scores, score_names, title='EEG Scores'):
     """
     Plot a radar chart for the given scores.
 
-    Parameters:
-    scores : list
-        List of scores to plot.
-    score_names : list
-        Names corresponding to the scores.
-    title : str
-        Title for the radar chart.
+    Parameters
+    ----------
+    scores : list of float
+        List of scores to plot. Each score represents a metric for evaluating EEG quality.
+    score_names : list of str
+        Names corresponding to the scores. These names describe the metrics for evaluating EEG quality.
+    title : str, optional
+        Title for the radar chart (default is 'EEG Scores').
+
+    Returns
+    -------
+    None
+
+    Note
+    ----
+    This function creates a radar chart using the provided scores and score names.
+    The radar chart is displayed using matplotlib.
     """
     angles = np.linspace(0, 2 * np.pi, len(scores), endpoint=False).tolist()
     angles += angles[:1]  # Complete the loop
@@ -99,13 +130,21 @@ def calculate_general_amplitude_score(data):
     Calculate a general amplitude score based on the proportion of signal amplitudes
     that fall within a specific range.
 
-    Parameters:
+    Parameters
+    ----------
     data : ndarray
-        2D array of EEG data where rows represent channels and columns represent amplitude at each time point.
+        2D array of EEG data where rows represent channels and columns represent amplitudes at each time point.
 
-    Returns:
+    Returns
+    -------
     float
         The average score across all channels, normalized to 100.
+
+    Note
+    ----
+    This function calculates the general amplitude score for each channel by counting the number of amplitudes
+    within a specific range (-100 to 100) and dividing it by the total number of amplitudes. The scores are then
+    averaged across all channels to obtain the final general amplitude score.
     """
     n_channels, n_samples = data.shape
     scores = np.zeros(n_channels)
@@ -126,15 +165,24 @@ def calculate_highest_amplitude_score(data, channel_indices):
     """
     Calculate the highest amplitude score for specific channels within the Alpha band.
 
-    Parameters:
+    Parameters
+    ----------
     data : ndarray
-        The EEG data in the Alpha band, expected to be a 2D array where rows represent channels and columns represent amplitude at each time point.
-    channel_indices : list
+        The EEG data in the Alpha band, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.
+    channel_indices : list of int
         List of indices for the channels of interest.
 
-    Returns:
+    Returns
+    -------
     float
         The calculated highest amplitude score, normalized to 100.
+
+    Note
+    ----
+    This function first filters the data for the specified channels of interest.
+    It then calculates the maximum amplitude for each channel. The amplitudes are sorted
+    in descending order, and scoring is applied based on the percentile of each channel's amplitude.
+    The final score is the average of these scores, normalized to 100.
     """
     # Filter out the channels of interest
     data_of_interest = data[channel_indices, :]
@@ -165,15 +213,23 @@ def calculate_dominant_frequency(signal, fs):
     """
     Calculate the dominant frequency of a signal.
 
-    Parameters:
+    Parameters
+    ----------
     signal : ndarray
-        The signal array.
+        The signal array. This should be a 1D array representing the time-series data of the EEG signal.
     fs : int
-        The sampling frequency of the signal.
+        The sampling frequency of the signal, representing the number of data points collected per second.
 
-    Returns:
+    Returns
+    -------
     float
-        The dominant frequency of the signal.
+        The dominant frequency of the signal, which is the frequency component that has the highest amplitude in the Fourier Transform of the signal.
+
+    Note
+    ----
+    This function computes the Fast Fourier Transform (FFT) of the input signal and identifies
+    the frequency with the highest amplitude. The dominant frequency is determined from the
+    positive frequency components of the FFT.
     """
     n = len(signal)
     yf = fft(signal)
@@ -186,19 +242,27 @@ def calculate_symmetry_score(data, channels_left, channels_right, fs):
     """
     Calculate the symmetry score between two sets of channels.
 
-    Parameters:
+    Parameters
+    ----------
     data : ndarray
-        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitude at each time point.
-    channels_left : list
+        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.
+    channels_left : list of int
         List of indices for the left channels.
-    channels_right : list
+    channels_right : list of int
         List of indices for the right channels.
     fs : int
         The sampling frequency of the data.
 
-    Returns:
+    Returns
+    -------
     float
-        The symmetry score between the two sets of channels.
+        The symmetry score between the two sets of channels, expressed as a percentage.
+
+    Note
+    ----
+    This function filters the data for the specified left and right channels, calculates the dominant frequencies
+    for each set of channels, and computes the correlation score between the dominant frequencies. The symmetry
+    score is normalized to a range of 0 to 100.
     """
     # Filter the data for the left and right channels
     data_left = data[channels_left, :]
@@ -218,13 +282,22 @@ def calculate_beta_sinusoidal_score(fft_data):
     Calculate the beta sinusoidal score by analyzing the proportion of significant energy
     in the FFT data.
 
-    Parameters:
+    Parameters
+    ----------
     fft_data : ndarray
         The FFT results of the EEG data, expected to be a 2D array where each row represents the FFT results of a channel.
 
-    Returns:
+    Returns
+    -------
     float
         The sinusoidal score as a percentage.
+
+    Note
+    ----
+    This function computes the total and significant energy for each channel based on the FFT results.
+    It applies a threshold to determine significant frequencies and calculates the score as the
+    percentage of significant energy relative to the total energy. If the total energy is zero,
+    the score for that channel is set to zero to avoid division errors.
     """
     total_energy = np.sum(np.abs(fft_data), axis=1)  # Total energy per channel
     max_energy = np.max(np.abs(fft_data), axis=1)  # Max energy per frequency per channel
@@ -251,16 +324,25 @@ def calculate_beta_amplitude_score(beta_data, threshold=20):
     Calculate Score 4 based on the percentage of beta wave samples in each channel
     that do not exceed the maximum amplitude threshold.
 
-    Parameters:
+    Parameters
+    ----------
     beta_data : ndarray
         The EEG data filtered in the beta band, expected to be a 2D array
-        where rows represent channels and columns represent amplitude at each time point.
-    threshold : float
-        The maximum amplitude threshold for the beta waves (in microvolts, μV).
+        where rows represent channels and columns represent amplitudes at each time point.
+    threshold : float, optional
+        The maximum amplitude threshold for the beta waves (in microvolts, μV). Default is 20.
 
-    Returns:
+    Returns
+    -------
     float
-        The average percentage of samples across all channels not exceeding the threshold.
+        The average percentage of samples across all channels that do not exceed the threshold.
+
+    Note
+    ----
+    This function counts the number of samples in each channel that are less than or equal
+    to the specified threshold and calculates the percentage of such samples relative to the
+    total number of samples in that channel. The final score is the average percentage across
+    all channels.
     """
     # Calculate the number of non-exceedance points per channel
     non_exceedances = np.abs(beta_data) <= threshold
@@ -278,15 +360,24 @@ def calculate_theta_amplitude_score(data, threshold=30):
     """
     Calculate the percentage of data points not exceeding a specified amplitude threshold in the theta frequency band.
 
-    Parameters:
+    Parameters
+    ----------
     data : ndarray
-        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitude at each time point.
-    threshold : float
-        The amplitude threshold for considering a data point as not exceeding.
+        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.
+    threshold : float, optional
+        The amplitude threshold for considering a data point as not exceeding. Default is 30.
 
-    Returns:
+    Returns
+    -------
     float
-        The average percentage of data points across all channels not exceeding the threshold.
+        The average percentage of data points across all channels that do not exceed the threshold.
+
+    Note
+    ----
+    This function checks for data points in the theta frequency band that are below the specified threshold
+    and calculates the percentage of such points for each channel. It returns the average percentage across
+    all channels. If the input data is not already filtered for the theta band, appropriate filtering should
+    be applied before using this function.
     """
     # Check if data is already filtered for theta band or filter here if necessary
     # For example, if data is raw EEG, you would need to filter it for the theta band
@@ -302,17 +393,27 @@ def classify_channels(channels):
     """
     Classify the given channels into different groups based on their location and type.
 
-    Parameters:
+    Parameters
+    ----------
     channels : list
         List of channel names.
 
-    Returns:
+    Returns
+    -------
     list
         List of channel indices that belong to Score 2.
     list
         List of left-side channel indices.
     list
         List of right-side channel indices.
+
+    Note
+    ----
+    This function classifies channels based on common EEG electrode naming conventions.
+    Channels are grouped into frontal, temporal, parietal, occipital, and auricular categories.
+    It distinguishes between left-side and right-side channels based on the suffix of their names,
+    where odd-numbered suffixes typically denote left-side channels and even-numbered suffixes
+    denote right-side channels. Midline and auricular channels are included in the Score 2 classification.
     """
     # Define channel groups based on regions
     frontal = ['Fp', 'AF', 'F']
@@ -345,31 +446,22 @@ def calculate_eeg_quality_scores(mne_io_raw):
     """
     Calculate EEG scores for the given data.
 
-    Parameters:
+    Parameters
+    ----------
     mne_io_raw : mne.io.Raw
         MNE Raw object containing EEG data.
-    normalize : bool
-        Flag indicating whether to normalize the data.
 
-    Returns:
+    Returns
+    -------
     list
         List of EEG scores corresponding to different metrics.
-    Usage:
-    -------
-    address = r'E:/test_dataset/test_sample_from_zenodo_saa.bdf'
 
-    raw = mne.io.read_raw(address, preload=True)
-
-    scores = calculate_eeg_quality_scores(raw)
-    score_names = [
-        "General Amplitude",
-        "Highest Amplitude",
-        "Dominant Frequency",
-        "Beta Sinusoidal",
-        "Beta Amplitude",
-        "Theta Amplitude"
-    ]
-    plot_radar_chart(scores, score_names)
+    Note
+    ----
+    This function calculates various EEG quality scores based on different metrics.
+    The scores are calculated using filtered data from the original EEG signals.
+    If fewer channels are available, only selected scores are computed.
+    Otherwise, additional metrics are included for a more comprehensive assessment.
     """
     # unit convertion
     data = mne_io_raw.get_data()

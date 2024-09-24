@@ -1,15 +1,3 @@
-"""
-Title: Multi-File Data Extraction and Analysis using gpt4.0
-Description: This script traverses a specified directory to read various file formats,
-             extract sampling rates and channel names using GPT4.0 model,
-             and selected the expected information in the extracted data through user input.
-Author: Jingyi Ding
-Email: Jingyi.Ding21@student.xjtlu.edu.cn
-Date Created: 2024-06-17
-Last Modified: 2024-07-26
-Version: 1.0
-"""
-
 import csv
 import json
 import os
@@ -21,7 +9,7 @@ from openai import AzureOpenAI
 from scipy.io import loadmat
 
 
-def read_files(directory):
+def _read_files(directory):
     files = []
     print(f"Traversing the directory：{directory}")
     for root, dirs, files_in_dir in os.walk(directory):
@@ -76,7 +64,7 @@ def read_files(directory):
     return files
 
 
-def filter_files_with_gpt(files, api_key, endpoint):
+def _filter_files_with_gpt(files, api_key, endpoint):
     client = AzureOpenAI(
         api_key=api_key,
         api_version="2023-03-15-preview",
@@ -119,7 +107,7 @@ def filter_files_with_gpt(files, api_key, endpoint):
         return []
 
 
-def resolve_sampling_rate_conflict(sampling_rate_list):
+def _resolve_sampling_rate_conflict(sampling_rate_list):
     if not sampling_rate_list:
         return None, "Sample rate information not found"
 
@@ -143,7 +131,7 @@ def resolve_sampling_rate_conflict(sampling_rate_list):
         return sampling_rate_list[chosen_index - 1][1], None
 
 
-def resolve_channel_names_conflict(channel_info_list):
+def _resolve_channel_names_conflict(channel_info_list):
     if not channel_info_list:
         return [], "No channel name information found"
 
@@ -167,31 +155,45 @@ def resolve_channel_names_conflict(channel_info_list):
         return channel_info_list[chosen_index - 1][1], None
 
 
-def llm_description_file_parser(api_key, endpoint, directory):
+def llm_description_file_parser(api_key: str, endpoint: str, directory: str):
     """
-    Parses files in a specified directory using an LLM (Large Language Model) API to identify and extract sampling rate
-    and channel information.
+    Parse files in a specified directory to extract sampling rate and channel information using a Large Language Model (LLM) API.
 
-    :param str api_key: The API key used to authenticate with the LLM service.
-    :param str endpoint: The endpoint URL for the LLM API.
-    :param str directory: The directory path where the files to be processed are located.
+    This function traverses a directory to read various file formats. It extracts sampling rates and channel names
+    from the files using an LLM API (e.g., GPT-4), and processes the extracted information based on user inputs to resolve conflicts.
 
-    :returns: A dictionary containing the parsed sampling rate and channel information. If no files are selected for
-              further analysis or if all data is discarded due to conflicts, an error message is returned.
-    :rtype: dict
+    Parameters
+    ----------
+    api_key : str
+        The API key used for authenticating with the LLM API.
+    endpoint : str
+        The endpoint URL of the LLM service.
+    directory : str
+        The directory path where the files are stored for processing.
 
-    **Usage:**
+    Returns
+    -------
+    dict: A dictionary containing the parsed sampling rate and channel information.
+          Returns an error message if no files are selected or if all data is discarded due to conflicts.
 
-    .. code-block:: python
+    Raises
+    ------
+    ValueError: If no files are selected for further analysis or if there are conflicts in the extracted data.
 
-        api_key = "your_api_key"
-        azure_endpoint = "https://your/end/point"
-        directory = 'path/to/description/file'
-        result = llm_description_file_parser(api_key, azure_endpoint, directory)
-        print("The end result:", json.dumps(result, indent=4, ensure_ascii=False))
+    Examples
+    --------
+    >>> api_key = "your_api_key"
+    >>> azure_endpoint = "https://your/end/point"
+    >>> directory = 'path/to/description/directory'
+    >>> result = llm_description_file_parser(api_key, azure_endpoint, directory)
+    >>> print("The end result:", json.dumps(result, indent=4, ensure_ascii=False))
+
+    Contributor
+    -----------
+    Jingyi Ding (Jingyi.Ding21@student.xjtlu.edu.cn), on 2024-07-26.
     """
-    files = read_files(directory)
-    processed_files = filter_files_with_gpt(files, api_key, endpoint)
+    files = _read_files(directory)
+    processed_files = _filter_files_with_gpt(files, api_key, endpoint)
 
     if not processed_files:
         return {"error": "No files were selected for further analysis"}
@@ -214,14 +216,14 @@ def llm_description_file_parser(api_key, endpoint, directory):
 
     selected_info = {"sampling_rate": None, "channels": []}
 
-    selected_sampling_rate, sampling_rate_msg = resolve_sampling_rate_conflict(sampling_rate_list)
+    selected_sampling_rate, sampling_rate_msg = _resolve_sampling_rate_conflict(sampling_rate_list)
     if sampling_rate_msg:
         print(f" Sampling rate data: {sampling_rate_msg}")
         selected_info["sampling_rate"] = None
     else:
         selected_info["sampling_rate"] = selected_sampling_rate
 
-    selected_channel_names, channel_names_msg = resolve_channel_names_conflict(channel_info_list)
+    selected_channel_names, channel_names_msg = _resolve_channel_names_conflict(channel_info_list)
     if channel_names_msg:
         print(f" Channel name data: {channel_names_msg}")
         selected_info["channels"] = []

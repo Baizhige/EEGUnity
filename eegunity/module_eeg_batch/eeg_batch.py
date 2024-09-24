@@ -64,16 +64,23 @@ class EEGBatch(UDatasetSharedAttributes):
         ValueError
             If `result_type` is not one of the expected values.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that `con_func` and `app_func` are compatible with the structure of the locator.
         If using `is_patch`, consider the implications on the data integrity.
 
+
         Examples
-        --------
-        >>> results = batch_process(locator, condition_function, application_function, True, 'series')
-        >>> print(results)
-        [expected result format]
+        ---------
+        >>> example1
+        >>> new_locator = unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='series')
+        >>> print(new_locator)
+        >>> example2
+        >>> a_list = unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='value')
+        >>> print(a_list)
+        >>> example3
+        >>> unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type=None)
+
         """
 
         if result_type is not None:
@@ -136,15 +143,13 @@ class EEGBatch(UDatasetSharedAttributes):
         TypeError
             If the input types are not as expected (e.g., `col_name` is not a string or `value` is not a list).
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the provided `value` list contains valid entries for the specified column type.
 
         Examples
         --------
-        >>> locator.set_column('column_name', [1, 2, 3])
-        >>> print(locator.dataframe['column_name'])
-        [1, 2, 3]
+        >>> unified_dataset.eeg_batch.set_column('column_name', [1, 2, 3])
         """
         # Check if locator is a DataFrame
         if not isinstance(self.get_shared_attr()['locator'], pd.DataFrame):
@@ -210,15 +215,13 @@ class EEGBatch(UDatasetSharedAttributes):
             If any of the input parameters are not in the expected format (e.g., invalid tuples or
             strings).
 
-        Notes
-        -----
+        Note
+        ----
         This method modifies the 'locator' dataframe in place based on the provided filters.
 
         Examples
         --------
-        >>> locator.sample_filter(channel_number=(2, 8), completeness_check='Completed')
-        >>> print(locator.filtered_data)
-        [expected filtered results]
+        >>> unified_dataset.eeg_batch.sample_filter(completeness_check='Completed')
         """
 
         def con_func(row):
@@ -298,15 +301,13 @@ class EEGBatch(UDatasetSharedAttributes):
         ValueError
             If the `format` is not 'fif' or 'csv'.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the `output_path` is accessible and has the necessary write permissions.
 
         Examples
         --------
-        >>> new_locator = locator.save_as_other('/path/to/output', domain_tag='example', format='csv')
-        >>> print(new_locator.file_paths)
-        [expected updated file paths]
+        >>> new_locator = unified_dataset.eeg_batch.save_as_other('/path/to/output', domain_tag='example', format='fif')
         """
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
@@ -399,16 +400,14 @@ class EEGBatch(UDatasetSharedAttributes):
         ValueError
             If inconsistent channel names or numbers are found within a domain when `domain_mean` is `True`.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the EEG data is properly formatted and that all necessary channels are present before calling
         this method.
 
         Examples
         --------
-        >>> locator.process_mean_std(domain_mean=True)
-        >>> print(locator.dataframe['MEAN STD'])
-        [expected mean and standard deviation results]
+        >>> unified_dataset.eeg_batch.process_mean_std(domain_mean=True)
         """
         def get_mean_std(data: mne.io.Raw):
             """
@@ -500,27 +499,25 @@ class EEGBatch(UDatasetSharedAttributes):
         to apply the formatting to each row, and the updated channel names are then saved
         back to the 'Channel Names' column.
 
-        Raises
-        ------
-        KeyError
-            If the 'Channel Names' column is missing from the dataset.
-
         Returns
         -------
         None
             The function modifies the dataset in place by updating the
             'Channel Names' column.
 
-        Notes
-        -----
+        Raises
+        ------
+        KeyError
+            If the 'Channel Names' column is missing from the dataset.
+
+        Note
+        ----
         Ensure that the dataset is properly loaded and contains the 'Channel Names' column
         before calling this method.
 
         Examples
         --------
-        >>> locator.format_channel_names()
-        >>> print(locator.dataframe['Channel Names'])
-        [expected formatted channel names]
+        >>> unified_dataset.eeg_batch.format_channel_names()
         """
 
         cache = {}
@@ -584,14 +581,13 @@ class EEGBatch(UDatasetSharedAttributes):
         ValueError
             If an invalid `filter_type` is specified or if cutoff frequencies are inconsistent.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the output path is accessible and that all necessary channels are specified for filtering.
 
         Examples
         --------
-        >>> locator.filter('/path/to/save/filtered_file.fif', filter_type='bandpass', l_freq=1.0, h_freq=40.0)
-        >>> print("Filtering complete.")
+        >>> unified_dataset.eeg_batch.filter('/path/to/save/', filter_type='bandpass', l_freq=1.0, h_freq=40.0)
         """
 
         def con_func(row):
@@ -689,15 +685,14 @@ class EEGBatch(UDatasetSharedAttributes):
         ValueError
             If the output path is invalid or if the specified parameters in `kwargs` are inconsistent.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the input data is properly formatted and that all necessary parameters are specified
         before calling this method.
 
         Examples
         --------
-        >>> locator.ica('/path/to/save/ica_processed_file.fif', n_components=20)
-        >>> print("ICA processing complete.")
+        >>> unified_dataset.eeg_batch.ica('/path/to/save/', n_components=20)
         """
 
         def con_func(row):
@@ -765,14 +760,13 @@ class EEGBatch(UDatasetSharedAttributes):
         Exception
             If an error occurs during resampling and `miss_bad_data` is set to `False`, the error will be raised.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the output path is accessible and that the input data is properly formatted before calling this method.
 
         Examples
         --------
-        >>> locator.resample('/path/to/save/resampled_file.fif', new_sfreq=256)
-        >>> print("Resampling complete.")
+        >>> unified_dataset.eeg_batch.resample('/path/to/save/', sfreq=256)
         """
 
         def con_func(row) -> bool:
@@ -849,14 +843,13 @@ class EEGBatch(UDatasetSharedAttributes):
             If any invalid channels are found in the provided `channel_order` or if the number of
             matching channels is below `min_num_channels`.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the output path is accessible and that the provided channel order is valid before calling this method.
 
         Examples
         --------
-        >>> locator.align_channel('/path/to/save/aligned_file.fif', channel_order=['C3', 'C4', 'O1'], min_num_channels=3)
-        >>> print("Channel alignment complete.")
+        >>> unified_dataset.eeg_batch.align_channel('/path/to/save/', channel_order=['C3', 'C4', 'O1'], min_num_channels=3)
         """
 
         invalid_channels = [ch for ch in channel_order if ch not in STANDARD_EEG_CHANNELS]
@@ -960,14 +953,13 @@ class EEGBatch(UDatasetSharedAttributes):
         ValueError
             If the specified normalization type is invalid or if there are issues with the input data.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the output path is accessible and that the input data is properly formatted before calling this method.
 
         Examples
         --------
-        >>> locator.normalize('/path/to/save/normalized_file.fif', norm_type='domain-wise', domain_mean=True)
-        >>> print("Normalization complete.")
+        >>> unified_dataset.eeg_batch.normalize('/path/to/save/', norm_type='domain-wise', domain_mean=True)
         """
 
         # Check if 'MEAN STD' column exists, if not process mean and std
@@ -1042,14 +1034,13 @@ class EEGBatch(UDatasetSharedAttributes):
         ValueError
             If the segment length is invalid or if any specified parameters are inconsistent.
 
-        Notes
-        -----
+        Note
+        ----
         Ensure that the output path is accessible and that the input data is properly formatted before calling this method.
 
         Examples
         --------
-        >>> locator.epoch_for_pretraining('/path/to/save/epochs.npy', seg_sec=2.0, resample=256)
-        >>> print("Epoch creation for pretraining complete.")
+        >>> unified_dataset.eeg_batch.epoch_for_pretraining('/path/to/save/', seg_sec=2.0, resample=256)
         """
 
         def con_func(row) -> bool:
@@ -1276,8 +1267,8 @@ class EEGBatch(UDatasetSharedAttributes):
         Exception
             If an error occurs during file processing and `miss_bad_data` is set to `False`.
 
-        Notes
-        -----
+        Note
+        ----
         This method applies a custom function to each row in the dataframe to infer the units for each channel
         based on the raw MNE data. The function handles errors gracefully if `miss_bad_data` is `True`.
         """
