@@ -52,6 +52,21 @@ class EEGParser(UDatasetSharedAttributes):
                 raise ValueError("The provided 'datasets' path is not a valid directory.")
 
     def _process_directory(self, datasets_path, use_relative_path=False):
+        """
+        Process a directory to gather information on various data files.
+
+        Parameters
+        ----------
+        datasets_path : str
+            The path to the directory containing the dataset files.
+        use_relative_path : bool, optional
+            Whether to use relative paths instead of absolute paths. Default is False.
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing metadata for each file in the directory, including file path, domain tag, file type, data shape, channel names, number of channels, sampling rate, duration, and completeness check.
+        """
         files_info = []
         datasets_path = os.path.abspath(datasets_path) if not use_relative_path else os.path.relpath(datasets_path)
 
@@ -69,6 +84,19 @@ class EEGParser(UDatasetSharedAttributes):
         return files_locator
 
     def _unzip_if_no_conflict(self, datasets_path):
+        """
+        Unzip zip files in the specified directory if no conflict exists.
+
+        Parameters
+        ----------
+        datasets_path : str
+            The path to the directory where zip files will be searched and extracted.
+
+        Returns
+        -------
+        None
+            The function does not return any value. It performs extraction as a side effect.
+        """
         if self.get_shared_attr()['is_unzip']:
             # Recursively traverse all files and subdirectories in the directory
             for root, dirs, files in os.walk(datasets_path):
@@ -94,10 +122,40 @@ class EEGParser(UDatasetSharedAttributes):
             return
 
     def get_data(self, data_idx, norm_type=None, unit_convert=False):
+        """
+        Retrieve data based on the specified index from the locator.
+
+        Parameters
+        ----------
+        data_idx : int
+            Index of the row in the locator DataFrame to retrieve data from.
+        norm_type : str, optional
+            Type of normalization to apply to the data, if any.
+        unit_convert : bool, optional
+            Whether to convert the data units.
+
+        Returns
+        -------
+        Any
+            The data retrieved and processed according to the specified parameters.
+        """
         row = self.get_shared_attr()['locator'].iloc[data_idx]
         return get_data_row(row, norm_type, self.get_shared_attr()['verbose'], unit_convert=unit_convert)
 
     def check_locator(self, locator):
+        """
+        Validate the contents of the locator DataFrame.
+
+        Parameters
+        ----------
+        locator : pd.DataFrame
+            A DataFrame containing file metadata, including data shape, channel names, file type, file path, number of channels, sampling rate, and duration.
+
+        Returns
+        -------
+        pd.DataFrame
+            The updated DataFrame with a 'Completeness Check' column indicating whether the validation was completed or if errors were found.
+        """
         locator = locator.astype(str)
 
         def check_data_shape(data_shape):
@@ -242,6 +300,21 @@ def normalize_data(raw_data, mean_std_str: Union[str, Dict], norm_type: str):
 
 
 def set_montage_any(raw_data: mne.io.Raw, verbose='CRITICAL'):
+    """
+    Set the montage for the given raw data using a montage defined in a JSON file.
+
+    Parameters
+    ----------
+    raw_data : mne.io.Raw
+        The raw data object to which the montage will be applied.
+    verbose : str, optional
+        The verbosity level for warnings or messages, by default 'CRITICAL'.
+
+    Returns
+    -------
+    mne.io.Raw
+        The updated raw data object with the applied montage.
+    """
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     montage = create_montage_from_json(os.path.join(current_dir, 'combined_montage.json'))
@@ -250,6 +323,19 @@ def set_montage_any(raw_data: mne.io.Raw, verbose='CRITICAL'):
 
 
 def create_montage_from_json(json_file):
+    """
+    Create a montage from a JSON file containing channel positions.
+
+    Parameters
+    ----------
+    json_file : str
+        The path to the JSON file containing channel names as keys and their positions as values.
+
+    Returns
+    -------
+    mne.channels.DigMontage
+        A montage object created from the channel positions defined in the JSON file.
+    """
     with open(json_file, 'r') as f:
         montage_data = json.load(f)
 
@@ -262,6 +348,26 @@ def create_montage_from_json(json_file):
 
 
 def set_channel_type(raw_data, channel_str):
+    """
+    Set the channel types for the given raw data based on the specified channel string.
+
+    Parameters
+    ----------
+    raw_data : mne.io.Raw
+        The raw data object containing the EEG, EMG, ECG, EOG, or other types of signals.
+    channel_str : str
+        A string specifying the channel types and names in the format 'type:name', separated by commas. Each type must correspond to the desired signal type.
+
+    Returns
+    -------
+    mne.io.Raw
+        The updated raw data object with renamed channels and set channel types.
+
+    Raises
+    ------
+    ValueError
+        If the format of any channel in the channel string is invalid (not in 'type:name' format).
+    """
     channel_info = [ch.split(':') for ch in channel_str.split(',')]
     for ch in channel_info:
         if len(ch) != 2:
@@ -295,24 +401,34 @@ def get_data_row(row: dict,
     """
     Process and return raw EEG data based on the input row information. Allows handling of standard and non-standard data.
 
-    :param row: Dictionary containing data attributes, such as file paths, file types, and channel names.
-    :type row: dict
-    :param norm_type: Type of normalization to apply, if any, defaults to None.
-    :type norm_type: str, optional
-    :param is_set_channel_type: Flag to set channel types based on the locator, defaults to False.
-    :type is_set_channel_type: bool, optional
-    :param is_set_montage: Flag to set montage (electrode coordinates), defaults to False.
-    :type is_set_montage: bool, optional
-    :param verbose: Verbosity level for MNE functions, defaults to 'CRITICAL'.
-    :type verbose: str, optional
-    :param pick_types: Channel picking parameters for MNE, defaults to None.
-    :type pick_types: dict, optional
-    :param unit_convert: Conversion type for resetting channel units, defaults to None.
-    :type unit_convert: str, optional
-    :param kwargs: Additional keyword arguments to enhance flexibility and robustness.
-    :type kwargs: Any
-    :return: Processed MNE raw data object.
-    :rtype: mne.io.BaseRaw
+    Parameters
+    ----------
+    row : dict
+        Dictionary containing data attributes, such as file paths, file types, and channel names.
+    norm_type : str, optional
+        Type of normalization to apply, if any. Defaults to None.
+    is_set_channel_type : bool, optional
+        Whether to set channel types based on provided information. Defaults to False.
+    is_set_montage : bool, optional
+        Whether to set montage (electrode coordinates). Defaults to False.
+    verbose : str, optional
+        Verbosity level for MNE functions. Defaults to 'CRITICAL'.
+    pick_types : dict, optional
+        Channel picking parameters for MNE. Defaults to None.
+    unit_convert : str, optional
+        Conversion type for resetting channel units. Defaults to None.
+    kwargs : any
+        Additional keyword arguments to enhance flexibility and robustness.
+
+    Returns
+    -------
+    mne.io.BaseRaw
+        The processed raw EEG data object.
+
+    Raises
+    ------
+    ValueError
+        If the number of channels in the locator file does not match the metadata.
     """
     filepath = row.get('File Path')
     file_type = row.get('File Type')
@@ -355,6 +471,27 @@ def get_data_row(row: dict,
 
 
 def set_infer_unit(raw_data, row):
+    """
+    Set the inferred unit for EEG channels in the raw data.
+
+    Parameters
+    ----------
+    raw_data : mne.io.Raw
+        The raw data object containing the EEG channels.
+
+    row : pandas.Series
+        A row from a DataFrame containing the 'Infer Unit' field, which should be a dictionary with channel names as keys and units as values.
+
+    Returns
+    -------
+    mne.io.Raw
+        The updated raw data object with the inferred units set for the specified channels.
+
+    Raises
+    ------
+    ValueError
+        If 'Infer Unit' is not a valid dictionary.
+    """
     infer_unit = ast.literal_eval(row['Infer Unit'])
     if isinstance(infer_unit, dict):
         for ch_name, unit in infer_unit.items():
@@ -367,6 +504,23 @@ def set_infer_unit(raw_data, row):
 
 
 def format_channel_names(input_string):
+    """
+    Format and standardize a list of channel names based on predefined rules.
+
+    Parameters
+    ----------
+    input_string : str
+        A comma-separated string containing channel names to be formatted.
+
+    Returns
+    -------
+    str
+        A comma-separated string of formatted channel names. If duplicates are found, the original input string is returned.
+
+    Warnings
+    --------
+    Warns if an invalid channel name is detected or if a duplicate formatted channel name is found.
+    """
     # Define a function to check if a channel is an EOG channel
     def is_eog_channel(channel):
         return "eog" in channel.lower()
@@ -482,6 +636,19 @@ def format_channel_names(input_string):
 
 
 def _clean_sampling_rate_(df):
+    """
+    Cleans the 'Sampling Rate' column in the provided DataFrame by removing invalid characters.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame containing the 'Sampling Rate' column to be cleaned.
+
+    Returns
+    -------
+    pd.DataFrame
+        The DataFrame with the cleaned 'Sampling Rate' column.
+    """
     # Convert the 'Sampling Rate' column to a string and retain only digits, decimal points, and the 'e' in scientific notation
     df['Sampling Rate'] = df['Sampling Rate'].astype(str).apply(lambda x: re.sub(r'[^0-9.eE+-]', '', x))
     # If necessary, convert the result back to a numeric type
@@ -491,6 +658,32 @@ def _clean_sampling_rate_(df):
 
 
 def handle_nonstandard_data(row, verbose='CRITICAL'):
+    """
+    Handles the loading of non-standard EEG data files into MNE Raw format.
+
+    This function processes EEG data from either .mat files or .csv/.txt files marked as 'csvData'.
+    It extracts channel names and sampling rates from the provided row, and creates an MNE RawArray object containing the EEG data.
+
+    Parameters
+    ----------
+    row : pd.Series
+        A row from a DataFrame containing information about the file, including 'File Path', 'Channel Names', 'Sampling Rate', and 'File Type'.
+
+    verbose : str, optional
+        The verbosity level for MNE functions. Default is 'CRITICAL'.
+
+    Returns
+    -------
+    mne.io.Raw
+        An MNE Raw object containing the EEG data.
+
+    Raises
+    ------
+    ValueError
+        If the number of channels in the DataFrame does not match the channel names specified in the row.
+    Exception
+        If the file type is unsupported or there is an error in loading the data.
+    """
     filepath = row['File Path']
     if filepath.endswith('.mat'):
         matdata = scipy.io.loadmat(filepath)
@@ -539,11 +732,13 @@ def extract_events(raw):
     Attempt to extract events using mne.find_events.
     If it fails, use mne.events_from_annotations to extract events.
 
-    Parameters:
+    Parameters
+    ----------
     raw : mne.io.Raw
         The raw data object.
 
-    Returns:
+    Returns
+    -------
     events : numpy.ndarray
         The events array, shaped (n_events, 3).
     event_id : dict
@@ -563,15 +758,19 @@ def extract_events(raw):
 
 def infer_channel_unit(ch_name, ch_data, ch_type):
     """
-    Infer the unit type for a channel.
+    Infer the unit type for a given channel based on its data and type.
 
     Parameters:
-    ch_name: The name of the channel
-    ch_data: The data of the channel
-    ch_type: The type of the channel
+    ch_name : str
+        The name of the channel.
+    ch_data : array-like
+        The data of the channel, typically an array of amplitude values.
+    ch_type : str
+        The type of the channel, such as 'eeg', 'emg', etc.
 
     Returns:
-    The inferred unit type, such as "uV", "mV", "V", etc.
+    str
+        The inferred unit type, such as "uV", "mV", or "V", based on the channel data and type.
     """
 
     mean_val = abs(ch_data).mean()
@@ -602,6 +801,26 @@ def infer_channel_unit(ch_name, ch_data, ch_type):
 
 
 def convert_unit(data: mne.io.Raw, unit: str) -> mne.io.Raw:
+    """
+    Convert the units of EEG data in a MNE Raw object.
+
+    Parameters
+    ----------
+    data : mne.io.Raw
+        The raw EEG data to be converted.
+    unit : str
+        The target unit to convert the data to. Must be one of 'V', 'mV', or 'uV'.
+
+    Raises
+    ------
+    ValueError
+        If the provided unit is not valid.
+
+    Returns
+    -------
+    mne.io.Raw
+        The raw EEG data with converted units.
+    """
     # Validate the unit
     valid_units = ['V', 'mV', 'uV']
     if unit not in valid_units:
@@ -635,6 +854,21 @@ def convert_unit(data: mne.io.Raw, unit: str) -> mne.io.Raw:
 
 
 def process_mne_files(files_locator, verbose):
+    """
+    Process MNE files based on a locator DataFrame.
+
+    Parameters
+    ----------
+    files_locator : pandas.DataFrame
+        DataFrame containing file paths and related metadata for processing.
+    verbose : str
+        Verbosity level for MNE functions.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Updated DataFrame with metadata extracted from processed files.
+    """
     for index, row in files_locator.iterrows():
         filepath = row['File Path']
         try:
