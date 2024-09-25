@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eegunity.module_eeg_batch.eeg_scores &mdash; EEGUnity 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -83,21 +83,33 @@
 <a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_scores.butter_bandpass">[docs]</a>
 <span class="k">def</span> <span class="nf">butter_bandpass</span><span class="p">(</span><span class="n">lowcut</span><span class="p">,</span> <span class="n">highcut</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a Butterworth bandpass filter.</span>
+<span class="sd">    Design a Butterworth bandpass filter.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    lowcut : float</span>
-<span class="sd">        The low frequency cut-off for the filter.</span>
-<span class="sd">    highcut : float</span>
-<span class="sd">        The high frequency cut-off for the filter.</span>
-<span class="sd">    fs : int</span>
-<span class="sd">        The sampling frequency of the data.</span>
-<span class="sd">    order : int</span>
-<span class="sd">        The order of the filter.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    low_cut : float</span>
+<span class="sd">        The lower cutoff frequency of the filter.</span>
+<span class="sd">    high_cut : float</span>
+<span class="sd">        The upper cutoff frequency of the filter.</span>
+<span class="sd">    sampling_freq : float</span>
+<span class="sd">        The sampling frequency of the input signal.</span>
+<span class="sd">    order : int, optional</span>
+<span class="sd">        The order of the Butterworth filter (default is 4).</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    b, a : ndarray, ndarray</span>
-<span class="sd">        Numerator (b) and denominator (a) polynomials of the IIR filter.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    b : ndarray</span>
+<span class="sd">        The numerator (b) coefficients of the IIR filter.</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        The denominator (a) coefficients of the IIR filter.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function designs a bandpass filter using a Butterworth design.</span>
+<span class="sd">    The cutoff frequencies are normalized by the Nyquist frequency,</span>
+<span class="sd">    which is half the sampling frequency. The filter coefficients are</span>
+<span class="sd">    returned as arrays suitable for use with `scipy.signal.lfilter` or</span>
+<span class="sd">    similar filtering functions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">nyq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">fs</span>  <span class="c1"># Nyquist frequency</span>
     <span class="n">low</span> <span class="o">=</span> <span class="n">lowcut</span> <span class="o">/</span> <span class="n">nyq</span>
@@ -114,7 +126,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply a bandpass filter to the data array.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    data : ndarray</span>
 <span class="sd">        Data to filter, with channels as rows.</span>
 <span class="sd">    lowcut : float</span>
@@ -123,12 +136,20 @@
 <span class="sd">        The high frequency cut-off for the filter.</span>
 <span class="sd">    fs : int</span>
 <span class="sd">        The sampling frequency of the data.</span>
-<span class="sd">    order : int</span>
-<span class="sd">        The order of the filter.</span>
+<span class="sd">    order : int, optional</span>
+<span class="sd">        The order of the filter (default is 4).</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    y : ndarray</span>
 <span class="sd">        The filtered data.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function uses a Butterworth bandpass filter designed with the</span>
+<span class="sd">    specified cut-off frequencies and order. The filter is applied using</span>
+<span class="sd">    zero-phase filtering with `scipy.signal.filtfilt`, which ensures</span>
+<span class="sd">    that the filtered signal is not phase-shifted.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter_bandpass</span><span class="p">(</span><span class="n">lowcut</span><span class="p">,</span> <span class="n">highcut</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">filtfilt</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Apply the filter along the second dimension (time)</span>
@@ -143,13 +164,23 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot a radar chart for the given scores.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    scores : list</span>
-<span class="sd">        List of scores to plot.</span>
-<span class="sd">    score_names : list</span>
-<span class="sd">        Names corresponding to the scores.</span>
-<span class="sd">    title : str</span>
-<span class="sd">        Title for the radar chart.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    scores : list of float</span>
+<span class="sd">        List of scores to plot. Each score represents a metric for evaluating EEG quality.</span>
+<span class="sd">    score_names : list of str</span>
+<span class="sd">        Names corresponding to the scores. These names describe the metrics for evaluating EEG quality.</span>
+<span class="sd">    title : str, optional</span>
+<span class="sd">        Title for the radar chart (default is &#39;EEG Scores&#39;).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function creates a radar chart using the provided scores and score names.</span>
+<span class="sd">    The radar chart is displayed using matplotlib.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">),</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="n">angles</span> <span class="o">+=</span> <span class="n">angles</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Complete the loop</span>
@@ -181,13 +212,21 @@
 <span class="sd">    Calculate a general amplitude score based on the proportion of signal amplitudes</span>
 <span class="sd">    that fall within a specific range.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    data : ndarray</span>
-<span class="sd">        2D array of EEG data where rows represent channels and columns represent amplitude at each time point.</span>
+<span class="sd">        2D array of EEG data where rows represent channels and columns represent amplitudes at each time point.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        The average score across all channels, normalized to 100.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function calculates the general amplitude score for each channel by counting the number of amplitudes</span>
+<span class="sd">    within a specific range (-100 to 100) and dividing it by the total number of amplitudes. The scores are then</span>
+<span class="sd">    averaged across all channels to obtain the final general amplitude score.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_channels</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_channels</span><span class="p">)</span>
@@ -211,15 +250,24 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the highest amplitude score for specific channels within the Alpha band.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    data : ndarray</span>
-<span class="sd">        The EEG data in the Alpha band, expected to be a 2D array where rows represent channels and columns represent amplitude at each time point.</span>
-<span class="sd">    channel_indices : list</span>
+<span class="sd">        The EEG data in the Alpha band, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.</span>
+<span class="sd">    channel_indices : list of int</span>
 <span class="sd">        List of indices for the channels of interest.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        The calculated highest amplitude score, normalized to 100.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function first filters the data for the specified channels of interest.</span>
+<span class="sd">    It then calculates the maximum amplitude for each channel. The amplitudes are sorted</span>
+<span class="sd">    in descending order, and scoring is applied based on the percentile of each channel&#39;s amplitude.</span>
+<span class="sd">    The final score is the average of these scores, normalized to 100.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Filter out the channels of interest</span>
     <span class="n">data_of_interest</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">channel_indices</span><span class="p">,</span> <span class="p">:]</span>
@@ -253,15 +301,23 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the dominant frequency of a signal.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    signal : ndarray</span>
-<span class="sd">        The signal array.</span>
+<span class="sd">        The signal array. This should be a 1D array representing the time-series data of the EEG signal.</span>
 <span class="sd">    fs : int</span>
-<span class="sd">        The sampling frequency of the signal.</span>
+<span class="sd">        The sampling frequency of the signal, representing the number of data points collected per second.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    float</span>
-<span class="sd">        The dominant frequency of the signal.</span>
+<span class="sd">        The dominant frequency of the signal, which is the frequency component that has the highest amplitude in the Fourier Transform of the signal.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function computes the Fast Fourier Transform (FFT) of the input signal and identifies</span>
+<span class="sd">    the frequency with the highest amplitude. The dominant frequency is determined from the</span>
+<span class="sd">    positive frequency components of the FFT.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
     <span class="n">yf</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
@@ -277,19 +333,27 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the symmetry score between two sets of channels.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    data : ndarray</span>
-<span class="sd">        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitude at each time point.</span>
-<span class="sd">    channels_left : list</span>
+<span class="sd">        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.</span>
+<span class="sd">    channels_left : list of int</span>
 <span class="sd">        List of indices for the left channels.</span>
-<span class="sd">    channels_right : list</span>
+<span class="sd">    channels_right : list of int</span>
 <span class="sd">        List of indices for the right channels.</span>
 <span class="sd">    fs : int</span>
 <span class="sd">        The sampling frequency of the data.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    float</span>
-<span class="sd">        The symmetry score between the two sets of channels.</span>
+<span class="sd">        The symmetry score between the two sets of channels, expressed as a percentage.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function filters the data for the specified left and right channels, calculates the dominant frequencies</span>
+<span class="sd">    for each set of channels, and computes the correlation score between the dominant frequencies. The symmetry</span>
+<span class="sd">    score is normalized to a range of 0 to 100.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Filter the data for the left and right channels</span>
     <span class="n">data_left</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">channels_left</span><span class="p">,</span> <span class="p">:]</span>
@@ -312,13 +376,22 @@
 <span class="sd">    Calculate the beta sinusoidal score by analyzing the proportion of significant energy</span>
 <span class="sd">    in the FFT data.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    fft_data : ndarray</span>
 <span class="sd">        The FFT results of the EEG data, expected to be a 2D array where each row represents the FFT results of a channel.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        The sinusoidal score as a percentage.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function computes the total and significant energy for each channel based on the FFT results.</span>
+<span class="sd">    It applies a threshold to determine significant frequencies and calculates the score as the</span>
+<span class="sd">    percentage of significant energy relative to the total energy. If the total energy is zero,</span>
+<span class="sd">    the score for that channel is set to zero to avoid division errors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">total_energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft_data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Total energy per channel</span>
     <span class="n">max_energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft_data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Max energy per frequency per channel</span>
@@ -348,16 +421,25 @@
 <span class="sd">    Calculate Score 4 based on the percentage of beta wave samples in each channel</span>
 <span class="sd">    that do not exceed the maximum amplitude threshold.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    beta_data : ndarray</span>
 <span class="sd">        The EEG data filtered in the beta band, expected to be a 2D array</span>
-<span class="sd">        where rows represent channels and columns represent amplitude at each time point.</span>
-<span class="sd">    threshold : float</span>
-<span class="sd">        The maximum amplitude threshold for the beta waves (in microvolts, μV).</span>
+<span class="sd">        where rows represent channels and columns represent amplitudes at each time point.</span>
+<span class="sd">    threshold : float, optional</span>
+<span class="sd">        The maximum amplitude threshold for the beta waves (in microvolts, μV). Default is 20.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    float</span>
-<span class="sd">        The average percentage of samples across all channels not exceeding the threshold.</span>
+<span class="sd">        The average percentage of samples across all channels that do not exceed the threshold.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function counts the number of samples in each channel that are less than or equal</span>
+<span class="sd">    to the specified threshold and calculates the percentage of such samples relative to the</span>
+<span class="sd">    total number of samples in that channel. The final score is the average percentage across</span>
+<span class="sd">    all channels.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Calculate the number of non-exceedance points per channel</span>
     <span class="n">non_exceedances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">beta_data</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span>
@@ -378,15 +460,24 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the percentage of data points not exceeding a specified amplitude threshold in the theta frequency band.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    data : ndarray</span>
-<span class="sd">        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitude at each time point.</span>
-<span class="sd">    threshold : float</span>
-<span class="sd">        The amplitude threshold for considering a data point as not exceeding.</span>
+<span class="sd">        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.</span>
+<span class="sd">    threshold : float, optional</span>
+<span class="sd">        The amplitude threshold for considering a data point as not exceeding. Default is 30.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    float</span>
-<span class="sd">        The average percentage of data points across all channels not exceeding the threshold.</span>
+<span class="sd">        The average percentage of data points across all channels that do not exceed the threshold.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function checks for data points in the theta frequency band that are below the specified threshold</span>
+<span class="sd">    and calculates the percentage of such points for each channel. It returns the average percentage across</span>
+<span class="sd">    all channels. If the input data is not already filtered for the theta band, appropriate filtering should</span>
+<span class="sd">    be applied before using this function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check if data is already filtered for theta band or filter here if necessary</span>
     <span class="c1"># For example, if data is raw EEG, you would need to filter it for the theta band</span>
@@ -405,17 +496,27 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Classify the given channels into different groups based on their location and type.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    channels : list</span>
 <span class="sd">        List of channel names.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    list</span>
 <span class="sd">        List of channel indices that belong to Score 2.</span>
 <span class="sd">    list</span>
 <span class="sd">        List of left-side channel indices.</span>
 <span class="sd">    list</span>
 <span class="sd">        List of right-side channel indices.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function classifies channels based on common EEG electrode naming conventions.</span>
+<span class="sd">    Channels are grouped into frontal, temporal, parietal, occipital, and auricular categories.</span>
+<span class="sd">    It distinguishes between left-side and right-side channels based on the suffix of their names,</span>
+<span class="sd">    where odd-numbered suffixes typically denote left-side channels and even-numbered suffixes</span>
+<span class="sd">    denote right-side channels. Midline and auricular channels are included in the Score 2 classification.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Define channel groups based on regions</span>
     <span class="n">frontal</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Fp&#39;</span><span class="p">,</span> <span class="s1">&#39;AF&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">]</span>
@@ -451,31 +552,22 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate EEG scores for the given data.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    mne_io_raw : mne.io.Raw</span>
 <span class="sd">        MNE Raw object containing EEG data.</span>
-<span class="sd">    normalize : bool</span>
-<span class="sd">        Flag indicating whether to normalize the data.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    list</span>
 <span class="sd">        List of EEG scores corresponding to different metrics.</span>
-<span class="sd">    Usage:</span>
-<span class="sd">    -------</span>
-<span class="sd">    address = r&#39;E:/test_dataset/test_sample_from_zenodo_saa.bdf&#39;</span>
 
-<span class="sd">    raw = mne.io.read_raw(address, preload=True)</span>
-
-<span class="sd">    scores = calculate_eeg_quality_scores(raw)</span>
-<span class="sd">    score_names = [</span>
-<span class="sd">        &quot;General Amplitude&quot;,</span>
-<span class="sd">        &quot;Highest Amplitude&quot;,</span>
-<span class="sd">        &quot;Dominant Frequency&quot;,</span>
-<span class="sd">        &quot;Beta Sinusoidal&quot;,</span>
-<span class="sd">        &quot;Beta Amplitude&quot;,</span>
-<span class="sd">        &quot;Theta Amplitude&quot;</span>
-<span class="sd">    ]</span>
-<span class="sd">    plot_radar_chart(scores, score_names)</span>
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function calculates various EEG quality scores based on different metrics.</span>
+<span class="sd">    The scores are calculated using filtered data from the original EEG signals.</span>
+<span class="sd">    If fewer channels are available, only selected scores are computed.</span>
+<span class="sd">    Otherwise, additional metrics are included for a more comprehensive assessment.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># unit convertion</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">mne_io_raw</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>

@@ -5,6 +5,19 @@ import pandas as pd
 
 
 def calculate_interval(times):
+    """
+    Calculate the average interval between time points.
+
+    Parameters
+    ----------
+    times : pandas.Series
+        A pandas Series object containing time points. The time points can either be timezone-aware `DatetimeTZDtype` or naive `pd.Timestamp` objects.
+
+    Returns
+    -------
+    float or None
+        The average interval between consecutive time points in seconds. If the input series is empty or only has one time point, returns None.
+    """
     if isinstance(times.dtype, pd.core.dtypes.dtypes.DatetimeTZDtype) or isinstance(times.iloc[0], pd.Timestamp):
         intervals = [t2 - t1 for t1, t2 in zip(times[:-1], times[1:])]
         average_interval = sum(intervals, pd.Timedelta(0)) / len(intervals) if intervals else pd.Timedelta(0)
@@ -15,6 +28,19 @@ def calculate_interval(times):
 
 
 def is_datetime_format(s):
+    """
+    Check if a string follows a datetime format.
+
+    Parameters
+    ----------
+    s : str
+        The string to be evaluated for compatibility with the datetime format.
+
+    Returns
+    -------
+    bool
+        Returns `True` if the string matches the datetime format "%Y-%m-%d %H:%M:%S.%f"`. Otherwise, returns `False`.
+    """
     try:
         datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f")
         return True
@@ -27,6 +53,21 @@ def is_datetime_format(s):
 
 
 def identify_time_columns(df):
+    """
+    Identify potential time columns in a DataFrame.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The input DataFrame containing potential time columns.
+
+    Returns
+    -------
+    str or list of str, float
+        If a single time column is identified, returns the column name and its sampling frequency as a float.
+        If multiple time columns are found with the same sampling frequency, returns a list of column names and the common sampling frequency.
+        Returns `None` if no valid time column is detected.
+    """
     time_columns = {}
     for column in df.columns:
         if df[column].dtype == 'object' and all(df[column].apply(lambda x: ':' in str(x))):
@@ -50,6 +91,19 @@ def identify_time_columns(df):
 
 
 def process_csv_files(files_locator):
+    """
+    Process CSV files and update a DataFrame with file details.
+
+    Parameters
+    ----------
+    files_locator : pandas.DataFrame
+        A DataFrame containing the metadata of files, including their file paths and other details. The column 'File Path' is expected to contain paths to the files.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Updated DataFrame with additional columns 'File Type', 'Sampling Rate', 'Channel Names', 'Number of Channels', and 'Duration' for each file. If a file cannot be processed, appropriate messages are printed.
+    """
     def calculate_sampling_rate(time_series):
         if not time_series.empty and not all(time_series == ''):
             time_series = pd.to_numeric(time_series, errors='coerce').dropna()

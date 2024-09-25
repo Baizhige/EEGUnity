@@ -7,6 +7,7 @@ import warnings
 import mne
 import numpy as np
 import pandas as pd
+from typing import Callable, Union, Tuple, List, Dict, Optional
 
 from eegunity.module_eeg_batch.eeg_scores import calculate_eeg_quality_scores
 from eegunity.module_eeg_parser.eeg_parser import get_data_row, format_channel_names, extract_events, infer_channel_unit
@@ -20,30 +21,66 @@ STANDARD_EEG_CHANNELS = list(data.keys())
 
 
 class EEGBatch(UDatasetSharedAttributes):
+    '''
+    This is a key module of UnifiedDataset class, with focus on batch processing.
+    This EEGBatch class has the same attributes as the UnifiedDataset class.
+    '''
     def __init__(self, main_instance):
         super().__init__()
         self._shared_attr = main_instance._shared_attr
+        self.main_instance = main_instance
+    def batch_process(self,
+                      con_func: Callable,
+                      app_func: Callable,
+                      is_patch: bool,
+                      result_type: Union[str, None] = None):
+        r"""Process each row of the given dataframe locator based on conditions specified
+        in `con_func` and apply `app_func` accordingly. This function handles both list
+        and dataframe return types, ensuring the result aligns with the original locator's
+        rows based on the `is_patch` flag.
 
-    def batch_process(self, con_func, app_func, is_patch, result_type=None):
-        """
-        This function processes each row of the given dataframe `locator` based on the conditions
-        specified in `con_func` and applies `app_func` accordingly. The function handles both
-        list and dataframe return types and ensures the result aligns with the `locator`'s rows
-        based on the `is_patch` flag.
+        Parameters
+        ----------
+        con_func : Callable
+            A function that takes a row of locator and returns `True` or `False` to determine
+            if `app_func` should be applied to that row.
+        app_func : Callable
+            A function that processes a row of locator and returns the result.
+        is_patch : bool
+            If `True`, the returned list length or dataframe rows will match the locator's
+            row count, using placeholder elements as needed.
+        result_type : {'series', 'value', None}, optional
+            Specifies the expected return type of `app_func` results. Can be "series", "value",
+            or `None` (case insensitive). Defaults to `None`.
 
-        Parameters:
-        con_func (function): A function that takes a row of `locator` and returns True or False
-                             to determine if `app_func` should be applied to that row.
-        app_func (function): A function that processes a row of `locator` and returns the result.
-        is_patch (bool): If True, the returned list length or dataframe rows will match `locator`'s
-                         row count, using placeholder elements as needed.
-        result_type (str, optional): Specifies the expected return type of `app_func` results.
-                                     Can be "series", "value", or None (case insensitive). Defaults to None.
+        Returns
+        -------
+        Union[None, list, pd.DataFrame]
+            The processed results, either as a list or dataframe, depending on `result_type`
+            and `app_func` return type and consistency. Returns `None` if `result_type` is `None`.
 
-        Returns:
-        None or list or pd.DataFrame: The processed results, either as a list or dataframe, depending
-                                      on the `result_type` and `app_func` return type and consistency.
-                                      Returns None if result_type is None.
+        Raises
+        ------
+        ValueError
+            If `result_type` is not one of the expected values.
+
+        Note
+        ----
+        Ensure that `con_func` and `app_func` are compatible with the structure of the locator.
+        If using `is_patch`, consider the implications on the data integrity.
+
+
+        Examples
+        ---------
+        >>> example1
+        >>> new_locator = unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='series')
+        >>> print(new_locator)
+        >>> example2
+        >>> a_list = unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='value')
+        >>> print(a_list)
+        >>> example3
+        >>> unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type=None)
+
         """
 
         if result_type is not None:
@@ -62,11 +99,19 @@ class EEGBatch(UDatasetSharedAttributes):
                     result = None
 
             results.append(result)
+
         if result_type == "series":
-            # Combine results into a DataFrame if app_func returns Series
-            combined_results = pd.concat([res for res in results if res is not None], axis=1).T
-            combined_results.reset_index(drop=True, inplace=True)
-            return combined_results
+            # Check if all elements in results are None
+            if all(res is None for res in results):
+                warnings.warn("The file list are empty. Returning an empty Locator. Please check the con_func() and app_func().")
+                # Create an empty DataFrame with the same columns as `locator`
+                empty_df = pd.DataFrame(columns=self.get_shared_attr()['locator'].columns)
+                return empty_df
+            else:
+                # Combine results into a DataFrame if app_func returns Series
+                combined_results = pd.concat([res for res in results if res is not None], axis=1).T
+                combined_results.reset_index(drop=True, inplace=True)
+                return combined_results
         elif result_type == "value":
             # Collect results into a list if app_func returns values
             if is_patch:
@@ -77,19 +122,34 @@ class EEGBatch(UDatasetSharedAttributes):
             return None
 
     def set_column(self, col_name: str, value: list):
-        """
-        Set the specified column in the locator with the given list of values.
+        r"""Set the specified column in the locator with the given list of values.
 
-        Args:
-        col_name (str): The name of the column to be set.
-        value (list): The list of values to set in the column.
+        Parameters
+        ----------
+        col_name : str
+            The name of the column to be set.
+        value : list
+            The list of values to set in the column. Its length must match the number of rows
+            in the dataframe.
 
-        Returns:
+        Returns
+        -------
         None
 
-        Raises:
-        ValueError: If the length of the value list does not match the number of rows in the dataframe.
-        TypeError: If the input types are not as expected.
+        Raises
+        ------
+        ValueError
+            If the length of the `value` list does not match the number of rows in the dataframe.
+        TypeError
+            If the input types are not as expected (e.g., `col_name` is not a string or `value` is not a list).
+
+        Note
+        ----
+        Ensure that the provided `value` list contains valid entries for the specified column type.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.set_column('column_name', [1, 2, 3])
         """
         # Check if locator is a DataFrame
         if not isinstance(self.get_shared_attr()['locator'], pd.DataFrame):
@@ -112,32 +172,56 @@ class EEGBatch(UDatasetSharedAttributes):
 
     def sample_filter(
             self,
-            channel_number=None,
-            sampling_rate=None,
-            duration=None,
-            completeness_check=None,
-            domain_tag=None,
-            file_type=None
-    ):
-        """
-        Filters the 'locator' dataframe based on the given criteria.
+            channel_number: Union[Tuple[int, int], List[int], None] = None,
+            sampling_rate: Union[Tuple[float, float], List[float], None] = None,
+            duration: Union[Tuple[float, float], List[float], None] = None,
+            completeness_check: Union[str, None] = None,
+            domain_tag: Union[str, None] = None,
+            file_type: Union[str, None] = None
+    ) -> None:
+        r"""Filters the 'locator' dataframe based on the given criteria. This function is typically
+        used to select the data file according to specified requirements. For advanced filtering,
+        refer to the `batch_process()` method.
 
-        :param (tuple/list/array-like, optional) channel_number: A tuple or list with (min, max) values to filter the
-            "Number of Channels" column. If None, this criterion is ignored. Default is None.
-<<<<<<< HEAD
-        :param (tuple/list/array-like, optional) sampling_rate: A tuple or list with (min, max) values to filter the
-=======
-        :param (tuple/list/array-like, optional) sampling_rate : A tuple or list with (min, max) values to filter the
->>>>>>> main
-            "Sampling Rate" column. If None, this criterion is ignored. Default is None.
-        :param (tuple/list/array-like, optional) duration: A tuple or list with (min, max) values to filter the
-            "Duration" column. If None, this criterion is ignored. Default is None.
-        :param (str, optional) completeness_check: A string that can be 'Completed', 'Unavailable', or 'Acceptable' to filter the
-            "Completeness Check" column. The check is case-insensitive. If None, this criterion is ignored. Default is None.
-        :param (str, optional) domain_tag: A string to filter the "Domain Tag" column. If None, this criterion is ignored. Default is None.
-        :param (str, optional) file_type: A string to filter the "File Type" column. If None, this criterion is ignored. Default is None.
+        Parameters
+        ----------
+        channel_number : Union[Tuple[int, int], List[int], None], optional
+            A tuple or list with (min, max) values to filter the "Number of Channels" column.
+            If `None`, this criterion is ignored. Defaults to `None`.
+        sampling_rate : Union[Tuple[float, float], List[float], None], optional
+            A tuple or list with (min, max) values to filter the "Sampling Rate" column.
+            If `None`, this criterion is ignored. Defaults to `None`.
+        duration : Union[Tuple[float, float], List[float], None], optional
+            A tuple or list with (min, max) values to filter the "Duration" column.
+            If `None`, this criterion is ignored. Defaults to `None`.
+        completeness_check : str, optional
+            A string that can be 'Completed', 'Unavailable', or 'Acceptable' to filter the
+            "Completeness Check" column. The check is case-insensitive. If `None`, this criterion
+            is ignored. Defaults to `None`.
+        domain_tag : str, optional
+            A string to filter the "Domain Tag" column. If `None`, this criterion is ignored.
+            Defaults to `None`.
+        file_type : str, optional
+            A string to filter the "File Type" column. If `None`, this criterion is ignored.
+            Defaults to `None`.
 
-        :return (None): None
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If any of the input parameters are not in the expected format (e.g., invalid tuples or
+            strings).
+
+        Note
+        ----
+        This method modifies the 'locator' dataframe in place based on the provided filters.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.sample_filter(completeness_check='Completed')
         """
 
         def con_func(row):
@@ -174,15 +258,6 @@ class EEGBatch(UDatasetSharedAttributes):
             return True
 
         def app_func(row):
-            """
-            Apply function to process a row that meets the condition.
-
-            Parameters:
-            row (pd.Series): A row from the 'locator' dataframe.
-
-            Returns:
-            pd.Series: The same row if it meets the condition.
-            """
             return row
 
         # Process the dataframe
@@ -191,11 +266,52 @@ class EEGBatch(UDatasetSharedAttributes):
         # Update the locator in shared attributes
         self.set_shared_attr({'locator': filtered_locator})
 
-    def save_as_other(self, output_path, domain_tag=None, format='fif'):
+    def save_as_other(self,
+                      output_path: str,
+                      domain_tag: Union[str, None] = None,
+                      format: str = 'fif',
+                      preserve_events: bool = True):  # New parameter to control event preservation
+        r"""Save data in the specified format ('fif' or 'csv') to the given output path.
+
+        Parameters
+        ----------
+        output_path : str
+            The directory path where the converted files will be saved. If the path does not exist,
+            a `FileNotFoundError` is raised.
+        domain_tag : str, optional
+            Optional filter to save only the files with a matching 'Domain Tag'. If `None`, all files
+            are processed.
+        format : str, optional
+            The format to save the data in. Supported formats are 'fif' and 'csv'. If an unsupported
+            format is provided, a `ValueError` is raised. Defaults to 'fif'.
+        preserve_events : bool, optional
+            If `True`, event markers will be included in the CSV file, and metadata will be adjusted.
+            Defaults to `True`.
+
+        Returns
+        -------
+        instance of the same class
+            A copied instance of the class with updated file paths and formats after the batch
+            processing is complete.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the output path does not exist.
+        ValueError
+            If the `format` is not 'fif' or 'csv'.
+
+        Note
+        ----
+        Ensure that the `output_path` is accessible and has the necessary write permissions.
+
+        Examples
+        --------
+        >>> new_locator = unified_dataset.eeg_batch.save_as_other('/path/to/output', domain_tag='example', format='fif')
+        """
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
 
-        # Check for valid format
         if format not in ['fif', 'csv']:
             raise ValueError(f"Unsupported format: {format}. Currently, only 'fif' and 'csv' are supported.")
 
@@ -207,14 +323,12 @@ class EEGBatch(UDatasetSharedAttributes):
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
 
             if format == 'fif':
-                # Saving as FIF format
                 new_file_path = os.path.join(output_path, f"{file_name}.fif")
                 raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
                 row['File Type'] = "standard_data"
 
             elif format == 'csv':
-                # Saving as CSV format
                 new_file_path = os.path.join(output_path, f"{file_name}.csv")
 
                 # Extract data and channel names from Raw object
@@ -223,32 +337,78 @@ class EEGBatch(UDatasetSharedAttributes):
 
                 # Create a DataFrame with 'date' column and channel data
                 df = pd.DataFrame(data.T, columns=channel_names)
-                df.insert(0, 'date', times)  # Add 'date' as the first column
+                df.insert(0, 'timestamp', times)  # Add 'date' as the first column
 
-                # Extract events from raw data
-                events, event_id = extract_events(raw)
+                if preserve_events:
+                    # Extract events from raw data
+                    events, event_id = extract_events(raw)
 
-                # Create an empty 'marker' column initialized with NaNs
-                df['marker'] = np.nan
+                    # Add a 'marker' column for event codes
+                    df['marker'] = np.nan
+                    for event in events:
+                        onset_sample = event[0]
+                        event_code = event[2]
+                        closest_time_idx = np.argmin(np.abs(times - raw.times[onset_sample]))
+                        df.at[closest_time_idx, 'marker'] = event_code
 
-                # Map event onsets to timepoints and set the corresponding marker
-                for event in events:
-                    onset_sample = event[0]
-                    event_code = event[2]
-                    # Find the closest timestamp for the onset sample
-                    closest_time_idx = np.argmin(np.abs(times - raw.times[onset_sample]))
-                    df.at[closest_time_idx, 'marker'] = event_code  # Mark event code in the 'marker' column
+                    # Adjust metadata in 'row'
+                    row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
+                    row['Channel Names'] += ', marker'
+                    row['Channel Names'] = 'timestamp, ' + row['Channel Names']
+                    # Adjust 'Data Shape'
+                    data_shape = eval(row['Data Shape'])
+                    smaller_shape, larger_shape = min(data_shape), max(data_shape)
+                    updated_shape = f"({smaller_shape + 1}, {larger_shape})" if smaller_shape == data_shape[
+                        0] else f"({larger_shape}, {smaller_shape + 1})"
+                    row['Data Shape'] = updated_shape
+
                 # Save DataFrame to CSV
                 df.to_csv(new_file_path, index=False)
                 row['File Path'] = new_file_path
-                row['File Type'] = "csv_data"
+                row['File Type'] = "csvData"
 
             return row
+
         copied_instance = copy.deepcopy(self)
         new_locator = self.batch_process(con_func, app_func, is_patch=False, result_type='series')
         copied_instance.set_shared_attr({'locator': new_locator})
         return copied_instance
-    def process_mean_std(self, domain_mean=True):
+
+    def process_mean_std(self, domain_mean: bool = True) -> None:
+        r"""Process the mean and standard deviation for EEG data across different channels and optionally
+        compute domain-level statistics.
+
+        This function calculates the mean and standard deviation for all EEG channels, both combined and individually.
+        It can also aggregate the results by domain if `domain_mean` is set to `True`.
+
+        Parameters
+        ----------
+        domain_mean : bool, optional
+            If `True` (default), the function aggregates the results by domain tags. Each domain contains the
+            mean and standard deviation across all related EEG channels. If `False`, the function calculates
+            and stores individual mean and standard deviation for each EEG recording.
+
+        Returns
+        -------
+        None
+            The function updates the instance by setting the "MEAN STD" column with the calculated mean and
+            standard deviation values. If `domain_mean` is `True`, it computes domain-aggregated statistics;
+            otherwise, it stores per-channel results.
+
+        Raises
+        ------
+        ValueError
+            If inconsistent channel names or numbers are found within a domain when `domain_mean` is `True`.
+
+        Note
+        ----
+        Ensure that the EEG data is properly formatted and that all necessary channels are present before calling
+        this method.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.process_mean_std(domain_mean=True)
+        """
         def get_mean_std(data: mne.io.Raw):
             """
             Calculate mean and standard deviation for each channel and all channels in the given EEG data.
@@ -330,6 +490,36 @@ class EEGBatch(UDatasetSharedAttributes):
             self.set_column("MEAN STD", results)
 
     def format_channel_names(self):
+        r"""Format channel names in the dataset and update the 'Channel Names' column.
+
+        This function processes each row in the dataset, checks the 'Channel Names'
+        column, and applies a formatting function to standardize the channel names.
+        A cache is used to avoid redundant formatting operations for channel names
+        that have already been processed. The function utilizes the `batch_process` method
+        to apply the formatting to each row, and the updated channel names are then saved
+        back to the 'Channel Names' column.
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place by updating the
+            'Channel Names' column.
+
+        Raises
+        ------
+        KeyError
+            If the 'Channel Names' column is missing from the dataset.
+
+        Note
+        ----
+        Ensure that the dataset is properly loaded and contains the 'Channel Names' column
+        before calling this method.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.format_channel_names()
+        """
+
         cache = {}
 
         def con_func(row):
@@ -344,34 +534,70 @@ class EEGBatch(UDatasetSharedAttributes):
                 cache[channel_name] = formatted_channel_name
                 return formatted_channel_name
 
-        # 使用 batch_process 处理数据
         results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
 
         self.set_column("Channel Names", results)
 
-    def filter(self, output_path, filter_type='bandpass', l_freq=None, h_freq=None, notch_freq=None,
-               auto_adjust_h_freq=True, picks='all', miss_bad_data=False):
-        """
-        Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.
+    def filter(self,
+               output_path: str,
+               filter_type: str = 'bandpass',
+               l_freq: float = None,
+               h_freq: float = None,
+               notch_freq: float = None,
+               auto_adjust_h_freq: bool = True,
+               picks: str = 'all',
+               miss_bad_data: bool = False,
+               **kwargs) -> None:
+        r"""Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.
 
-        Parameters:
-        filter_type: Type of filter, which can be 'lowpass', 'highpass', 'bandpass', or 'notch'.
-        l_freq: Low cutoff frequency for the filter (used in high-pass or low-frequency band-pass filters).
-        h_freq: High cutoff frequency for the filter (used in low-pass or high-frequency band-pass filters).
-        notch_freq: Frequency for the notch filter.
-        output_path: Path to save the filtered file.
-        auto_adjust_h_freq: Whether to automatically adjust the high cutoff frequency to fit the Nyquist frequency.
-        picks: Channels to be used for filtering.
-        miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
+        Parameters
+        ----------
+        output_path : str
+            Path to save the filtered file.
+        filter_type : {'lowpass', 'highpass', 'bandpass', 'notch'}, optional
+            Type of filter to apply. Defaults to 'bandpass'.
+        l_freq : float, optional
+            Low cutoff frequency for the filter (used in high-pass or low-frequency band-pass filters). Defaults to `None`.
+        h_freq : float, optional
+            High cutoff frequency for the filter (used in low-pass or high-frequency band-pass filters). Defaults to `None`.
+        notch_freq : float, optional
+            Frequency for the notch filter. Defaults to `None`.
+        auto_adjust_h_freq : bool, optional
+            Whether to automatically adjust the high cutoff frequency to fit the Nyquist frequency. Defaults to `True`.
+        picks : str, optional
+            Channels to be used for filtering. Defaults to 'all'.
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
+        **kwargs : dict
+            Additional keyword arguments for `mne_raw.filter()` and `mne_raw.notch_filter()`.
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place.
+
+        Raises
+        ------
+        ValueError
+            If an invalid `filter_type` is specified or if cutoff frequencies are inconsistent.
+
+        Note
+        ----
+        Ensure that the output path is accessible and that all necessary channels are specified for filtering.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.filter('/path/to/save/', filter_type='bandpass', l_freq=1.0, h_freq=40.0)
         """
 
         def con_func(row):
             return True
 
-        def app_func(row, l_freq, h_freq, notch_freq, filter_type, output_path, auto_adjust_h_freq):
+        def app_func(row, l_freq, h_freq, notch_freq, filter_type, output_path, auto_adjust_h_freq, picks,
+                     **kwargs):
             try:
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-                new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
+                new_file_path = os.path.join(output_path, f"{file_name}_filter.fif")
                 mne_raw = get_data_row(row)
 
                 # get sampling rate
@@ -388,16 +614,18 @@ class EEGBatch(UDatasetSharedAttributes):
                         raise ValueError(
                             f"High-pass frequency must be less than Nyquist frequency ({nyquist_freq} Hz).")
 
-                # filter data by specified filter
-                if filter_type == 'lowpass':
-                    mne_raw.filter(l_freq=None, h_freq=h_freq, fir_design='firwin', picks=picks)
-                elif filter_type == 'highpass':
-                    mne_raw.filter(l_freq=l_freq, h_freq=None, fir_design='firwin', picks=picks)
-                elif filter_type == 'bandpass':
-                    mne_raw.filter(l_freq=l_freq, h_freq=h_freq, fir_design='firwin', picks=picks)
+                # add l_freq and h_freq to kwargs
+                if filter_type in ['lowpass', 'highpass', 'bandpass']:
+                    kwargs['l_freq'] = l_freq
+                    kwargs['h_freq'] = h_freq
+                    kwargs['fir_design'] = 'firwin'
+
+                # apply the appropriate filter based on filter_type
+                if filter_type in ['lowpass', 'highpass', 'bandpass']:
+                    mne_raw.filter(picks=picks, **kwargs)
                 elif filter_type == 'notch':
                     if notch_freq is not None:
-                        mne_raw.notch_filter(freqs=notch_freq, fir_design='firwin', picks=picks)
+                        mne_raw.notch_filter(freqs=notch_freq, picks=picks, **kwargs)
                     else:
                         raise ValueError("notch_freq must be specified for notch filter.")
                 else:
@@ -417,7 +645,8 @@ class EEGBatch(UDatasetSharedAttributes):
 
         new_path_list = self.batch_process(con_func,
                                            lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
-                                                                output_path, auto_adjust_h_freq),
+                                                                output_path, auto_adjust_h_freq, picks,
+                                                                **kwargs),
                                            is_patch=False,
                                            result_type='value')
 
@@ -426,46 +655,65 @@ class EEGBatch(UDatasetSharedAttributes):
         locator_df = locator_df[locator_df['File Path'] != ""]
         self.get_shared_attr()['locator'] = locator_df
 
-    def ica(self, output_path, max_components=20, method='fastica', random_state=42, max_iter=1000, picks='eeg',
-            miss_bad_data=False):
-        """
-        Apply ICA (Independent Component Analysis) to the specified file in the dataset.
+    def ica(self, output_path: str, miss_bad_data: bool = False, **kwargs: Dict):
+        r"""Apply ICA (Independent Component Analysis) to the specified file in the dataset.
 
-        Parameters:
-        - max_components: The maximum number of components to retain in the ICA.
-        - method: The ICA method to use, such as 'fastica', 'infomax', 'extended-infomax', etc.
-        - random_state: The random state to ensure reproducibility of the results.
-        - max_iter: The maximum number of iterations for the ICA algorithm.
-        - output_path: The path where the processed file will be saved.
-        - picks: Channels to include in the ICA processing.
-        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
+        This method applies ICA to clean the EEG data using parameters passed through **kwargs.
+        Please refer to the official documentation for `mne.preprocessing.ICA` and `ica.fit()` for the
+        complete list of available parameters.
+
+        Documentation links:
+        - `mne.preprocessing.ICA`: https://mne.tools/stable/generated/mne.preprocessing.ICA.html
+
+        Parameters
+        ----------
+        output_path : str
+            Path to save the processed file after applying ICA.
+        miss_bad_data : bool, optional
+            Whether to skip bad data files and continue processing the next one. Defaults to `False`.
+        **kwargs : dict
+            Additional parameters passed to `mne.preprocessing.ICA`, `ica.fit()`, and other MNE functions.
+            This includes `picks`, `n_components`, `method`, `random_state`, etc.
+
+        Returns
+        -------
+        None
+            Updates the file path in the dataset locator after ICA is applied.
+
+        Raises
+        ------
+        ValueError
+            If the output path is invalid or if the specified parameters in `kwargs` are inconsistent.
+
+        Note
+        ----
+        Ensure that the input data is properly formatted and that all necessary parameters are specified
+        before calling this method.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.ica('/path/to/save/', n_components=20)
         """
 
         def con_func(row):
             return True
 
-        def app_func(row, max_components, method, random_state, max_iter, output_path):
+        def app_func(row, output_path: str):
             try:
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_ica_cleaned_raw.fif")
                 mne_raw = get_data_row(row)
 
-                picks_channels = mne.pick_types(mne_raw.info, meg=False, eeg=(picks == 'eeg'), eog=False)
-                n_components = min(len(picks_channels), max_components)
-                if n_components == 0:
-                    print(f"No EEG channels in file {row['File Path']}")
-                    return ""
-                # initialize ICA
-                ica = mne.preprocessing.ICA(n_components=n_components, method=method, random_state=random_state,
-                                            max_iter=max_iter)
+                # Initialize ICA with additional kwargs
+                ica = mne.preprocessing.ICA(**kwargs)
 
-                # fit ICA
-                ica.fit(mne_raw, picks=picks)
+                # Fit ICA with kwargs
+                ica.fit(mne_raw, **kwargs)
 
-                # apply ICA to raw data
-                ica.apply(mne_raw)
+                # Apply ICA to raw data with kwargs
+                ica.apply(mne_raw, **kwargs)
 
-                # save file and modified path in locator
+                # Save file and update path in locator
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
 
@@ -473,88 +721,141 @@ class EEGBatch(UDatasetSharedAttributes):
             except Exception as e:
                 if miss_bad_data:
                     print(f"Error processing file {row['File Path']}: {e}")
-                    return ""  # Return an empty path to indicate failure
+                    return ""  # Return empty path to indicate failure
                 else:
                     raise
 
         new_path_list = self.batch_process(con_func,
-                                           lambda row: app_func(row, max_components, method, random_state, max_iter,
-                                                                output_path),
+                                           lambda row: app_func(row, output_path),
                                            is_patch=False,
                                            result_type='value')
 
-        # update locator
+        # Update locator
         self.set_column("File Path", new_path_list)
         locator_df = self.get_shared_attr()['locator']
         locator_df = locator_df[locator_df['File Path'] != ""]
         self.get_shared_attr()['locator'] = locator_df
 
-    def resample(self, output_path, new_sfreq, miss_bad_data=False):
-        """
-        Resample the data.
+    def resample(self, output_path: str, miss_bad_data: bool = False, **kwargs) -> None:
+        r"""Resample the data using MNE's resampling functionality and save the processed data.
 
-        Parameters:
-        - output_path: The path where the resampled file will be saved.
-        - new_sfreq: The new sampling rate after resampling.
-        - picks: Channels to include in the resampling process.
-        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
+        Parameters
+        ----------
+        output_path : str
+            The path where the resampled file will be saved.
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
+        **kwargs : dict
+            Additional parameters to be passed to the `mne_raw.resample()` function. For detailed information about
+            these parameters, refer to the MNE documentation:
+            https://mne.tools/stable/generated/mne.io.Raw.html#mne.io.Raw.resample
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place by saving the resampled data.
+
+        Raises
+        ------
+        Exception
+            If an error occurs during resampling and `miss_bad_data` is set to `False`, the error will be raised.
+
+        Note
+        ----
+        Ensure that the output path is accessible and that the input data is properly formatted before calling this method.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.resample('/path/to/save/', sfreq=256)
         """
 
-        def con_func(row):
+        def con_func(row) -> bool:
             return True
 
-        def app_func(row, new_sfreq, output_path):
+        def app_func(row, output_path: str) -> dict:
             try:
-
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_resampled_raw.fif")
 
                 mne_raw = get_data_row(row)
 
-                # resample
-                mne_raw.resample(sfreq=new_sfreq)
+                # Resample using the provided kwargs
+                mne_raw.resample(**kwargs)
 
-                # save resampled data and update locator
+                # Save resampled data and update locator
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
                 row['Duration'] = str(
-                    float(row['Sampling Rate'].strip()) * float(row['Duration'].strip()) / int(new_sfreq))
-                row['Sampling Rate'] = str(int(new_sfreq))
+                    float(row['Sampling Rate'].strip()) * float(row['Duration'].strip()) / int(mne_raw.info['sfreq']))
+                row['Sampling Rate'] = str(int(mne_raw.info['sfreq']))
 
                 dimensions = row['Data Shape'].strip('()').split(',')
-
                 dimensions = [int(dim.strip()) for dim in dimensions]
-                dimensions[dimensions.index(max(dimensions))] = int(float(row['Duration'].strip()) * float(new_sfreq))
+                dimensions[dimensions.index(max(dimensions))] = int(
+                    float(row['Duration'].strip()) * float(mne_raw.info['sfreq']))
                 row['Data Shape'] = f"({dimensions[0]}, {dimensions[1]})"
                 return row
             except Exception as e:
                 if miss_bad_data:
                     print(f"Error processing file {row['File Path']}: {e}")
-                    return None  # Return an empty path to indicate failure
+                    return None  # Return None to indicate failure
                 else:
                     raise
 
         new_locator = self.batch_process(con_func,
-                                         lambda row: app_func(row, new_sfreq, output_path),
+                                         lambda row: app_func(row, output_path),
                                          is_patch=False,
                                          result_type='series')
         self.get_shared_attr()['locator'] = new_locator
 
-    def align_channel(self, output_path, channel_order, min_num_channels=32, miss_bad_data=False):
-        """
-        Adjust the channel order and perform interpolation on the data.
+    def align_channel(self, output_path: str, channel_order: list, min_num_channels: int = 1,
+                      miss_bad_data: bool = False, **kwargs: Dict):
+        r"""Adjust the channel order and perform interpolation on the data.
 
-        Parameters:
-        - output_path: The path where the adjusted file will be saved.
-        - channel_order: The desired order of channels, provided as a list.
-        - min_num_channels: The minimum number of channels required for alignment.
-        - picks: Channels involved in the adjustment process.
-        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
+        This method realigns the EEG data channels based on the provided `channel_order`. It utilizes
+        `get_data_row()` for retrieving the data. Additional parameters can be passed to `get_data_row()`
+        via `**kwargs`. For more information on available options, refer to the
+        :func:`get_data_row` function in this documentation.
+
+        Parameters
+        ----------
+        output_path : str
+            The path where the adjusted file will be saved.
+        channel_order : list
+            The desired order of channels, provided as a list.
+        min_num_channels : int, optional
+            The minimum number of channels required for alignment. Defaults to 1.
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one if an error occurs.
+            Defaults to `False`.
+        **kwargs : dict, optional
+            Additional keyword arguments to be passed to :func:`get_data_row` for data fetching.
+            This allows fine-tuning the data retrieval process.
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place by saving the adjusted data.
+
+        Raises
+        ------
+        ValueError
+            If any invalid channels are found in the provided `channel_order` or if the number of
+            matching channels is below `min_num_channels`.
+
+        Note
+        ----
+        Ensure that the output path is accessible and that the provided channel order is valid before calling this method.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.align_channel('/path/to/save/', channel_order=['C3', 'C4', 'O1'], min_num_channels=3)
         """
 
         invalid_channels = [ch for ch in channel_order if ch not in STANDARD_EEG_CHANNELS]
         if invalid_channels:
-            raise ValueError(f"Invalid channels found: {invalid_channels}")
+            raise ValueError(
+                f"Invalid channels found: {invalid_channels}. All specified channels must be in the standard channel list.")
 
         def con_func(row):
             return True
@@ -562,9 +863,10 @@ class EEGBatch(UDatasetSharedAttributes):
         def app_func(row, channel_order, output_path, min_num_channels):
             try:
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-                new_file_path = os.path.join(output_path, f"{file_name}_aligned_raw.fif")
+                new_file_path = os.path.join(output_path, f"{file_name}_aligned.fif")
 
-                mne_raw = get_data_row(row, norm_type="channel-wise")
+                # Fetch the data using get_data_row and **kwargs
+                mne_raw = get_data_row(row, **kwargs)
 
                 existing_channels = mne_raw.ch_names
                 matched_channels = [ch for ch in channel_order if ch in existing_channels]
@@ -577,11 +879,21 @@ class EEGBatch(UDatasetSharedAttributes):
                         raise ValueError(
                             f"File {row['File Path']} has insufficient matching channels. Required: {min_num_channels}, Found: {len(matched_channels)}")
 
+                # Pick the matched channels and ensure the correct order
                 mne_raw.pick_channels(matched_channels, ordered=True)
+
                 if len(matched_channels) < len(channel_order):
                     missing_channels = [ch for ch in channel_order if ch not in existing_channels]
-                    mne_raw.add_channels(
-                        [mne.create_info(missing_channels, sfreq=mne_raw.info['sfreq'], ch_types='eeg')])
+
+                    # Preload the data before adding channels
+                    mne_raw.load_data()
+
+                    # Create missing channels and add them
+                    missing_info = mne.create_info(missing_channels, sfreq=mne_raw.info['sfreq'], ch_types='eeg')
+                    missing_raw = mne.io.RawArray(np.zeros((len(missing_channels), len(mne_raw.times))), missing_info)
+                    mne_raw.add_channels([missing_raw])
+
+                    # Interpolate missing channels
                     mne_raw.interpolate_bads(reset_bads=False, origin='auto')
 
                 mne_raw.save(new_file_path, overwrite=True)
@@ -606,15 +918,54 @@ class EEGBatch(UDatasetSharedAttributes):
                                          result_type='series')
         self.get_shared_attr()['locator'] = new_locator
 
-    def normalize(self, output_path, norm_type='sample-wise', miss_bad_data=False):
-        """
-        Normalize the data.
+    def normalize(self, output_path: str, norm_type: str = 'sample-wise', miss_bad_data: bool = False,
+                  domain_mean: bool = True, **kwargs):
+        r"""Normalize the data.
 
-        Parameters:
-        - output_path: The path where the normalized file will be saved.
-        - norm_type: The type of normalization to apply.
-        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
+        This method normalizes the EEG data based on the specified normalization type. It can either
+        perform sample-wise normalization or aggregate by domain mean, depending on the provided parameters.
+
+        Parameters
+        ----------
+        output_path : str
+            The path where the normalized file will be saved.
+        norm_type : {'sample-wise', 'domain-wise'}, optional
+            The type of normalization to apply. Defaults to 'sample-wise'.
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one if an error occurs.
+            Defaults to `False`.
+        domain_mean : bool, optional
+            If True (default), the function aggregates the results by domain tags. Each domain contains the
+            mean and standard deviation across all related EEG channels. If False, the function calculates
+            and stores individual mean and standard deviation for each EEG recording.
+        **kwargs : dict, optional
+            Additional keyword arguments passed to :func:`get_data_row`. This allows users to pass extra parameters
+            required by the `get_data_row` function seamlessly. For details on the parameters, refer to the
+            :func:`get_data_row()` function in this documentation.
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place by saving the normalized data.
+
+        Raises
+        ------
+        ValueError
+            If the specified normalization type is invalid or if there are issues with the input data.
+
+        Note
+        ----
+        Ensure that the output path is accessible and that the input data is properly formatted before calling this method.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.normalize('/path/to/save/', norm_type='domain-wise', domain_mean=True)
         """
+
+        # Check if 'MEAN STD' column exists, if not process mean and std
+        locator = self.get_shared_attr()['locator']
+        if 'MEAN STD' not in locator.columns:
+            self.process_mean_std(domain_mean=domain_mean)
 
         def con_func(row):
             return True
@@ -622,8 +973,8 @@ class EEGBatch(UDatasetSharedAttributes):
         def app_func(row, norm_type, output_path):
             try:
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-                new_file_path = os.path.join(output_path, f"{file_name}_normed_raw.fif")
-                mne_raw = get_data_row(row, norm_type=norm_type)
+                new_file_path = os.path.join(output_path, f"{file_name}_normed.fif")
+                mne_raw = get_data_row(row, norm_type=norm_type, **kwargs)
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
                 row['File Type'] = "standard_data"
@@ -631,7 +982,7 @@ class EEGBatch(UDatasetSharedAttributes):
             except Exception as e:
                 if miss_bad_data:
                     print(f"Error processing file {row['File Path']}: {e}")
-                    return None  # Return an empty path to indicate failure
+                    return None  # Return None to indicate failure
                 else:
                     raise
 
@@ -641,69 +992,165 @@ class EEGBatch(UDatasetSharedAttributes):
                                          result_type='series')
         self.get_shared_attr()['locator'] = new_locator
 
-    def epoch_for_pretraining(self, output_path, seg_sec: float, resample: int = None, overlap: float = 0,
-                              exclude_bad=True, baseline=(None, 0), miss_bad_data=False):
-        def con_func(row):
+    def epoch_for_pretraining(self,
+                              output_path: str,
+                              seg_sec: float,
+                              resample: Optional[int] = None,
+                              overlap: float = 0.0,
+                              exclude_bad: bool = True,
+                              baseline: Tuple[Optional[float], float] = (None, 0),
+                              miss_bad_data: bool = False,
+                              **kwargs) -> None:
+        r"""Processes data by creating epochs for pretraining from raw EEG data, applying optional resampling and event
+        segmentation.
+
+        Parameters
+        ----------
+        output_path : str
+            Path to save the preprocessed epoch data in .npy format.
+        seg_sec : float
+            Segment length in seconds for each epoch.
+        resample : Optional[int], optional
+            New sampling rate. If specified, raw data will be resampled.
+        overlap : float, optional
+            Fraction of overlap between consecutive segments (0.0 means no overlap).
+        exclude_bad : bool, optional
+            If True, drops epochs marked as bad.
+        baseline : Tuple[Optional[float], float], optional
+            Baseline correction period, represented as a tuple (start, end). Default is (None, 0).
+        miss_bad_data : bool, optional
+            If True, skips files with errors instead of raising an exception.
+        **kwargs : dict, optional
+            Additional keyword arguments passed to `mne.Epochs()` and `raw_data.resample()`
+            for further filtering options. Refer to the respective functions' documentation for details.
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place by saving the processed epoch data.
+
+        Raises
+        ------
+        ValueError
+            If the segment length is invalid or if any specified parameters are inconsistent.
+
+        Note
+        ----
+        Ensure that the output path is accessible and that the input data is properly formatted before calling this method.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.epoch_for_pretraining('/path/to/save/', seg_sec=2.0, resample=256)
+        """
+
+        def con_func(row) -> bool:
+            """Condition function to always process the row."""
             return True
 
-        def app_func(row, output_path: str, seg_sec: float, resample: int = None, overlap: float = 0,
-                     exclude_bad=True, baseline=(None, 0)):
+        def app_func(row: Dict,
+                     output_path: str,
+                     seg_sec: float,
+                     resample: Optional[int] = None,
+                     overlap: float = 0.0,
+                     exclude_bad: bool = True,
+                     baseline: Tuple[Optional[float], float] = None,
+                     **kwargs) -> Optional[None]:
+            """
+            Applies the epoch processing to a single row of data.
+
+            :param row: A dictionary representing a data row, including 'File Path' for raw EEG file.
+            :param output_path: Path to save the epoch data.
+            :param seg_sec: Length of each epoch in seconds.
+            :param resample: Optional resampling rate.
+            :param overlap: Overlap fraction between epochs.
+            :param exclude_bad: Whether to exclude bad epochs.
+            :param baseline: Baseline period for correction.
+            :param kwargs: Additional keyword arguments for filtering.
+            :return: None if successful, or skips file if an error occurs and miss_bad_data is True.
+            """
             try:
+                # Retrieve the raw data for processing
                 raw_data = get_data_row(row)
+
+                # Apply resampling if specified
                 if resample:
-                    raw_data.resample(resample)
+                    raw_data.resample(resample, **kwargs)
 
                 # Calculate step size and event intervals
                 step_sec = seg_sec * (1 - overlap)
-                if baseline is not None and baseline[0] is not None and baseline[0] < 0:
-                    start = -1 * baseline[0]
-                else:
-                    start = 0
+                start = 0 if baseline is None or baseline[0] is None or baseline[0] >= 0 else -baseline[0]
+
+                # Create events for fixed-length segments
                 events = mne.make_fixed_length_events(raw_data, start=start, stop=None, duration=step_sec)
                 event_id = {'segment': 1}
 
-                # Create epochs
+                # Create epochs from raw data and events
                 epochs = mne.Epochs(raw_data, events, event_id, tmin=0, tmax=seg_sec,
-                                    baseline=baseline, preload=True)
+                                    baseline=baseline, preload=True, **kwargs)
 
-                # Exclude bad epochs
+                # Exclude bad epochs if specified
                 if exclude_bad:
                     epochs.drop_bad()
 
-                # Convert epochs to numpy array and Save
+                # Save epochs data as numpy array
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 np.save(os.path.join(output_path, f"{file_name}_pretrain_epoch.npy"), epochs.get_data())
+
                 return None
+
             except Exception as e:
                 if miss_bad_data:
                     print(f"Error processing file {row['File Path']}: {e}")
-                    return None  # Return an empty path to indicate failure
+                    return None
                 else:
                     raise
 
+        # Batch process the data
         self.batch_process(con_func,
                            lambda row: app_func(row, output_path, seg_sec=seg_sec, resample=resample,
                                                 overlap=overlap, exclude_bad=exclude_bad,
-                                                baseline=baseline),
+                                                baseline=baseline, **kwargs),
                            is_patch=False,
                            result_type=None)
 
-    def get_events(self, miss_bad_data=False):
-        """
-        Extract events and log them in the data rows.
+    def get_events(self, miss_bad_data: bool = False, **kwargs) -> None:
+        r"""Extract events and log them in the data rows.
 
-        Parameters:
-        - output_path: The path where the file with extracted events will be saved.
-        - miss_bad_data: Whether to skip the current file and continue processing the next one if an error occurs.
+        This method processes each data row by applying the `get_data_row()` and `extract_events()`
+        functions. The `**kwargs` parameters are passed seamlessly to both functions
+        to allow customization of data extraction and event handling.
+
+        Parameters
+        ----------
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
+        **kwargs : dict, optional
+            Additional keyword arguments that are passed to both `get_data_row()` and `extract_events()`
+            for advanced filtering and event extraction.
+
+        Raises
+        ------
+        Exception
+            If `miss_bad_data` is `False`, an exception is raised on processing errors.
+
+        Note
+        ----
+        Please refer to the documentation of `get_data_row()` and `extract_events()`
+        for detailed descriptions of the available `kwargs` parameters.
         """
+
 
         def con_func(row):
             return True
 
         def app_func(row):
             try:
-                mne_raw = get_data_row(row)
-                events, event_id = extract_events(mne_raw)
+                # Pass kwargs to get_data_row()
+                mne_raw = get_data_row(row, **kwargs)
+
+                # Pass kwargs to extract_events()
+                events, event_id = extract_events(mne_raw, **kwargs)
+
                 row["event_id"] = str(event_id)
                 event_id_num = {key: sum(events[:, 2] == val) for key, val in event_id.items()}
                 row["event_id_num"] = str(event_id_num)
@@ -715,6 +1162,7 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
+        # Process all rows and update the locator attribute
         new_locator = self.batch_process(con_func,
                                          lambda row: app_func(row),
                                          is_patch=False,
@@ -723,20 +1171,30 @@ class EEGBatch(UDatasetSharedAttributes):
 
     def epoch_by_event(self, output_path: str, resample: int = None,
                        exclude_bad=True, miss_bad_data=False, **epoch_params):
-        """
-        Batch process EEG data to create epochs based on events specified in event_id column.
+        r"""Batch process EEG data to create epochs based on events specified in the event_id column.
 
-        Parameters:
-        df (pd.DataFrame): DataFrame containing paths to raw EEG data and event_id information.
-        output_path (str): Directory to save the processed epochs.
-        seg_sec (float): Length of each epoch in seconds.
-        resample (int): Resample rate for the raw data. If None, no resampling is performed.
-        exclude_bad (bool): Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs.
-        miss_bad_data (bool): Whether to skip files with processing errors.
-        **epoch_params: Additional parameters for mne.Epochs, excluding raw_data, events, event_id.
+        Parameters
+        ----------
+        output_path : str
+            Directory to save the processed epochs.
+        resample : int, optional
+            Resample rate for the raw data. If None, no resampling is performed.
+        exclude_bad : bool, optional
+            Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is `True`.
+        miss_bad_data : bool, optional
+            Whether to skip files with processing errors. Default is `False`.
+        **epoch_params : dict, optional
+            Additional parameters for `mne.Epochs`, excluding `raw_data`, `events`, and `event_id`.
 
-        Returns:
+        Returns
+        -------
         None
+            The function modifies the dataset in place by creating and saving the epochs.
+
+        Raises
+        ------
+        ValueError
+            If any parameters are inconsistent or if the specified output path is invalid.
         """
 
         def con_func(row):
@@ -791,12 +1249,28 @@ class EEGBatch(UDatasetSharedAttributes):
                            is_patch=False,
                            result_type=None)
 
-    def infer_units(self, miss_bad_data=False):
-        """
-        Infer the units of each channel and record them in the data line.
+    def infer_units(self, miss_bad_data: bool = False, **kwargs: dict) -> None:
+        r"""Infer the units of each channel and record them in the data line.
 
-        Parameters:
-        miss_bad_data: Whether to skip the current file and continue processing the next file when an error occurs.
+        Parameters
+        ----------
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next file when an error occurs.
+            Defaults to `False`.
+
+        **kwargs : dict
+            Additional parameters passed to `get_data_row()`. These allow for more flexible data processing
+            during the inference process. For more details on available options, refer to the `get_data_row()` function.
+
+        Raises
+        ------
+        Exception
+            If an error occurs during file processing and `miss_bad_data` is set to `False`.
+
+        Note
+        ----
+        This method applies a custom function to each row in the dataframe to infer the units for each channel
+        based on the raw MNE data. The function handles errors gracefully if `miss_bad_data` is `True`.
         """
 
         def con_func(row):
@@ -804,7 +1278,8 @@ class EEGBatch(UDatasetSharedAttributes):
 
         def app_func(row):
             try:
-                mne_raw = get_data_row(row)
+                # Pass **kwargs to get_data_row
+                mne_raw = get_data_row(row, **kwargs)
 
                 units = {}
 
@@ -814,10 +1289,13 @@ class EEGBatch(UDatasetSharedAttributes):
                 for ch_name, ch_type in zip(ch_names, ch_types):
                     ch_data = mne_raw.get_data(picks=[ch_name])
 
+                    # Infer unit for each channel
                     unit = infer_channel_unit(ch_name, ch_data, ch_type)
                     units[ch_name] = unit
+
                 row["Infer Unit"] = str(units)
                 return row
+
             except Exception as e:
                 if miss_bad_data:
                     print(f"Error processing file {row['File Path']}: {e}")
@@ -825,44 +1303,70 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        new_locator = self.batch_process(con_func,
-                                         lambda row: app_func(row),
-                                         is_patch=False,
-                                         result_type='series')
+        new_locator = self.batch_process(
+            con_func,
+            lambda row: app_func(row),
+            is_patch=False,
+            result_type='series'
+        )
+
         self.get_shared_attr()['locator'] = new_locator
 
-    def get_quality(self, miss_bad_data=False):
+    def get_quality(self, miss_bad_data: bool = False, **kwargs) -> None:
+        r"""Process the data quality of EEG files by calculating quality scores for each row in the dataset.
+
+        Parameters
+        ----------
+        miss_bad_data : bool, optional
+            If `True`, skips rows that contain bad data without raising an error.
+            If `False`, raises an exception when encountering bad data.
+
+        **kwargs : dict
+            Additional keyword arguments passed to the `get_data_row()` function.
+            This allows fine-tuning of parameters such as unit conversion, data normalization, etc.
+            For details, refer to the `get_data_row()` function documentation.
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place by updating quality scores for each row.
+        """
 
         def con_func(row):
             return True
 
         def app_func(row):
             try:
-                raw_data = get_data_row(row, unit_convert='uV')
+                # Pass **kwargs to get_data_row to ensure seamless integration
+                raw_data = get_data_row(row, **kwargs)
                 scores = calculate_eeg_quality_scores(raw_data)
                 score = np.mean(scores)
                 return str(score)
             except Exception as e:
                 if miss_bad_data:
                     print(f"Error processing file {row['File Path']}: {e}")
-                    return ""  # Return None to indicate failure
+                    return ""  # Return an empty string to indicate failure
                 else:
                     raise
 
         results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
-
         self.set_column("Score", results)
 
-
     def replace_paths(self, old_prefix, new_prefix):
-        """
-        Replace the prefix of file paths in the dataset according to the provided mapping.
+        r"""Replace the prefix of file paths in the dataset according to the provided mapping.
 
-        Parameters:
-        - path_mapping (dict): A dictionary where the keys are the old path prefixes and the values are the new prefixes.
+        Parameters
+        ----------
+        old_prefix : str
+            The old path prefix to be replaced.
 
-        Returns:
-        - A new instance with updated file paths.
+        new_prefix : str
+            The new path prefix to replace the old one.
+
+        Returns
+        -------
+        object
+            A new UnifiedDataset with updated locator.
         """
 
         def replace_func(row):
