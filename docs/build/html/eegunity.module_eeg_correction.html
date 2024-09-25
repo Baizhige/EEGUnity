@@ -186,15 +186,8 @@ plots for each domain in the dataset.</p>
 <p class="admonition-title">Note</p>
 <p>If a domain contains inconsistent sampling rates across its samples, the
 data will be resampled to the lowest sampling rate within the domain.
-Frequency bands for visualization are fixed as follows:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>0-4 Hz</p></li>
-<li><p>4-8 Hz</p></li>
-<li><p>8-13 Hz</p></li>
-<li><p>13-30 Hz</p></li>
-</ul>
-</div></blockquote>
+Frequency bands for visualization are fixed as follows: 0-4 Hz, 4-8 Hz,
+and 8-13 Hz, 13-30 Hz.</p>
 </div>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">visualization_frequency</span><span class="p">(</span><span class="n">max_sample</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>

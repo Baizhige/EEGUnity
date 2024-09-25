@@ -137,11 +137,8 @@ class EEGCorrection(UDatasetSharedAttributes):
         ----
         If a domain contains inconsistent sampling rates across its samples, the
         data will be resampled to the lowest sampling rate within the domain.
-        Frequency bands for visualization are fixed as follows:
-            - 0-4 Hz
-            - 4-8 Hz
-            - 8-13 Hz
-            - 13-30 Hz
+        Frequency bands for visualization are fixed as follows: 0-4 Hz, 4-8 Hz,
+        and 8-13 Hz, 13-30 Hz.
 
         Example
         -------

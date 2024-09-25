@@ -54,7 +54,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.share_attributes">eegunity.share_attributes module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="eegunity.html#eegunity-unifieddataset-module">eegunity.unifieddataset module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.unifieddataset">eegunity.unifieddataset module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity">Module contents</a></li>
 </ul>
 </li>
@@ -102,24 +102,82 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.EEGParser.check_locator">
 <span class="sig-name descname"><span class="pre">check_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#EEGParser.check_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.EEGParser.check_locator" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Validate the contents of the locator DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>locator</strong> (<em>pd.DataFrame</em>) – A DataFrame containing file metadata, including data shape, channel names, file type, file path, number of channels, sampling rate, and duration.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated DataFrame with a ‘Completeness Check’ column indicating whether the validation was completed or if errors were found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.EEGParser.get_data">
 <span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_convert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#EEGParser.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.EEGParser.get_data" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Retrieve data based on the specified index from the locator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_idx</strong> (<em>int</em>) – Index of the row in the locator DataFrame to retrieve data from.</p></li>
+<li><p><strong>norm_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of normalization to apply to the data, if any.</p></li>
+<li><p><strong>unit_convert</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to convert the data units.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The data retrieved and processed according to the specified parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.convert_unit">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">convert_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Raw</span></span></span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#convert_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.convert_unit" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Convert the units of EEG data in a MNE Raw object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>mne.io.Raw</em>) – The raw EEG data to be converted.</p></li>
+<li><p><strong>unit</strong> (<em>str</em>) – The target unit to convert the data to. Must be one of ‘V’, ‘mV’, or ‘uV’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided unit is not valid.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The raw EEG data with converted units.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>mne.io.Raw</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.create_montage_from_json">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">create_montage_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#create_montage_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.create_montage_from_json" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Create a montage from a JSON file containing channel positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_file</strong> (<em>str</em>) – The path to the JSON file containing channel names as keys and their positions as values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A montage object created from the channel positions defined in the JSON file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.channels.DigMontage</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.extract_events">
@@ -127,18 +185,16 @@
 <dd><p>Extract events from an mne.io.Raw object.</p>
 <p>Attempt to extract events using mne.find_events.
 If it fails, use mne.events_from_annotations to extract events.</p>
-<p>Parameters:
-raw : mne.io.Raw</p>
-<blockquote>
-<div><p>The raw data object.</p>
-</div></blockquote>
-<p>Returns:
-events : numpy.ndarray</p>
-<blockquote>
-<div><p>The events array, shaped (n_events, 3).</p>
-</div></blockquote>
-<dl class="simple">
-<dt>event_id<span class="classifier">dict</span></dt><dd><p>Dictionary of event IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw</strong> (<em>mne.io.Raw</em>) – The raw data object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>events</strong> (<em>numpy.ndarray</em>) – The events array, shaped (n_events, 3).</p></li>
+<li><p><strong>event_id</strong> (<em>dict</em>) – Dictionary of event IDs.</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -146,7 +202,23 @@ events : numpy.ndarray</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.format_channel_names">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">format_channel_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#format_channel_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.format_channel_names" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Format and standardize a list of channel names based on predefined rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_string</strong> (<em>str</em>) – A comma-separated string containing channel names to be formatted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A comma-separated string of formatted channel names. If duplicates are found, the original input string is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Warns if an invalid channel name is detected or if a duplicate formatted channel name is found.</p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.get_data_row">
@@ -156,20 +228,23 @@ events : numpy.ndarray</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>row</strong> (<em>dict</em>) – Dictionary containing data attributes, such as file paths, file types, and channel names.</p></li>
-<li><p><strong>norm_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of normalization to apply, if any, defaults to None.</p></li>
-<li><p><strong>is_set_channel_type</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag to set channel types based on the locator, defaults to False.</p></li>
-<li><p><strong>is_set_montage</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag to set montage (electrode coordinates), defaults to False.</p></li>
-<li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – Verbosity level for MNE functions, defaults to ‘CRITICAL’.</p></li>
-<li><p><strong>pick_types</strong> (<em>dict</em><em>, </em><em>optional</em>) – Channel picking parameters for MNE, defaults to None.</p></li>
-<li><p><strong>unit_convert</strong> (<em>str</em><em>, </em><em>optional</em>) – Conversion type for resetting channel units, defaults to None.</p></li>
-<li><p><strong>kwargs</strong> (<em>Any</em>) – Additional keyword arguments to enhance flexibility and robustness.</p></li>
+<li><p><strong>norm_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of normalization to apply, if any. Defaults to None.</p></li>
+<li><p><strong>is_set_channel_type</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to set channel types based on provided information. Defaults to False.</p></li>
+<li><p><strong>is_set_montage</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to set montage (electrode coordinates). Defaults to False.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – Verbosity level for MNE functions. Defaults to ‘CRITICAL’.</p></li>
+<li><p><strong>pick_types</strong> (<em>dict</em><em>, </em><em>optional</em>) – Channel picking parameters for MNE. Defaults to None.</p></li>
+<li><p><strong>unit_convert</strong> (<em>str</em><em>, </em><em>optional</em>) – Conversion type for resetting channel units. Defaults to None.</p></li>
+<li><p><strong>kwargs</strong> (<em>any</em>) – Additional keyword arguments to enhance flexibility and robustness.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Processed MNE raw data object.</p>
+<dd class="field-even"><p>The processed raw EEG data object.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>mne.io.BaseRaw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the number of channels in the locator file does not match the metadata.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -177,18 +252,50 @@ events : numpy.ndarray</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.handle_nonstandard_data">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">handle_nonstandard_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#handle_nonstandard_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.handle_nonstandard_data" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Handles the loading of non-standard EEG data files into MNE Raw format.</p>
+<p>This function processes EEG data from either .mat files or .csv/.txt files marked as ‘csvData’.
+It extracts channel names and sampling rates from the provided row, and creates an MNE RawArray object containing the EEG data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>pd.Series</em>) – A row from a DataFrame containing information about the file, including ‘File Path’, ‘Channel Names’, ‘Sampling Rate’, and ‘File Type’.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – The verbosity level for MNE functions. Default is ‘CRITICAL’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An MNE Raw object containing the EEG data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the number of channels in the DataFrame does not match the channel names specified in the row.</p></li>
+<li><p><strong>Exception</strong> – If the file type is unsupported or there is an error in loading the data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.infer_channel_unit">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">infer_channel_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ch_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#infer_channel_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.infer_channel_unit" title="Link to this definition">¶</a></dt>
-<dd><p>Infer the unit type for a channel.</p>
-<p>Parameters:
-ch_name: The name of the channel
-ch_data: The data of the channel
-ch_type: The type of the channel</p>
-<p>Returns:
-The inferred unit type, such as “uV”, “mV”, “V”, etc.</p>
+<dd><p>Infer the unit type for a given channel based on its data and type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ch_name</strong> (<em>str</em>) – The name of the channel.</p></li>
+<li><p><strong>ch_data</strong> (<em>array-like</em>) – The data of the channel, typically an array of amplitude values.</p></li>
+<li><p><strong>ch_type</strong> (<em>str</em>) – The type of the channel, such as ‘eeg’, ‘emg’, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The inferred unit type, such as “uV”, “mV”, or “V”, based on the channel data and type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -223,22 +330,88 @@ or ‘all_eeg’ (for sample-wise normalization).</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.process_mne_files">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">process_mne_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_locator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#process_mne_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.process_mne_files" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Process MNE files based on a locator DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files_locator</strong> (<em>pandas.DataFrame</em>) – DataFrame containing file paths and related metadata for processing.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em>) – Verbosity level for MNE functions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated DataFrame with metadata extracted from processed files.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.set_channel_type">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">set_channel_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#set_channel_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.set_channel_type" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set the channel types for the given raw data based on the specified channel string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>mne.io.Raw</em>) – The raw data object containing the EEG, EMG, ECG, EOG, or other types of signals.</p></li>
+<li><p><strong>channel_str</strong> (<em>str</em>) – A string specifying the channel types and names in the format ‘type:name’, separated by commas. Each type must correspond to the desired signal type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated raw data object with renamed channels and set channel types.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the format of any channel in the channel string is invalid (not in ‘type:name’ format).</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.set_infer_unit">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">set_infer_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#set_infer_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.set_infer_unit" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set the inferred unit for EEG channels in the raw data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>mne.io.Raw</em>) – The raw data object containing the EEG channels.</p></li>
+<li><p><strong>row</strong> (<em>pandas.Series</em>) – A row from a DataFrame containing the ‘Infer Unit’ field, which should be a dictionary with channel names as keys and units as values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated raw data object with the inferred units set for the specified channels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If ‘Infer Unit’ is not a valid dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.set_montage_any">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">set_montage_any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#set_montage_any"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.set_montage_any" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set the montage for the given raw data using a montage defined in a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>mne.io.Raw</em>) – The raw data object to which the montage will be applied.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – The verbosity level for warnings or messages, by default ‘CRITICAL’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated raw data object with the applied montage.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-eegunity.module_eeg_parser.eeg_parser_config">
@@ -249,22 +422,72 @@ or ‘all_eeg’ (for sample-wise normalization).</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser_csv.calculate_interval">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">calculate_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser_csv.html#calculate_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser_csv.calculate_interval" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Calculate the average interval between time points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>times</strong> (<em>pandas.Series</em>) – A pandas Series object containing time points. The time points can either be timezone-aware <cite>DatetimeTZDtype</cite> or naive <cite>pd.Timestamp</cite> objects.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The average interval between consecutive time points in seconds. If the input series is empty or only has one time point, returns None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser_csv.identify_time_columns">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">identify_time_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser_csv.html#identify_time_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser_csv.identify_time_columns" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Identify potential time columns in a DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input DataFrame containing potential time columns.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If a single time column is identified, returns the column name and its sampling frequency as a float.
+If multiple time columns are found with the same sampling frequency, returns a list of column names and the common sampling frequency.
+Returns <cite>None</cite> if no valid time column is detected.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or list of str, float</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser_csv.is_datetime_format">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">is_datetime_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser_csv.html#is_datetime_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser_csv.is_datetime_format" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Check if a string follows a datetime format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>str</em>) – The string to be evaluated for compatibility with the datetime format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns <cite>True</cite> if the string matches the datetime format “%Y-%m-%d %H:%M:%S.%f”<cite>. Otherwise, returns `False</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser_csv.process_csv_files">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">process_csv_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_locator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser_csv.html#process_csv_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser_csv.process_csv_files" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Process CSV files and update a DataFrame with file details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>files_locator</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the metadata of files, including their file paths and other details. The column ‘File Path’ is expected to contain paths to the files.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated DataFrame with additional columns ‘File Type’, ‘Sampling Rate’, ‘Channel Names’, ‘Number of Channels’, and ‘Duration’ for each file. If a file cannot be processed, appropriate messages are printed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-eegunity.module_eeg_parser.eeg_parser_mat">
@@ -272,7 +495,27 @@ or ‘all_eeg’ (for sample-wise normalization).</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser_mat.process_mat_files">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser_mat.</span></span><span class="sig-name descname"><span class="pre">process_mat_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_locator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser_mat.html#process_mat_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser_mat.process_mat_files" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Process MAT files and update a DataFrame with file details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>files_locator</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the metadata of files, including their file paths and other details.
+The column ‘File Path’ is expected to contain paths to the MAT files.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated DataFrame with additional columns ‘File Type’, ‘Sampling Rate’, ‘Channel Names’, ‘Number of Channels’, and ‘Duration’ for each file.
+If a file cannot be processed, appropriate messages are printed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the MAT file cannot be located.</p></li>
+<li><p><strong>Exception</strong> – General exception for unexpected errors during file processing.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-eegunity.module_eeg_parser">

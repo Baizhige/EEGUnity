@@ -78,6 +78,19 @@
 <div class="viewcode-block" id="calculate_interval">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser_csv.calculate_interval">[docs]</a>
 <span class="k">def</span> <span class="nf">calculate_interval</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the average interval between time points.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    times : pandas.Series</span>
+<span class="sd">        A pandas Series object containing time points. The time points can either be timezone-aware `DatetimeTZDtype` or naive `pd.Timestamp` objects.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float or None</span>
+<span class="sd">        The average interval between consecutive time points in seconds. If the input series is empty or only has one time point, returns None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">DatetimeTZDtype</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">):</span>
         <span class="n">intervals</span> <span class="o">=</span> <span class="p">[</span><span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span> <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
         <span class="n">average_interval</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">intervals</span><span class="p">)</span> <span class="k">if</span> <span class="n">intervals</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -91,6 +104,19 @@
 <div class="viewcode-block" id="is_datetime_format">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser_csv.is_datetime_format">[docs]</a>
 <span class="k">def</span> <span class="nf">is_datetime_format</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a string follows a datetime format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    s : str</span>
+<span class="sd">        The string to be evaluated for compatibility with the datetime format.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        Returns `True` if the string matches the datetime format &quot;%Y-%m-%d %H:%M:%S.%f&quot;`. Otherwise, returns `False`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S.</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -106,6 +132,21 @@
 <div class="viewcode-block" id="identify_time_columns">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser_csv.identify_time_columns">[docs]</a>
 <span class="k">def</span> <span class="nf">identify_time_columns</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify potential time columns in a DataFrame.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        The input DataFrame containing potential time columns.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str or list of str, float</span>
+<span class="sd">        If a single time column is identified, returns the column name and its sampling frequency as a float.</span>
+<span class="sd">        If multiple time columns are found with the same sampling frequency, returns a list of column names and the common sampling frequency.</span>
+<span class="sd">        Returns `None` if no valid time column is detected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">time_columns</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))):</span>
@@ -132,6 +173,19 @@
 <div class="viewcode-block" id="process_csv_files">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser_csv.process_csv_files">[docs]</a>
 <span class="k">def</span> <span class="nf">process_csv_files</span><span class="p">(</span><span class="n">files_locator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process CSV files and update a DataFrame with file details.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    files_locator : pandas.DataFrame</span>
+<span class="sd">        A DataFrame containing the metadata of files, including their file paths and other details. The column &#39;File Path&#39; is expected to contain paths to the files.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        Updated DataFrame with additional columns &#39;File Type&#39;, &#39;Sampling Rate&#39;, &#39;Channel Names&#39;, &#39;Number of Channels&#39;, and &#39;Duration&#39; for each file. If a file cannot be processed, appropriate messages are printed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">calculate_sampling_rate</span><span class="p">(</span><span class="n">time_series</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">time_series</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">time_series</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
             <span class="n">time_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>

@@ -760,7 +760,8 @@ def infer_channel_unit(ch_name, ch_data, ch_type):
     """
     Infer the unit type for a given channel based on its data and type.
 
-    Parameters:
+    Parameters
+    ----------
     ch_name : str
         The name of the channel.
     ch_data : array-like
@@ -768,7 +769,8 @@ def infer_channel_unit(ch_name, ch_data, ch_type):
     ch_type : str
         The type of the channel, such as 'eeg', 'emg', etc.
 
-    Returns:
+    Returns
+    -------
     str
         The inferred unit type, such as "uV", "mV", or "V", based on the channel data and type.
     """

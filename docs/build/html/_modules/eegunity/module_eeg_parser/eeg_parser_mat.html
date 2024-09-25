@@ -80,6 +80,28 @@
 <div class="viewcode-block" id="process_mat_files">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser_mat.process_mat_files">[docs]</a>
 <span class="k">def</span> <span class="nf">process_mat_files</span><span class="p">(</span><span class="n">files_locator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process MAT files and update a DataFrame with file details.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    files_locator : pandas.DataFrame</span>
+<span class="sd">        A DataFrame containing the metadata of files, including their file paths and other details.</span>
+<span class="sd">        The column &#39;File Path&#39; is expected to contain paths to the MAT files.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        Updated DataFrame with additional columns &#39;File Type&#39;, &#39;Sampling Rate&#39;, &#39;Channel Names&#39;, &#39;Number of Channels&#39;, and &#39;Duration&#39; for each file.</span>
+<span class="sd">        If a file cannot be processed, appropriate messages are printed.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    FileNotFoundError</span>
+<span class="sd">        If the MAT file cannot be located.</span>
+<span class="sd">    Exception</span>
+<span class="sd">        General exception for unexpected errors during file processing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">is_numeric</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
         <span class="c1"># Match integer or floating-point numbers</span>
         <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^-?\d+(\.\d+)?$&#39;</span>
@@ -144,6 +166,28 @@
 
 
 <span class="k">def</span> <span class="nf">_find_variables_by_condition</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">condition_func</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search for variables in a nested data structure that satisfy a given condition.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        The data structure to search through, typically loaded from a .mat file.</span>
+<span class="sd">    condition_func : function</span>
+<span class="sd">        A function that takes in a variable&#39;s path and value, and returns a boolean indicating whether the variable meets the specified condition.</span>
+<span class="sd">    max_depth : int, optional</span>
+<span class="sd">        The maximum depth to search within the nested structure. Defaults to 5.</span>
+<span class="sd">    max_width : int, optional</span>
+<span class="sd">        The maximum number of items to check at each depth level. Defaults to 5.</span>
+<span class="sd">    debug : bool, optional</span>
+<span class="sd">        If True, enables additional logging for debugging purposes. Defaults to False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        A tuple containing the first variable&#39;s name and its value that satisfies the condition.</span>
+<span class="sd">        If no variable satisfies the condition, returns (&quot;unknown&quot;, &#39;&#39;).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">satisfying_variables</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">_search_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">condition_func</span><span class="p">,</span> <span class="n">satisfying_variables</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">max_width</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">satisfying_variables</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -153,12 +197,42 @@
 
 
 <span class="k">def</span> <span class="nf">_condition_source_data</span><span class="p">(</span><span class="n">var_path</span><span class="p">,</span> <span class="n">var_value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Condition function to check if a variable is a 2D ndarray of significant size.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    var_path : str</span>
+<span class="sd">        The path of the variable within the data structure.</span>
+<span class="sd">    var_value : any</span>
+<span class="sd">        The value of the variable, typically an array or other data structure.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if `var_value` is a 2D ndarray larger than 5MB, otherwise False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var_value</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var_value</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">var_value</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="kc">False</span>
 
 
 <span class="k">def</span> <span class="nf">_condition_source_data_3d</span><span class="p">(</span><span class="n">var_path</span><span class="p">,</span> <span class="n">var_value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Condition function to check if a variable is a 3D ndarray of significant size.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    var_path : str</span>
+<span class="sd">        The path of the variable within the data structure.</span>
+<span class="sd">    var_value : any</span>
+<span class="sd">        The value of the variable, typically an array or other data structure.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if `var_value` is a 3D ndarray larger than 5MB, otherwise False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var_value</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">var_value</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">var_value</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="kc">False</span>
@@ -168,12 +242,17 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Condition function that checks if the variable path contains &#39;fs&#39; or &#39;fre&#39;.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">        var_path (str): The path of the variable.</span>
-<span class="sd">        var_value: The value of the variable (unused in this condition).</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    var_path : str</span>
+<span class="sd">        The path of the variable.</span>
+<span class="sd">    var_value : any</span>
+<span class="sd">        The value of the variable (unused in this condition).</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        bool: True if &#39;fs&#39; or &#39;fre&#39; is in the variable path, False otherwise.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if &#39;fs&#39; or &#39;fre&#39; is in the variable path, False otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">var_path</span> <span class="o">=</span> <span class="n">var_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">return</span> <span class="s1">&#39;fs&#39;</span> <span class="ow">in</span> <span class="n">var_path</span> <span class="ow">or</span> <span class="s1">&#39;fre&#39;</span> <span class="ow">in</span> <span class="n">var_path</span>
@@ -183,12 +262,17 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Condition function that checks if the variable path contains &#39;chan&#39;.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">        var_path (str): The path of the variable.</span>
-<span class="sd">        var_value: The value of the variable (unused in this condition).</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    var_path : str</span>
+<span class="sd">        The path of the variable.</span>
+<span class="sd">    var_value: any</span>
+<span class="sd">        The value of the variable (unused in this condition).</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        bool: True if &#39;chan&#39; is in the variable path, False otherwise.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if &#39;chan&#39; is in the variable path, False otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">var_path</span> <span class="o">=</span> <span class="n">var_path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;chan&#39;</span> <span class="ow">in</span> <span class="n">var_path</span> <span class="ow">or</span> <span class="s1">&#39;chname&#39;</span> <span class="ow">in</span> <span class="n">var_path</span> <span class="ow">or</span> <span class="s1">&#39;clab&#39;</span> <span class="ow">in</span> <span class="n">var_path</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
@@ -197,6 +281,35 @@
 
 <span class="k">def</span> <span class="nf">_search_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">condition_func</span><span class="p">,</span> <span class="n">satisfying_variables</span><span class="p">,</span> <span class="n">current_depth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                  <span class="n">ignore_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively search for variables in nested data structures that satisfy a given condition.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : dict or ndarray</span>
+<span class="sd">        The data structure to search through, which can be a dictionary or a NumPy ndarray.</span>
+<span class="sd">    path : str</span>
+<span class="sd">        The current path in the data structure, used for tracking the location of found variables.</span>
+<span class="sd">    condition_func : callable</span>
+<span class="sd">        A function that takes a path and data item and returns True if the item satisfies the search condition.</span>
+<span class="sd">    satisfying_variables : list</span>
+<span class="sd">        A list that will be populated with tuples of paths and their corresponding data that satisfy the condition.</span>
+<span class="sd">    current_depth : int, optional</span>
+<span class="sd">        The current depth of recursion, default is 0.</span>
+<span class="sd">    max_depth : int, optional</span>
+<span class="sd">        The maximum depth to search, default is 5.</span>
+<span class="sd">    max_width : int, optional</span>
+<span class="sd">        The maximum number of items to process at each level, default is 5.</span>
+<span class="sd">    ignore_keys : list, optional</span>
+<span class="sd">        A list of keys to ignore during the search, default excludes certain internal keys.</span>
+<span class="sd">    debug : bool, optional</span>
+<span class="sd">        If True, prints debugging information during the search.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        The function modifies the satisfying_variables list in place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">ignore_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ignore_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__header__&#39;</span><span class="p">,</span> <span class="s1">&#39;__version__&#39;</span><span class="p">,</span> <span class="s1">&#39;__globals__&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
