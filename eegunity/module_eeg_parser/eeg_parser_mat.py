@@ -7,6 +7,28 @@ from scipy.io import loadmat
 
 
 def process_mat_files(files_locator):
+    """
+    Process MAT files and update a DataFrame with file details.
+
+    Parameters
+    ----------
+    files_locator : pandas.DataFrame
+        A DataFrame containing the metadata of files, including their file paths and other details.
+        The column 'File Path' is expected to contain paths to the MAT files.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Updated DataFrame with additional columns 'File Type', 'Sampling Rate', 'Channel Names', 'Number of Channels', and 'Duration' for each file.
+        If a file cannot be processed, appropriate messages are printed.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the MAT file cannot be located.
+    Exception
+        General exception for unexpected errors during file processing.
+    """
     def is_numeric(s):
         # Match integer or floating-point numbers
         pattern = r'^-?\d+(\.\d+)?$'
@@ -70,6 +92,28 @@ def process_mat_files(files_locator):
 
 
 def _find_variables_by_condition(data, condition_func, max_depth=5, max_width=5, debug=False):
+    """
+    Search for variables in a nested data structure that satisfy a given condition.
+
+    Parameters
+    ----------
+    data : dict
+        The data structure to search through, typically loaded from a .mat file.
+    condition_func : function
+        A function that takes in a variable's path and value, and returns a boolean indicating whether the variable meets the specified condition.
+    max_depth : int, optional
+        The maximum depth to search within the nested structure. Defaults to 5.
+    max_width : int, optional
+        The maximum number of items to check at each depth level. Defaults to 5.
+    debug : bool, optional
+        If True, enables additional logging for debugging purposes. Defaults to False.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the first variable's name and its value that satisfies the condition.
+        If no variable satisfies the condition, returns ("unknown", '').
+    """
     satisfying_variables = []
     _search_data(data, '', condition_func, satisfying_variables, 0, max_depth, max_width, debug=debug)
     if len(satisfying_variables) == 0:
@@ -79,12 +123,42 @@ def _find_variables_by_condition(data, condition_func, max_depth=5, max_width=5,
 
 
 def _condition_source_data(var_path, var_value):
+    """
+    Condition function to check if a variable is a 2D ndarray of significant size.
+
+    Parameters
+    ----------
+    var_path : str
+        The path of the variable within the data structure.
+    var_value : any
+        The value of the variable, typically an array or other data structure.
+
+    Returns
+    -------
+    bool
+        True if `var_value` is a 2D ndarray larger than 5MB, otherwise False.
+    """
     if isinstance(var_value, ndarray) and var_value.ndim == 2 and var_value.nbytes > 5 * 1024 * 1024:
         return True
     return False
 
 
 def _condition_source_data_3d(var_path, var_value):
+    """
+    Condition function to check if a variable is a 3D ndarray of significant size.
+
+    Parameters
+    ----------
+    var_path : str
+        The path of the variable within the data structure.
+    var_value : any
+        The value of the variable, typically an array or other data structure.
+
+    Returns
+    -------
+    bool
+        True if `var_value` is a 3D ndarray larger than 5MB, otherwise False.
+    """
     if isinstance(var_value, ndarray) and var_value.ndim == 3 and var_value.nbytes > 5 * 1024 * 1024:
         return True
     return False
@@ -94,12 +168,17 @@ def _condition_sampling_rate(var_path, var_value):
     """
     Condition function that checks if the variable path contains 'fs' or 'fre'.
 
-    Parameters:
-        var_path (str): The path of the variable.
-        var_value: The value of the variable (unused in this condition).
+    Parameters
+    ----------
+    var_path : str
+        The path of the variable.
+    var_value : any
+        The value of the variable (unused in this condition).
 
-    Returns:
-        bool: True if 'fs' or 'fre' is in the variable path, False otherwise.
+    Returns
+    -------
+    bool
+        True if 'fs' or 'fre' is in the variable path, False otherwise.
     """
     var_path = var_path.lower()
     return 'fs' in var_path or 'fre' in var_path
@@ -109,12 +188,17 @@ def _condition_sampling_channel_name(var_path, var_value):
     """
     Condition function that checks if the variable path contains 'chan'.
 
-    Parameters:
-        var_path (str): The path of the variable.
-        var_value: The value of the variable (unused in this condition).
+    Parameters
+    ----------
+    var_path : str
+        The path of the variable.
+    var_value: any
+        The value of the variable (unused in this condition).
 
-    Returns:
-        bool: True if 'chan' is in the variable path, False otherwise.
+    Returns
+    -------
+    bool
+        True if 'chan' is in the variable path, False otherwise.
     """
     var_path = var_path.lower()
     return ('chan' in var_path or 'chname' in var_path or 'clab' in var_path) and (
@@ -123,6 +207,35 @@ def _condition_sampling_channel_name(var_path, var_value):
 
 def _search_data(data, path, condition_func, satisfying_variables, current_depth=0, max_depth=5, max_width=5,
                  ignore_keys=None, debug=False):
+    """
+    Recursively search for variables in nested data structures that satisfy a given condition.
+
+    Parameters
+    ----------
+    data : dict or ndarray
+        The data structure to search through, which can be a dictionary or a NumPy ndarray.
+    path : str
+        The current path in the data structure, used for tracking the location of found variables.
+    condition_func : callable
+        A function that takes a path and data item and returns True if the item satisfies the search condition.
+    satisfying_variables : list
+        A list that will be populated with tuples of paths and their corresponding data that satisfy the condition.
+    current_depth : int, optional
+        The current depth of recursion, default is 0.
+    max_depth : int, optional
+        The maximum depth to search, default is 5.
+    max_width : int, optional
+        The maximum number of items to process at each level, default is 5.
+    ignore_keys : list, optional
+        A list of keys to ignore during the search, default excludes certain internal keys.
+    debug : bool, optional
+        If True, prints debugging information during the search.
+
+    Returns
+    -------
+    None
+        The function modifies the satisfying_variables list in place.
+    """
     if ignore_keys is None:
         ignore_keys = ['__header__', '__version__', '__globals__']
     if debug:
