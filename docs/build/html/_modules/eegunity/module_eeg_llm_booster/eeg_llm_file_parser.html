@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eegunity.module_eeg_llm_booster.eeg_llm_file_parser &mdash; EEGUnity 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -69,17 +69,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for eegunity.module_eeg_llm_booster.eeg_llm_file_parser</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Title: LLM Boost Parser using gpt4.0</span>
-<span class="sd">Description: his project provides a Python script to parse and process EEG data files (CSV or TXT) using Azure OpenAI&#39;s GPT model to generate a function that reads the data, calculates the sampling frequency, and extracts channel names.</span>
-<span class="sd">Author: Ziyi Jia</span>
-<span class="sd">Email: Ziyi.Jia21@student.xjtlu.edu.cn</span>
-<span class="sd">GitHub: [Ziyi-Jia05](https://github.com/1232353124)</span>
-<span class="sd">Date Created: 2024-06-17</span>
-<span class="sd">Last Modified: 2024-07-26</span>
-<span class="sd">Version: 1.0</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># ----------------------------------------------------------------------</span>
+<span></span><span class="c1"># ----------------------------------------------------------------------</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">mne</span>
@@ -94,26 +84,44 @@
 <span class="sd">    Parses and processes an EEG data file using Azure OpenAI to generate a function</span>
 <span class="sd">    that reads the data, calculates the sampling frequency, and extracts channel names.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">        file_path (str): Path to the CSV or TXT file</span>
-<span class="sd">        api_key (str): API key for Azure OpenAI.</span>
-<span class="sd">        azure_endpoint (str): Endpoint URL for Azure OpenAI.</span>
-<span class="sd">        max_iterations (int, optional): Maximum number of iterations to refine the generated function code. Default is 5.</span>
+<span class="sd">    This function interacts with Azure OpenAI to automatically generate and refine a Python</span>
+<span class="sd">    function that reads EEG data from a CSV or TXT file, determines the sampling frequency</span>
+<span class="sd">    from timestamp columns, and extracts the relevant channel names. The function iterates</span>
+<span class="sd">    through the process up to `max_iterations` times to refine the generated code in case</span>
+<span class="sd">    of errors or unsatisfactory outputs.</span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the CSV or TXT file.</span>
+<span class="sd">    api_key : str</span>
+<span class="sd">        API key for Azure OpenAI.</span>
+<span class="sd">    azure_endpoint : str</span>
+<span class="sd">        Endpoint URL for Azure OpenAI.</span>
+<span class="sd">    max_iterations : (int, optional)</span>
+<span class="sd">        Maximum number of iterations to refine the generated function code. Default is 5.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">        mne.io.Raw: An MNE RawArray object containing the processed EEG data.</span>
 
-<span class="sd">    Raises:</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
 <span class="sd">        ValueError: If the file extension is not supported.</span>
 <span class="sd">        FileNotFoundError: If the specified file is not found.</span>
 <span class="sd">        RuntimeError: If the function code cannot be generated within the maximum iteration limit.</span>
-<span class="sd">    Usage:</span>
-<span class="sd">        api_key = (&quot;your api key here&quot;)</span>
-<span class="sd">        azure_endpoint = &quot;https://your_endpoint&quot;</span>
-<span class="sd">        file_path = &quot;data_file&quot;</span>
-<span class="sd">        raw_data = LLM_boost_parser(file_path, api_key, azure_endpoint)</span>
-<span class="sd">        print(&quot;Extracted Data:&quot;)</span>
-<span class="sd">        print(raw_data)</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; api_key = &quot;your_api_key&quot;</span>
+<span class="sd">    &gt;&gt;&gt; azure_endpoint = &quot;https://your_endpoint&quot;</span>
+<span class="sd">    &gt;&gt;&gt; locator_path = &quot;data_file.csv&quot;</span>
+<span class="sd">    &gt;&gt;&gt; raw_data = llm_boost_parser(locator_path, api_key, azure_endpoint)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Extracted Data:&quot;, raw_data)</span>
+
+<span class="sd">    Contributor</span>
+<span class="sd">    -----------</span>
+<span class="sd">    Ziyi Jia (Ziyi.Jia21@student.xjtlu.edu.cn), on 2024-07-26.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">file_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
     <span class="c1"># Check if the file is a CSV or TXT file</span>

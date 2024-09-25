@@ -1,0 +1,7 @@
+{
+  "test_data_list": [
+    "figshare_meng2019_CI"
+  ],
+  "locator_base_path": "../locator",
+  "CI_output_path": "../../EEGUnity_CI"
+}

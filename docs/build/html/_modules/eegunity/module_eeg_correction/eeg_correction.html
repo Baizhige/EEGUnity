@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>eegunity.module_eeg_correction.eeg_correction &mdash; EEGUnity 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
 
   
@@ -93,9 +93,24 @@
 <a class="viewcode-back" href="../../../eegunity.module_eeg_correction.html#eegunity.module_eeg_correction.eeg_correction.EEGCorrection.report">[docs]</a>
     <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">           Generate a statistical report on the dataset, including file type proportions, sampling rates,</span>
-<span class="sd">           channel configurations, and completeness checks. This report can be generated for individual</span>
-<span class="sd">           groups within the dataset or for the dataset as a whole.</span>
+<span class="sd">        Generate a statistical report on the dataset, providing proportions for file types,</span>
+<span class="sd">        sampling rates, channel configurations, and completeness checks. The report can be</span>
+<span class="sd">        generated for the dataset as a whole or for individual groups based on domain tags.</span>
+
+<span class="sd">        The report includes:</span>
+<span class="sd">        - File Type Proportions (%)</span>
+<span class="sd">        - Sampling Rate Proportions (%)</span>
+<span class="sd">        - Channel Configuration Proportions (%)</span>
+<span class="sd">        - Completeness Check Proportions (%)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            dict: A dictionary containing the computed proportions for file types,</span>
+<span class="sd">            sampling rates, channel configurations, and completeness checks for each domain or overall.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; unified_dataset.eeg_correction.report()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">percentage</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">whole</span><span class="p">):</span>
@@ -174,25 +189,40 @@
 
 <div class="viewcode-block" id="EEGCorrection.visualization_frequency">
 <a class="viewcode-back" href="../../../eegunity.module_eeg_correction.html#eegunity.module_eeg_correction.eeg_correction.EEGCorrection.visualization_frequency">[docs]</a>
-    <span class="k">def</span> <span class="nf">visualization_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_sample</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">visualization_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_sample</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Visualize the frequency spectrum for each domain in the dataset.</span>
+<span class="sd">        Visualize the frequency spectrum for each domain in the dataset.</span>
 
-<span class="sd">            Parameters:</span>
-<span class="sd">            -----------</span>
-<span class="sd">            max_sample : int, optional</span>
-<span class="sd">                The maximum number of samples to visualize per domain. If the number of</span>
-<span class="sd">                samples in a domain exceeds this value, a random subset will be used.</span>
-<span class="sd">                Default is 10.</span>
+<span class="sd">        For each domain in the dataset, this function computes and visualizes the</span>
+<span class="sd">        amplitude spectrum of the data. The number of samples visualized per domain</span>
+<span class="sd">        is limited by the `max_sample` parameter. If a domain contains more samples</span>
+<span class="sd">        than this limit, a random subset will be selected.</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">            --------</span>
-<span class="sd">            None</span>
-<span class="sd">                This function does not return any value. It displays frequency spectrum</span>
-<span class="sd">                plots for each domain in the dataset.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        max_sample : int, optional</span>
+<span class="sd">            The maximum number of samples to visualize per domain. If the number of</span>
+<span class="sd">            samples in a domain exceeds this value, a random subset will be used.</span>
+<span class="sd">            The default value is 10.</span>
 
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            This function does not return any value. It displays frequency spectrum</span>
+<span class="sd">            plots for each domain in the dataset.</span>
 
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        If a domain contains inconsistent sampling rates across its samples, the</span>
+<span class="sd">        data will be resampled to the lowest sampling rate within the domain.</span>
+<span class="sd">        Frequency bands for visualization are fixed as follows: 0-4 Hz, 4-8 Hz,</span>
+<span class="sd">        and 8-13 Hz, 13-30 Hz.</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; unified_dataset.eeg_batch.visualization_frequency(max_sample=5)</span>
+<span class="sd">        &gt;&gt;&gt; # This will visualize the frequency spectrum for up to 5 samples per domain from the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">compute_amplitude_spectrum</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">):</span>
             <span class="c1"># Compute amplitude spectrum using scipy&#39;s welch method</span>
             <span class="n">freqs</span><span class="p">,</span> <span class="n">psd</span> <span class="o">=</span> <span class="n">welch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">sfreq</span><span class="p">),</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;hann&#39;</span><span class="p">,</span> <span class="n">nperseg</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -260,18 +290,33 @@
 <a class="viewcode-back" href="../../../eegunity.module_eeg_correction.html#eegunity.module_eeg_correction.eeg_correction.EEGCorrection.visualization_channels_corr">[docs]</a>
     <span class="k">def</span> <span class="nf">visualization_channels_corr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_sample</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Visualizes the correlation between EEG data channels for different domains.</span>
+<span class="sd">        Visualize the correlation between EEG data channels for different domains.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        This method computes and visualizes the correlation matrix between EEG channels for each domain</span>
+<span class="sd">        available in the dataset. For each domain, a sample of EEG data is selected, and the correlation</span>
+<span class="sd">        between channels is plotted as a matrix.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        max_sample : int, optional</span>
-<span class="sd">            Maximum number of samples to visualize per domain. Default is 16.</span>
+<span class="sd">            The maximum number of samples to visualize per domain. If the number of available samples</span>
+<span class="sd">            exceeds this value, a random subset of samples is selected. Default is 16.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        None</span>
-<span class="sd">            This function does not return a value. It displays a set of correlation matrix plots for each domain.</span>
+<span class="sd">            This function does not return any value. It generates and displays a set of correlation matrix</span>
+<span class="sd">            plots for each domain.</span>
 
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        - This function uses the `np.corrcoef` method to compute the correlation matrix.</span>
+<span class="sd">        - The visualization is created using `matplotlib`, and the correlation values range from -1 to 1.</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; # To visualize the correlation matrices for up to 10 samples per domain:</span>
+<span class="sd">        &gt;&gt;&gt; unified_dataset.eeg_batch.visualization_channels_corr(max_sample=10)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">compute_channel_correlation</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
