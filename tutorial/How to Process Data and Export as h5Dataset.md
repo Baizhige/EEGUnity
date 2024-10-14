@@ -5,7 +5,8 @@ This section introduces two demos for processing EEG datasets using **EEGUnity**
 
 ## Demo 1: Detailed Processing Workflow (`demo_make_h5Dataset.py`)
 
-This demo illustrates how to process EEG datasets step by step and export them as h5Dataset. The process involves multiple IO operations, making it slower but more flexible for debugging. This method is suitable for users who want precise control over each processing step.
+This demo illustrates how to process EEG datasets step by step and export them as h5Dataset. The process involves multiple IO operations, making it slower but more flexible for debugging. This method is suitable for users who want precise control over each processing step. The two demos presented in this tutorial allow for flexible EEG data processing depending on the user's needs. The first demo provides a detailed step-by-step approach for users who prefer fine control over each process, while the second demo offers a quicker and more streamlined batch processing method for users familiar with Python.
+
 
 ### Key Steps:
 1. Load the dataset directory.
@@ -33,18 +34,18 @@ from eegunity.unifieddataset import UnifiedDataset
 # 8. Export the processed data as an h5Dataset
 
 # Parameter settings
-input_path = r'E:\tuh_eeg_artifact'  # Dataset directory
-domain_tag = "tuh_eeg_artifact"      # Domain tag for marking the dataset
-output_path = r'E:\AACache\tuh_eeg_artifact_h5Dataset'  # Output path for the h5Dataset
+input_path = r'path/to/dataset'  # Dataset directory
+domain_tag = "demp-tag"      # Domain tag for marking the dataset
+output_path = r'path/for/saving-h5Dataset'  # Output path for the h5Dataset
 
 # Intermediate processing cache paths
-cache_bandpassfilter_path = r"E:\AACache\tuh_eeg_artifact_completed_bandpassfilter"
-cache_notchfilter_path = r"E:\AACache\tuh_eeg_artifact_completed_notchfilter"
-cache_resample_path = r"E:\AACache\tuh_eeg_artifact_completed_filter_resample200"
-cache_norm_path = r"E:\AACache\tuh_eeg_artifact_completed_filter_resample200_norm"
+cache_bandpassfilter_path = r"path/for/saving-dataset-by-bandpass-filter"
+cache_notchfilter_path = r"path/for/saving-dataset-by-notch-filter"
+cache_resample_path = r"path/for/saving-dataset-by-resample"
+cache_norm_path = r"path/for/saving-dataset-by-normalization"
 
 # Locator file path for saving processed results
-locator_norm_path = r".\locator\tuh_eeg_artifact_completed_filter_resample200_norm.csv"
+locator_norm_path = r"path/for/saving-locator.csv"
 
 # Code execution steps
 # 1. Load the dataset directory
@@ -112,10 +113,10 @@ import os
 # 8. Export the processed data as an h5Dataset
 
 # Parameter settings
-input_path = r'E:\tuh_eeg_artifact'  # Dataset directory
-domain_tag = "tuh_eeg_artifact"      # Domain tag for marking the dataset
-cache_path = r'E:\AACache\tug_eeg_artifact_quick_process'  # Cache path for batch processing
-output_path = r'E:\AACache\tuh_eeg_artifact_h5Dataset'  # Output path for h5Dataset
+input_path = r'path/to/dataset'  # Dataset directory
+domain_tag = "demo-tag"      # Domain tag for marking the dataset
+cache_path = r"path/for/saving-dataset-by-pipeline"  # Cache path for batch processing
+output_path = r"path/for/saving-h5Dataset"  # Output path for h5Dataset
 
 # Define the processing function using the Pipeline for simplification
 def app_func(row, output_dir):
@@ -130,8 +131,8 @@ def app_func(row, output_dir):
         lambda mne_raw: mne_raw.resample(sfreq=200),  # Resample to 200 Hz
         normalize_mne   # Custom normalization function
     ])
-    mne_raw = get_data_row(row, is_set_channel_type=True)  # Get and set channel types
-    processed_mne_raw = pipeline.forward(mne_raw)  # Process data
+    mne_raw = get_data_row(row, is_set_channel_type=True)  # Get and set channel types, for later mne_raw.pick_types（）
+    processed_mne_raw = pipeline.forward(mne_raw)  # Process data based on custom pipeline
     # Save the processed EEG data
     filename = os.path.basename(row['File Path'])  # Get the file name
     output_path = f"{output_dir}/{filename}_processed.fif"  # Define the output path
@@ -156,6 +157,3 @@ unified_dataset.eeg_batch.batch_process(
 unified_dataset_process = UnifiedDataset(dataset_path=cache_path, domain_tag=domain_tag)
 unified_dataset_process.eeg_batch.export_h5Dataset(output_path, name=domain_tag, verbose=True)
 ```
-
-## Conclusion
-The two demos presented in this tutorial allow for flexible EEG data processing depending on the user's needs. The first demo provides a detailed step-by-step approach for users who prefer fine control over each process, while the second demo offers a quicker and more streamlined batch processing method for users familiar with Python.
