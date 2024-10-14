@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath('../..'))  # 将项目根目录添加到模�
 project = 'EEGUnity'
 copyright = '2024, Wenlong You'
 author = 'Wenlong You'
-release = '0.0.1'
+release = '0.3.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

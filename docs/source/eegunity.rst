@@ -11,6 +11,7 @@ Subpackages
    eegunity.module_eeg_correction
    eegunity.module_eeg_llm_booster
    eegunity.module_eeg_parser
+   eegunity.utils
 
 Submodules
 ----------
