@@ -48,7 +48,8 @@ my_project/
 └── your_script.py
 ```
 # Tutorial
-1. How to Process Data and Export as h5Dataset: [Click here to view the tutorial](./tutorial/How to Process Data and Export as h5Dataset.md)
+1. How to Process Data and Export as h5Dataset: [Click here to view the tutorial](./tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.md)
+
 
 # Project Documentation
 You can view the project manual through the following link: [Click here to view the manual](https://eegunity.readthedocs.io/en/latest/)
