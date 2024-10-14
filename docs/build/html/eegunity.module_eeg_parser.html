@@ -140,6 +140,27 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.channel_name_parser">
+<span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">channel_name_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#channel_name_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.channel_name_parser" title="Link to this definition">¶</a></dt>
+<dd><p>Format and standardize a list of channel names based on predefined rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_string</strong> (<em>str</em>) – A comma-separated string containing channel names to be formatted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A comma-separated string of formatted channel names. If duplicates are found, the original input string is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Warns if an invalid channel name is detected or if a duplicate formatted channel name is found.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.convert_unit">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">convert_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Raw</span></span></span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#convert_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.convert_unit" title="Link to this definition">¶</a></dt>
 <dd><p>Convert the units of EEG data in a MNE Raw object.</p>
@@ -200,39 +221,22 @@ If it fails, use mne.events_from_annotations to extract events.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.format_channel_names">
-<span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">format_channel_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#format_channel_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.format_channel_names" title="Link to this definition">¶</a></dt>
-<dd><p>Format and standardize a list of channel names based on predefined rules.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_string</strong> (<em>str</em>) – A comma-separated string containing channel names to be formatted.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A comma-separated string of formatted channel names. If duplicates are found, the original input string is returned.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Warns if an invalid channel name is detected or if a duplicate formatted channel name is found.</p>
-</div>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="eegunity.module_eeg_parser.eeg_parser.get_data_row">
 <span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">get_data_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_set_channel_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_set_montage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pick_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_convert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">BaseRaw</span></span></span><a class="reference internal" href="_modules/eegunity/module_eeg_parser/eeg_parser.html#get_data_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_parser.eeg_parser.get_data_row" title="Link to this definition">¶</a></dt>
-<dd><p>Process and return raw EEG data based on the input row information. Allows handling of standard and non-standard data.</p>
+<dd><p>Process and return raw EEG data based on the input row information.
+Allows handling of standard and non-standard data with options for
+setting channel types, montage, normalization, and unit conversion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>row</strong> (<em>dict</em>) – Dictionary containing data attributes, such as file paths, file types, and channel names.</p></li>
+<li><p><strong>row</strong> (<em>dict</em>) – Dictionary containing data attributes, such as file paths, file types,
+and channel names.</p></li>
 <li><p><strong>norm_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of normalization to apply, if any. Defaults to None.</p></li>
 <li><p><strong>is_set_channel_type</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to set channel types based on provided information. Defaults to False.</p></li>
 <li><p><strong>is_set_montage</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to set montage (electrode coordinates). Defaults to False.</p></li>
 <li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – Verbosity level for MNE functions. Defaults to ‘CRITICAL’.</p></li>
-<li><p><strong>pick_types</strong> (<em>dict</em><em>, </em><em>optional</em>) – Channel picking parameters for MNE. Defaults to None.</p></li>
+<li><p><strong>pick_types</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary specifying which channel types to include. The keys should
+match the parameters of <cite>raw.pick_types()</cite>. Defaults to None.</p></li>
 <li><p><strong>unit_convert</strong> (<em>str</em><em>, </em><em>optional</em>) – Conversion type for resetting channel units. Defaults to None.</p></li>
 <li><p><strong>kwargs</strong> (<em>any</em>) – Additional keyword arguments to enhance flexibility and robustness.</p></li>
 </ul>
@@ -244,7 +248,11 @@ If it fails, use mne.events_from_annotations to extract events.</p>
 <dd class="field-odd"><p>mne.io.BaseRaw</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the number of channels in the locator file does not match the metadata.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the number of channels in the locator file does not match the metadata.</p></li>
+<li><p><strong>Warning</strong> – If <cite>pick_types</cite> is not None but <cite>is_set_channel_type</cite> is False, a warning
+    will be issued to inform the user to set <cite>is_set_channel_type=True</cite>.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

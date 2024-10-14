@@ -144,6 +144,34 @@ This allows fine-tuning the data retrieval process.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.auto_domain">
+<span class="sig-name descname"><span class="pre">auto_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.auto_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.auto_domain" title="Link to this definition">¶</a></dt>
+<dd><p>Automatically modify the ‘Domain Tag’ of each row based on ‘Sampling Rate’ and ‘Channel Names’.</p>
+<p>This function processes each row in the dataset and updates the ‘Domain Tag’
+by appending the ‘Sampling Rate’ and a unique encoded representation of the ‘Channel Names’.
+The ‘Channel Names’ are encoded using a hashing function to ensure uniqueness, and
+the ‘Domain Tag’ is updated in the format:
+<cite>f”row[‘Domain Tag’]-row[‘Sampling Rate’]-ch_enc(row[‘Channel Names’])”</cite>.</p>
+<p>The function utilizes the <cite>batch_process</cite> method to apply these modifications
+across the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The function modifies the dataset in place by updating the ‘Domain Tag’ column.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>KeyError</strong> – If the required columns (‘Domain Tag’, ‘Sampling Rate’, ‘Channel Names’) are missing.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">auto_domain</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.batch_process">
 <span class="sig-name descname"><span class="pre">batch_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">con_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.batch_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.batch_process" title="Link to this definition">¶</a></dt>
 <dd><p>Process each row of the given dataframe locator based on conditions specified
@@ -257,6 +285,39 @@ for further filtering options. Refer to the respective functions’ documentatio
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.export_h5Dataset">
+<span class="sig-name descname"><span class="pre">export_h5Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EEGUnity_export'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.export_h5Dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.export_h5Dataset" title="Link to this definition">¶</a></dt>
+<dd><p>Export the dataset in HDF5 format to the specified output path.</p>
+<p>This function processes all files in the dataset, ensuring that each file
+is stored in a separate group with its own dataset and attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The directory path where the exported HDF5 files will be saved.
+A <cite>FileNotFoundError</cite> is raised if the path does not exist.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the HDF5 file. Must be a string. The default value is ‘EEGUnity_export’.
+Raises a <cite>TypeError</cite> if the value provided is not a string.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, prints the progress of the export process. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function does not return any value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the output path does not exist.</p></li>
+<li><p><strong>FileExistsError</strong> – If the HDF5 file already exists in the specified output path.</p></li>
+<li><p><strong>ValueError</strong> – If channel configurations or counts are inconsistent within a domain tag.</p></li>
+<li><p><strong>TypeError</strong> – If the <cite>name</cite> parameter is not a string.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="eegunity.module_eeg_batch.eeg_batch.EEGBatch.filter">
 <span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bandpass'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notch_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_adjust_h_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/module_eeg_batch/eeg_batch.html#EEGBatch.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_batch.eeg_batch.EEGBatch.filter" title="Link to this definition">¶</a></dt>
 <dd><p>Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.</p>
@@ -280,18 +341,7 @@ for further filtering options. Refer to the respective functions’ documentatio
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If an invalid <cite>filter_type</cite> is specified or if cutoff frequencies are inconsistent.</p>
-</dd>
 </dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Ensure that the output path is accessible and that all necessary channels are specified for filtering.</p>
-</div>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;/path/to/save/&#39;</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="s1">&#39;bandpass&#39;</span><span class="p">,</span> <span class="n">l_freq</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">h_freq</span><span class="o">=</span><span class="mf">40.0</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -449,7 +499,9 @@ perform sample-wise normalization or aggregate by domain mean, depending on the 
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_path</strong> (<em>str</em>) – The path where the normalized file will be saved.</p></li>
-<li><p><strong>norm_type</strong> (<em>{'sample-wise'</em><em>, </em><em>'domain-wise'}</em><em>, </em><em>optional</em>) – The type of normalization to apply. Defaults to ‘sample-wise’.</p></li>
+<li><p><strong>norm_type</strong> (<em>str</em>) – The type of normalization to perform. It can be:
+- ‘channel-wise’: Normalize each channel individually based on its mean and standard deviation.
+- ‘sample-wise’: Normalize all channels based on a common mean and standard deviation.</p></li>
 <li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs.
 Defaults to <cite>False</cite>.</p></li>
 <li><p><strong>domain_mean</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True (default), the function aggregates the results by domain tags. Each domain contains the
