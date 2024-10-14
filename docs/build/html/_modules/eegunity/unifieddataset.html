@@ -81,13 +81,80 @@
 <div class="viewcode-block" id="UnifiedDataset">
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset">[docs]</a>
 <span class="k">class</span> <span class="nc">UnifiedDataset</span><span class="p">(</span><span class="n">UDatasetSharedAttributes</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain_tag</span><span class="p">,</span> <span class="n">dataset_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">locator_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_unzip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="s1">&#39;CRITICAL&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the kernel class to manage mutiple EEG dataset and associated processing tools.</span>
+
+<span class="sd">        This class allows for the initialization of EEG data using either a</span>
+<span class="sd">        dataset path or a locator path, with the option to unzip the potential zip file.</span>
+<span class="sd">        If a dataset path is provided, a domain tag must also be provided.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        dataset_path : str, optional</span>
+<span class="sd">            Path to the dataset. Should not be provided alongside locator_path.</span>
+<span class="sd">        locator_path : str, optional</span>
+<span class="sd">            Path to the locator. Should not be provided alongside dataset_path.</span>
+<span class="sd">        is_unzip : bool, optional</span>
+<span class="sd">            A flag indicating if the dataset should be unzipped (default is True).</span>
+<span class="sd">        domain_tag : str, optional</span>
+<span class="sd">            Domain tag, required when dataset_path is provided.</span>
+<span class="sd">        verbose : str, optional</span>
+<span class="sd">            Level of verbosity for logging (default is &#39;CRITICAL&#39;).</span>
+<span class="sd">        eeg_parser : EEGParser</span>
+<span class="sd">            EEGParser module</span>
+<span class="sd">        eeg_batch : EEGBatch</span>
+<span class="sd">            EEGBatch module</span>
+<span class="sd">        eeg_correction : EEGCorrection</span>
+<span class="sd">            EEGCorrection module</span>
+<span class="sd">        module_eeg_llm_booster : EEGLLMBooster</span>
+<span class="sd">           EEGLLMBooster module</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain_tag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">locator_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">is_unzip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;CRITICAL&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the class with either dataset_path or locator_path. Only one of</span>
+<span class="sd">        these parameters should be provided. If dataset_path is provided, domain_tag is required.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        domain_tag : str, optional</span>
+<span class="sd">            The domain tag, required when dataset_path is provided.</span>
+<span class="sd">        dataset_path : str, optional</span>
+<span class="sd">            The path to the dataset. Should not be provided alongside locator_path.</span>
+<span class="sd">        locator_path : str, optional</span>
+<span class="sd">            The path to the locator. Should not be provided alongside dataset_path.</span>
+<span class="sd">        is_unzip : bool, optional</span>
+<span class="sd">            A flag indicating whether the dataset should be unzipped (default is True).</span>
+<span class="sd">        verbose : str, optional</span>
+<span class="sd">            The verbosity level for logging (default is &#39;CRITICAL&#39;).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">        -------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If both dataset_path and locator_path are provided, or neither is provided.</span>
+<span class="sd">            If dataset_path is provided without domain_tag.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Ensure only one of dataset_path or locator_path is provided</span>
+        <span class="k">if</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="n">locator_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only one of &#39;dataset_path&#39; or &#39;locator_path&#39; can be provided, not both.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">locator_path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One of &#39;dataset_path&#39; or &#39;locator_path&#39; must be provided.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Ensure domain_tag is provided when dataset_path is used</span>
+        <span class="k">if</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">domain_tag</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A &#39;domain_tag&#39; must be provided when &#39;dataset_path&#39; is specified.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Set attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;dataset_path&#39;</span><span class="p">:</span> <span class="n">dataset_path</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator_path&#39;</span><span class="p">:</span> <span class="n">locator_path</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;is_unzip&#39;</span><span class="p">:</span> <span class="n">is_unzip</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;domain_tag&#39;</span><span class="p">:</span> <span class="n">domain_tag</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="n">verbose</span><span class="p">})</span>
+
+        <span class="c1"># Initialize associated modules</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eeg_parser</span> <span class="o">=</span> <span class="n">EEGParser</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eeg_batch</span> <span class="o">=</span> <span class="n">EEGBatch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eeg_correction</span> <span class="o">=</span> <span class="n">EEGCorrection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -116,7 +183,6 @@
     <span class="k">def</span> <span class="nf">set_locator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_locator</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_locator</span></div>
 </div>
-
 
 </pre></div>
 
