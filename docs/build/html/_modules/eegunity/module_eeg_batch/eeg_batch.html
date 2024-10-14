@@ -74,21 +74,24 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-
+<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">mne</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_batch.eeg_scores</span> <span class="kn">import</span> <span class="n">calculate_eeg_quality_scores</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">get_data_row</span><span class="p">,</span> <span class="n">format_channel_names</span><span class="p">,</span> <span class="n">extract_events</span><span class="p">,</span> <span class="n">infer_channel_unit</span>
+<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">get_data_row</span><span class="p">,</span> <span class="n">channel_name_parser</span><span class="p">,</span> <span class="n">extract_events</span><span class="p">,</span> <span class="n">infer_channel_unit</span>
 <span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
+<span class="kn">from</span> <span class="nn">eegunity.utils.h5</span> <span class="kn">import</span> <span class="n">h5Dataset</span>
 
 <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="n">json_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;module_eeg_parser&#39;</span><span class="p">,</span> <span class="s1">&#39;combined_montage.json&#39;</span><span class="p">)</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-<span class="n">STANDARD_EEG_CHANNELS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">STANDARD_EEG_CHANNELS</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="EEGBatch">
@@ -620,12 +623,11 @@
             <span class="k">if</span> <span class="n">channel_name</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">cache</span><span class="p">[</span><span class="n">channel_name</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">formatted_channel_name</span> <span class="o">=</span> <span class="n">format_channel_names</span><span class="p">(</span><span class="n">channel_name</span><span class="p">)</span>
+                <span class="n">formatted_channel_name</span> <span class="o">=</span> <span class="n">channel_name_parser</span><span class="p">(</span><span class="n">channel_name</span><span class="p">)</span>
                 <span class="n">cache</span><span class="p">[</span><span class="n">channel_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">formatted_channel_name</span>
                 <span class="k">return</span> <span class="n">formatted_channel_name</span>
 
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span> <span class="n">app_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s2">&quot;Channel Names&quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></div>
 
 
@@ -641,7 +643,8 @@
                <span class="n">picks</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
                <span class="n">miss_bad_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -668,36 +671,27 @@
 <span class="sd">        -------</span>
 <span class="sd">        None</span>
 <span class="sd">            The function modifies the dataset in place.</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ValueError</span>
-<span class="sd">            If an invalid `filter_type` is specified or if cutoff frequencies are inconsistent.</span>
-
-<span class="sd">        Note</span>
-<span class="sd">        ----</span>
-<span class="sd">        Ensure that the output path is accessible and that all necessary channels are specified for filtering.</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; unified_dataset.eeg_batch.filter(&#39;/path/to/save/&#39;, filter_type=&#39;bandpass&#39;, l_freq=1.0, h_freq=40.0)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">con_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">l_freq</span><span class="p">,</span> <span class="n">h_freq</span><span class="p">,</span> <span class="n">notch_freq</span><span class="p">,</span> <span class="n">filter_type</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">auto_adjust_h_freq</span><span class="p">,</span> <span class="n">picks</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">l_freq</span><span class="p">,</span> <span class="n">h_freq</span><span class="p">,</span> <span class="n">notch_freq</span><span class="p">,</span> <span class="n">filter_type</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">auto_adjust_h_freq</span><span class="p">,</span> <span class="n">picks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Construct file paths</span>
                 <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">new_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_filter.fif&quot;</span><span class="p">)</span>
-                <span class="n">mne_raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
-                <span class="c1"># get sampling rate</span>
+                <span class="c1"># Get the argument signature for get_data_row</span>
+                <span class="n">get_data_row_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">get_data_row</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+                <span class="c1"># Filter kwargs for get_data_row</span>
+                <span class="n">get_data_row_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">get_data_row_params</span><span class="p">}</span>
+
+                <span class="c1"># Call get_data_row with filtered kwargs</span>
+                <span class="n">mne_raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="o">**</span><span class="n">get_data_row_kwargs</span><span class="p">)</span>
+
+                <span class="c1"># Get sampling frequency and Nyquist frequency</span>
                 <span class="n">sfreq</span> <span class="o">=</span> <span class="n">mne_raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;sfreq&#39;</span><span class="p">]</span>
                 <span class="n">nyquist_freq</span> <span class="o">=</span> <span class="n">sfreq</span> <span class="o">/</span> <span class="mf">2.0</span>
 
-                <span class="c1"># adjust high pass frequency based on nyquist frequency</span>
+                <span class="c1"># Adjust high-pass frequency if it exceeds the Nyquist frequency</span>
                 <span class="k">if</span> <span class="n">h_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h_freq</span> <span class="o">&gt;=</span> <span class="n">nyquist_freq</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">auto_adjust_h_freq</span><span class="p">:</span>
                         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -707,46 +701,54 @@
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;High-pass frequency must be less than Nyquist frequency (</span><span class="si">{</span><span class="n">nyquist_freq</span><span class="si">}</span><span class="s2"> Hz).&quot;</span><span class="p">)</span>
 
-                <span class="c1"># add l_freq and h_freq to kwargs</span>
-                <span class="k">if</span> <span class="n">filter_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="s1">&#39;highpass&#39;</span><span class="p">,</span> <span class="s1">&#39;bandpass&#39;</span><span class="p">]:</span>
-                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;l_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">l_freq</span>
-                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;h_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h_freq</span>
-                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fir_design&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;firwin&#39;</span>
+                <span class="c1"># Get the argument signatures for mne_raw.filter and mne_raw.notch_filter</span>
+                <span class="n">filter_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">mne_raw</span><span class="o">.</span><span class="n">filter</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+                <span class="n">notch_filter_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">mne_raw</span><span class="o">.</span><span class="n">notch_filter</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
 
-                <span class="c1"># apply the appropriate filter based on filter_type</span>
+                <span class="c1"># Filter kwargs for mne_raw.filter and mne_raw.notch_filter</span>
+                <span class="n">filter_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">filter_params</span> <span class="ow">or</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">notch_filter_params</span><span class="p">}</span>
+
+                <span class="c1"># Add l_freq and h_freq to kwargs if applicable</span>
                 <span class="k">if</span> <span class="n">filter_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="s1">&#39;highpass&#39;</span><span class="p">,</span> <span class="s1">&#39;bandpass&#39;</span><span class="p">]:</span>
-                    <span class="n">mne_raw</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">picks</span><span class="o">=</span><span class="n">picks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="n">filter_kwargs</span><span class="p">[</span><span class="s1">&#39;l_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">l_freq</span>
+                    <span class="n">filter_kwargs</span><span class="p">[</span><span class="s1">&#39;h_freq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h_freq</span>
+                    <span class="n">filter_kwargs</span><span class="p">[</span><span class="s1">&#39;fir_design&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;firwin&#39;</span>
+
+                <span class="c1"># Apply the appropriate filter based on filter_type</span>
+                <span class="k">if</span> <span class="n">filter_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="s1">&#39;highpass&#39;</span><span class="p">,</span> <span class="s1">&#39;bandpass&#39;</span><span class="p">]:</span>
+                    <span class="n">mne_raw</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">picks</span><span class="o">=</span><span class="n">picks</span><span class="p">,</span> <span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;notch&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">notch_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">mne_raw</span><span class="o">.</span><span class="n">notch_filter</span><span class="p">(</span><span class="n">freqs</span><span class="o">=</span><span class="n">notch_freq</span><span class="p">,</span> <span class="n">picks</span><span class="o">=</span><span class="n">picks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                        <span class="n">mne_raw</span><span class="o">.</span><span class="n">notch_filter</span><span class="p">(</span><span class="n">freqs</span><span class="o">=</span><span class="n">notch_freq</span><span class="p">,</span> <span class="n">picks</span><span class="o">=</span><span class="n">picks</span><span class="p">,</span> <span class="o">**</span><span class="n">filter_kwargs</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;notch_freq must be specified for notch filter.&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid filter_type. Must be &#39;lowpass&#39;, &#39;highpass&#39;, &#39;bandpass&#39;, or &#39;notch&#39;.&quot;</span><span class="p">)</span>
 
-                <span class="c1"># save filtered data</span>
+                <span class="c1"># Save filtered data</span>
                 <span class="n">mne_raw</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">new_file_path</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_file_path</span>
 
-                <span class="k">return</span> <span class="n">new_file_path</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">miss_bad_data</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing file </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># Return an empty path to indicate failure</span>
+                    <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Return an empty path to indicate failure</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span>
 
-        <span class="n">new_path_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span>
-                                           <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">l_freq</span><span class="p">,</span> <span class="n">h_freq</span><span class="p">,</span> <span class="n">notch_freq</span><span class="p">,</span> <span class="n">filter_type</span><span class="p">,</span>
-                                                                <span class="n">output_path</span><span class="p">,</span> <span class="n">auto_adjust_h_freq</span><span class="p">,</span> <span class="n">picks</span><span class="p">,</span>
-                                                                <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
-                                           <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                           <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+        <span class="c1"># Process the batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                           <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">l_freq</span><span class="p">,</span> <span class="n">h_freq</span><span class="p">,</span> <span class="n">notch_freq</span><span class="p">,</span> <span class="n">filter_type</span><span class="p">,</span>
+                                                <span class="n">output_path</span><span class="p">,</span> <span class="n">auto_adjust_h_freq</span><span class="p">,</span> <span class="n">picks</span><span class="p">,</span>
+                                                <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+                           <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s2">&quot;File Path&quot;</span><span class="p">,</span> <span class="n">new_path_list</span><span class="p">)</span>
-        <span class="n">locator_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span>
-        <span class="n">locator_df</span> <span class="o">=</span> <span class="n">locator_df</span><span class="p">[</span><span class="n">locator_df</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">locator_df</span></div>
+        <span class="c1"># Update file paths in the dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s2">&quot;dataset_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_instance</span><span class="o">.</span><span class="n">eeg_parser</span><span class="o">.</span><span class="n">check_locator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main_instance</span><span class="o">.</span><span class="n">eeg_parser</span><span class="o">.</span><span class="n">_process_directory</span><span class="p">(</span><span class="n">output_path</span><span class="p">))})</span></div>
 
 
 <div class="viewcode-block" id="EEGBatch.ica">
@@ -1034,8 +1036,10 @@
 <span class="sd">        ----------</span>
 <span class="sd">        output_path : str</span>
 <span class="sd">            The path where the normalized file will be saved.</span>
-<span class="sd">        norm_type : {&#39;sample-wise&#39;, &#39;domain-wise&#39;}, optional</span>
-<span class="sd">            The type of normalization to apply. Defaults to &#39;sample-wise&#39;.</span>
+<span class="sd">        norm_type : str</span>
+<span class="sd">            The type of normalization to perform. It can be:</span>
+<span class="sd">            - &#39;channel-wise&#39;: Normalize each channel individually based on its mean and standard deviation.</span>
+<span class="sd">            - &#39;sample-wise&#39;: Normalize all channels based on a common mean and standard deviation.</span>
 <span class="sd">        miss_bad_data : bool, optional</span>
 <span class="sd">            Whether to skip the current file and continue processing the next one if an error occurs.</span>
 <span class="sd">            Defaults to `False`.</span>
@@ -1508,6 +1512,172 @@
 
         <span class="n">copied_instance</span><span class="o">.</span><span class="n">set_shared_attr</span><span class="p">({</span><span class="s1">&#39;locator&#39;</span><span class="p">:</span> <span class="n">updated_locator</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">copied_instance</span></div>
+
+
+<div class="viewcode-block" id="EEGBatch.export_h5Dataset">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.export_h5Dataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">export_h5Dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;EEGUnity_export&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the dataset in HDF5 format to the specified output path.</span>
+
+<span class="sd">        This function processes all files in the dataset, ensuring that each file</span>
+<span class="sd">        is stored in a separate group with its own dataset and attributes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : str</span>
+<span class="sd">            The directory path where the exported HDF5 files will be saved.</span>
+<span class="sd">            A `FileNotFoundError` is raised if the path does not exist.</span>
+<span class="sd">        name : str</span>
+<span class="sd">            The name of the HDF5 file. Must be a string. The default value is &#39;EEGUnity_export&#39;.</span>
+<span class="sd">            Raises a `TypeError` if the value provided is not a string.</span>
+<span class="sd">        verbose : bool, optional</span>
+<span class="sd">            If True, prints the progress of the export process. Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The function does not return any value.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        FileNotFoundError</span>
+<span class="sd">            If the output path does not exist.</span>
+<span class="sd">        FileExistsError</span>
+<span class="sd">            If the HDF5 file already exists in the specified output path.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If channel configurations or counts are inconsistent within a domain tag.</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If the `name` parameter is not a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The name parameter must be a string, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> instead.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output path does not exist: </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create the HDF5 file path</span>
+        <span class="n">h5_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span>
+
+        <span class="c1"># Check if the HDF5 file already exists</span>
+        <span class="k">if</span> <span class="n">h5_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The HDF5 file &#39;</span><span class="si">{</span><span class="n">h5_path</span><span class="si">}</span><span class="s2">&#39; already exists. Please choose a different name or delete the existing file.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create the HDF5 file handler</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5Dataset</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="c1"># Extract channel information for the current file</span>
+            <span class="n">current_channels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">channel</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
+            <span class="n">current_sf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]))</span>
+
+            <span class="c1"># Get EEG data</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">eeg_data</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+            <span class="c1"># Create a group and dataset in the HDF5 file for each file</span>
+            <span class="n">grp</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addGroup</span><span class="p">(</span><span class="n">grpName</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))</span>
+            <span class="n">dset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="s1">&#39;eeg&#39;</span><span class="p">,</span> <span class="n">eeg_data</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">eeg_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="c1"># Add individual attributes for each dataset</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;rsFreq&#39;</span><span class="p">,</span> <span class="n">current_sf</span><span class="p">)</span>  <span class="c1"># Sampling rate may vary per file</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;chOrder&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">current_channels</span><span class="p">))</span>  <span class="c1"># Channel order may vary per file</span>
+
+            <span class="c1"># Print progress if verbose is True</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed file: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># No need to return any result</span>
+
+        <span class="c1"># Process batch data without domain_tag filtering, processing all files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="n">app_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># Save the dataset to disk</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="c1"># Print completion message if verbose is True</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All data exported successfully to </span><span class="si">{</span><span class="n">h5_path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EEGBatch.auto_domain">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.auto_domain">[docs]</a>
+    <span class="k">def</span> <span class="nf">auto_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatically modify the &#39;Domain Tag&#39; of each row based on &#39;Sampling Rate&#39; and &#39;Channel Names&#39;.</span>
+
+<span class="sd">        This function processes each row in the dataset and updates the &#39;Domain Tag&#39;</span>
+<span class="sd">        by appending the &#39;Sampling Rate&#39; and a unique encoded representation of the &#39;Channel Names&#39;.</span>
+<span class="sd">        The &#39;Channel Names&#39; are encoded using a hashing function to ensure uniqueness, and</span>
+<span class="sd">        the &#39;Domain Tag&#39; is updated in the format:</span>
+<span class="sd">        `f&quot;row[&#39;Domain Tag&#39;]-row[&#39;Sampling Rate&#39;]-ch_enc(row[&#39;Channel Names&#39;])&quot;`.</span>
+
+<span class="sd">        The function utilizes the `batch_process` method to apply these modifications</span>
+<span class="sd">        across the dataset.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The function modifies the dataset in place by updating the &#39;Domain Tag&#39; column.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If the required columns (&#39;Domain Tag&#39;, &#39;Sampling Rate&#39;, &#39;Channel Names&#39;) are missing.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; unified_dataset.eeg_batch.auto_domain()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">ch_enc</span><span class="p">(</span><span class="n">channel_names</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Encodes the channel names into a short unique identifier.</span>
+
+<span class="sd">            The identifier includes the length of the channel names list (in digits) and</span>
+<span class="sd">            a 4-character hash that represents the content. Channel names order does not</span>
+<span class="sd">            affect the hash, ensuring only differences in content cause a different hash.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c1"># Split the channel names string by comma, strip whitespace, and sort the list</span>
+            <span class="n">channels</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">ch</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channel_names</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+
+            <span class="c1"># Join the sorted and stripped channel names back into a single string</span>
+            <span class="n">sorted_channel_str</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+
+            <span class="c1"># Hash the sorted channel string and take the first 4 characters of the hash</span>
+            <span class="n">hash_object</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">sorted_channel_str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="n">hash_part</span> <span class="o">=</span> <span class="n">hash_object</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">4</span><span class="p">]</span>  <span class="c1"># Use the first 4 characters of the hash</span>
+
+            <span class="c1"># Combine the length of the list with the 4-character hash</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">hash_part</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">def</span> <span class="nf">con_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="c1"># Always return True as we want to process all rows</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="c1"># Get the necessary values from the row</span>
+            <span class="n">domain_tag</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Domain Tag&#39;</span><span class="p">]</span>
+            <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">]</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Attempt to convert sampling rate to an integer after converting to float</span>
+                <span class="n">sampling_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sampling_rate</span><span class="p">))</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="c1"># If conversion fails, fallback to a default value (optional)</span>
+                <span class="n">sampling_rate</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">channel_names</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Generate the new domain tag using the provided format</span>
+            <span class="n">new_domain_tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">domain_tag</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">ch_enc</span><span class="p">(</span><span class="n">channel_names</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">return</span> <span class="n">new_domain_tag</span>
+
+        <span class="c1"># Use batch_process to apply the function to each row</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">con_func</span><span class="p">,</span> <span class="n">app_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Update the &#39;Domain Tag&#39; column with the new values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s2">&quot;Domain Tag&quot;</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

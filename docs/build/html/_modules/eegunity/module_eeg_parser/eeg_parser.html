@@ -77,12 +77,12 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">zipfile</span>
-
 <span class="kn">import</span> <span class="nn">mne</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_csv</span> <span class="kn">import</span> <span class="n">process_csv_files</span>
 <span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser_mat</span> <span class="kn">import</span> <span class="n">process_mat_files</span><span class="p">,</span> <span class="n">_find_variables_by_condition</span><span class="p">,</span> \
@@ -93,8 +93,8 @@
 <span class="n">json_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="s1">&#39;combined_montage.json&#39;</span><span class="p">)</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-<span class="n">STANDARD_EEG_CHANNELS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-<span class="n">EEG_PREFIXES_SUFFIXES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;EEG&quot;</span><span class="p">,</span> <span class="s2">&quot;FP&quot;</span><span class="p">,</span> <span class="s2">&quot;REF&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="s2">&quot;RE&quot;</span><span class="p">}</span>
+<span class="n">STANDARD_EEG_CHANNELS</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">EEG_PREFIXES_SUFFIXES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;EEG&quot;</span><span class="p">,</span> <span class="s2">&quot;REF&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="EEGParser">
@@ -103,7 +103,6 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">main_instance</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shared_attr</span> <span class="o">=</span> <span class="n">main_instance</span><span class="o">.</span><span class="n">_shared_attr</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">format_channel_names</span> <span class="o">=</span> <span class="n">format_channel_names</span>
         <span class="n">dataset_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;dataset_path&#39;</span><span class="p">]</span>
         <span class="n">locator_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator_path&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="n">locator_path</span><span class="p">:</span>
@@ -493,12 +492,15 @@
                  <span class="n">unit_convert</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mne</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">BaseRaw</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Process and return raw EEG data based on the input row information. Allows handling of standard and non-standard data.</span>
+<span class="sd">    Process and return raw EEG data based on the input row information.</span>
+<span class="sd">    Allows handling of standard and non-standard data with options for</span>
+<span class="sd">    setting channel types, montage, normalization, and unit conversion.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    row : dict</span>
-<span class="sd">        Dictionary containing data attributes, such as file paths, file types, and channel names.</span>
+<span class="sd">        Dictionary containing data attributes, such as file paths, file types,</span>
+<span class="sd">        and channel names.</span>
 <span class="sd">    norm_type : str, optional</span>
 <span class="sd">        Type of normalization to apply, if any. Defaults to None.</span>
 <span class="sd">    is_set_channel_type : bool, optional</span>
@@ -508,7 +510,8 @@
 <span class="sd">    verbose : str, optional</span>
 <span class="sd">        Verbosity level for MNE functions. Defaults to &#39;CRITICAL&#39;.</span>
 <span class="sd">    pick_types : dict, optional</span>
-<span class="sd">        Channel picking parameters for MNE. Defaults to None.</span>
+<span class="sd">        Dictionary specifying which channel types to include. The keys should</span>
+<span class="sd">        match the parameters of `raw.pick_types()`. Defaults to None.</span>
 <span class="sd">    unit_convert : str, optional</span>
 <span class="sd">        Conversion type for resetting channel units. Defaults to None.</span>
 <span class="sd">    kwargs : any</span>
@@ -523,6 +526,9 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the number of channels in the locator file does not match the metadata.</span>
+<span class="sd">    Warning</span>
+<span class="sd">        If `pick_types` is not None but `is_set_channel_type` is False, a warning</span>
+<span class="sd">        will be issued to inform the user to set `is_set_channel_type=True`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filepath</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;File Path&#39;</span><span class="p">)</span>
     <span class="n">file_type</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;File Type&#39;</span><span class="p">)</span>
@@ -538,9 +544,17 @@
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># Handle non-standard data</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">handle_nonstandard_data</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="c1"># Check if pick_types is provided without is_set_channel_type being True</span>
+    <span class="k">if</span> <span class="n">pick_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_set_channel_type</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;When `pick_types` is not None, it&#39;s recommended to set `is_set_channel_type=True`.&quot;</span><span class="p">)</span>
+
     <span class="c1"># Set channel types if required</span>
     <span class="k">if</span> <span class="n">is_set_channel_type</span><span class="p">:</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">set_channel_type</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Channel Names&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Apply pick types if provided</span>
+        <span class="k">if</span> <span class="n">pick_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">pick_types</span><span class="p">(</span><span class="o">**</span><span class="n">pick_types</span><span class="p">)</span>  <span class="c1"># Unpack the dictionary here</span>
 
     <span class="c1"># Set montage if required</span>
     <span class="k">if</span> <span class="n">is_set_montage</span><span class="p">:</span>
@@ -601,9 +615,9 @@
 
 
 
-<div class="viewcode-block" id="format_channel_names">
-<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.format_channel_names">[docs]</a>
-<span class="k">def</span> <span class="nf">format_channel_names</span><span class="p">(</span><span class="n">input_string</span><span class="p">):</span>
+<div class="viewcode-block" id="channel_name_parser">
+<a class="viewcode-back" href="../../../eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.channel_name_parser">[docs]</a>
+<span class="k">def</span> <span class="nf">channel_name_parser</span><span class="p">(</span><span class="n">input_string</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Format and standardize a list of channel names based on predefined rules.</span>
 
@@ -641,7 +655,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">valid_channels</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;REF&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="s2">&quot;EEG&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;EMG&quot;</span><span class="p">}</span>
+        <span class="n">valid_channels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;REF&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="s2">&quot;EEG&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;EMG&quot;</span><span class="p">]</span>
 
         <span class="c1"># Convert both parts to upper case for case-insensitive comparison</span>
         <span class="n">part1</span><span class="p">,</span> <span class="n">part2</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -661,14 +675,14 @@
         <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EEG:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;EEG&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;eeg&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
         <span class="c1"># define rules for replacement</span>
-        <span class="n">replacements</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;FAF&#39;</span><span class="p">:</span> <span class="s1">&#39;AFF&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;CFC&#39;</span><span class="p">:</span> <span class="s1">&#39;FCC&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;CPC&#39;</span><span class="p">:</span> <span class="s1">&#39;CCP&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;POP&#39;</span><span class="p">:</span> <span class="s1">&#39;PPO&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;TPT&#39;</span><span class="p">:</span> <span class="s1">&#39;TTP&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;TFT&#39;</span><span class="p">:</span> <span class="s1">&#39;FTT&#39;</span>
-        <span class="p">}</span>
+        <span class="n">replacements</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+            <span class="p">(</span><span class="s1">&#39;FAF&#39;</span><span class="p">,</span> <span class="s1">&#39;AFF&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;CFC&#39;</span><span class="p">,</span> <span class="s1">&#39;FCC&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;CPC&#39;</span><span class="p">,</span> <span class="s1">&#39;CCP&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;POP&#39;</span><span class="p">,</span> <span class="s1">&#39;PPO&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;TPT&#39;</span><span class="p">,</span> <span class="s1">&#39;TTP&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;TFT&#39;</span><span class="p">,</span> <span class="s1">&#39;FTT&#39;</span><span class="p">)</span>
+        <span class="p">])</span>
         <span class="c1"># employ replacement and propose warnings</span>
         <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">replacements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">old</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">channel</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
@@ -679,7 +693,6 @@
 
     <span class="c1"># Define a function to preprocess channel names by removing leading/trailing whitespace and EEG-related prefixes/suffixes</span>
     <span class="k">def</span> <span class="nf">preprocess_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">):</span>
-        <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">prefix_suffix</span> <span class="ow">in</span> <span class="n">EEG_PREFIXES_SUFFIXES</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">channel</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix_suffix</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
                 <span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix_suffix</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="p">):]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -694,7 +707,7 @@
         <span class="k">return</span> <span class="n">channel</span>
 
     <span class="c1"># Split the input string into a list of channel names</span>
-    <span class="n">channels</span> <span class="o">=</span> <span class="n">input_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="n">channel</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">input_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
 
     <span class="c1"># Initialize a set for formatted channel names and a set for seen channel names</span>
     <span class="n">formatted_channels</span> <span class="o">=</span> <span class="p">[]</span>

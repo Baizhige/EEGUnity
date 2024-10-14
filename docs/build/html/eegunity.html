@@ -105,9 +105,11 @@
 <li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_batch.html#module-eegunity.module_eeg_batch.eeg_batch">eegunity.module_eeg_batch.eeg_batch module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch"><code class="docutils literal notranslate"><span class="pre">EEGBatch</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.align_channel"><code class="docutils literal notranslate"><span class="pre">EEGBatch.align_channel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.auto_domain"><code class="docutils literal notranslate"><span class="pre">EEGBatch.auto_domain()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.batch_process"><code class="docutils literal notranslate"><span class="pre">EEGBatch.batch_process()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.epoch_by_event"><code class="docutils literal notranslate"><span class="pre">EEGBatch.epoch_by_event()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.epoch_for_pretraining"><code class="docutils literal notranslate"><span class="pre">EEGBatch.epoch_for_pretraining()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.export_h5Dataset"><code class="docutils literal notranslate"><span class="pre">EEGBatch.export_h5Dataset()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.filter"><code class="docutils literal notranslate"><span class="pre">EEGBatch.filter()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.format_channel_names"><code class="docutils literal notranslate"><span class="pre">EEGBatch.format_channel_names()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity.module_eeg_batch.eeg_batch.EEGBatch.get_events"><code class="docutils literal notranslate"><span class="pre">EEGBatch.get_events()</span></code></a></li>
@@ -182,10 +184,10 @@
 <li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.EEGParser.get_data"><code class="docutils literal notranslate"><span class="pre">EEGParser.get_data()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.channel_name_parser"><code class="docutils literal notranslate"><span class="pre">channel_name_parser()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.convert_unit"><code class="docutils literal notranslate"><span class="pre">convert_unit()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.create_montage_from_json"><code class="docutils literal notranslate"><span class="pre">create_montage_from_json()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.extract_events"><code class="docutils literal notranslate"><span class="pre">extract_events()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.format_channel_names"><code class="docutils literal notranslate"><span class="pre">format_channel_names()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.get_data_row"><code class="docutils literal notranslate"><span class="pre">get_data_row()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.handle_nonstandard_data"><code class="docutils literal notranslate"><span class="pre">handle_nonstandard_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity.module_eeg_parser.eeg_parser.infer_channel_unit"><code class="docutils literal notranslate"><span class="pre">infer_channel_unit()</span></code></a></li>
@@ -240,8 +242,34 @@
 <span id="eegunity-unifieddataset-module"></span><h2>eegunity.unifieddataset module<a class="headerlink" href="#module-eegunity.unifieddataset" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.unifieddataset.</span></span><span class="sig-name descname"><span class="pre">UnifiedDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain_tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unzip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.unifieddataset.</span></span><span class="sig-name descname"><span class="pre">UnifiedDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain_tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unzip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#eegunity.share_attributes.UDatasetSharedAttributes" title="eegunity.share_attributes.UDatasetSharedAttributes"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDatasetSharedAttributes</span></code></a></p>
+<p>This is the kernel class to manage mutiple EEG dataset and associated processing tools.</p>
+<p>This class allows for the initialization of EEG data using either a
+dataset path or a locator path, with the option to unzip the potential zip file.
+If a dataset path is provided, a domain tag must also be provided.</p>
+<section id="attributes">
+<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dataset_path<span class="classifier">str, optional</span></dt><dd><p>Path to the dataset. Should not be provided alongside locator_path.</p>
+</dd>
+<dt>locator_path<span class="classifier">str, optional</span></dt><dd><p>Path to the locator. Should not be provided alongside dataset_path.</p>
+</dd>
+<dt>is_unzip<span class="classifier">bool, optional</span></dt><dd><p>A flag indicating if the dataset should be unzipped (default is True).</p>
+</dd>
+<dt>domain_tag<span class="classifier">str, optional</span></dt><dd><p>Domain tag, required when dataset_path is provided.</p>
+</dd>
+<dt>verbose<span class="classifier">str, optional</span></dt><dd><p>Level of verbosity for logging (default is ‘CRITICAL’).</p>
+</dd>
+<dt>eeg_parser<span class="classifier">EEGParser</span></dt><dd><p>EEGParser module</p>
+</dd>
+<dt>eeg_batch<span class="classifier">EEGBatch</span></dt><dd><p>EEGBatch module</p>
+</dd>
+<dt>eeg_correction<span class="classifier">EEGCorrection</span></dt><dd><p>EEGCorrection module</p>
+</dd>
+<dt>module_eeg_llm_booster<span class="classifier">EEGLLMBooster</span></dt><dd><p>EEGLLMBooster module</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.copy" title="Link to this definition">¶</a></dt>
@@ -262,6 +290,7 @@
 <span class="sig-name descname"><span class="pre">set_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_locator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.set_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.set_locator" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</section>
 </dd></dl>
 
 </section>
