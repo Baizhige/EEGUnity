@@ -6,12 +6,12 @@ import os
 import re
 import warnings
 import zipfile
-
 import mne
 import numpy as np
 import pandas as pd
 import scipy
 from typing import Union, Dict
+from collections import OrderedDict
 
 from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
 from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
@@ -22,15 +22,14 @@ current_dir = os.path.dirname(__file__)
 json_file_path = os.path.join(current_dir, 'combined_montage.json')
 with open(json_file_path, 'r') as file:
     data = json.load(file)
-STANDARD_EEG_CHANNELS = list(data.keys())
-EEG_PREFIXES_SUFFIXES = {"EEG", "FP", "REF", "LE", "RE"}
+STANDARD_EEG_CHANNELS = sorted(data.keys(), key=len, reverse=True)
+EEG_PREFIXES_SUFFIXES = ["EEG", "REF", "LE"]
 
 
 class EEGParser(UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()
         self._shared_attr = main_instance._shared_attr
-        self.format_channel_names = format_channel_names
         dataset_path = self.get_shared_attr()['dataset_path']
         locator_path = self.get_shared_attr()['locator_path']
         if dataset_path and locator_path:
@@ -399,12 +398,15 @@ def get_data_row(row: dict,
                  unit_convert: str = None,
                  **kwargs) -> mne.io.BaseRaw:
     """
-    Process and return raw EEG data based on the input row information. Allows handling of standard and non-standard data.
+    Process and return raw EEG data based on the input row information.
+    Allows handling of standard and non-standard data with options for
+    setting channel types, montage, normalization, and unit conversion.
 
     Parameters
     ----------
     row : dict
-        Dictionary containing data attributes, such as file paths, file types, and channel names.
+        Dictionary containing data attributes, such as file paths, file types,
+        and channel names.
     norm_type : str, optional
         Type of normalization to apply, if any. Defaults to None.
     is_set_channel_type : bool, optional
@@ -414,7 +416,8 @@ def get_data_row(row: dict,
     verbose : str, optional
         Verbosity level for MNE functions. Defaults to 'CRITICAL'.
     pick_types : dict, optional
-        Channel picking parameters for MNE. Defaults to None.
+        Dictionary specifying which channel types to include. The keys should
+        match the parameters of `raw.pick_types()`. Defaults to None.
     unit_convert : str, optional
         Conversion type for resetting channel units. Defaults to None.
     kwargs : any
@@ -429,6 +432,9 @@ def get_data_row(row: dict,
     ------
     ValueError
         If the number of channels in the locator file does not match the metadata.
+    Warning
+        If `pick_types` is not None but `is_set_channel_type` is False, a warning
+        will be issued to inform the user to set `is_set_channel_type=True`.
     """
     filepath = row.get('File Path')
     file_type = row.get('File Type')
@@ -444,9 +450,17 @@ def get_data_row(row: dict,
     else:  # Handle non-standard data
         raw_data = handle_nonstandard_data(row, verbose=verbose, **kwargs)
 
+    # Check if pick_types is provided without is_set_channel_type being True
+    if pick_types is not None and not is_set_channel_type:
+        warnings.warn("When `pick_types` is not None, it's recommended to set `is_set_channel_type=True`.")
+
     # Set channel types if required
     if is_set_channel_type:
         raw_data = set_channel_type(raw_data, row['Channel Names'])
+
+        # Apply pick types if provided
+        if pick_types is not None:
+            raw_data = raw_data.pick_types(**pick_types)  # Unpack the dictionary here
 
     # Set montage if required
     if is_set_montage:
@@ -503,7 +517,7 @@ def set_infer_unit(raw_data, row):
         raise ValueError(f"'Infer Unit' is not a valid dictionary: {row['Infer Unit']}")
 
 
-def format_channel_names(input_string):
+def channel_name_parser(input_string):
     """
     Format and standardize a list of channel names based on predefined rules.
 
@@ -541,7 +555,7 @@ def format_channel_names(input_string):
         if len(parts) != 2:
             return False
 
-        valid_channels = {"REF", "LE", "EEG", "ECG", "EOG", "EMG"}
+        valid_channels = ["REF", "LE", "EEG", "ECG", "EOG", "EMG"]
 
         # Convert both parts to upper case for case-insensitive comparison
         part1, part2 = parts[0].upper(), parts[1].upper()
@@ -561,14 +575,14 @@ def format_channel_names(input_string):
         channel = channel.replace('EEG:', '').replace('EEG', '').replace('eeg', '')
 
         # define rules for replacement
-        replacements = {
-            'FAF': 'AFF',
-            'CFC': 'FCC',
-            'CPC': 'CCP',
-            'POP': 'PPO',
-            'TPT': 'TTP',
-            'TFT': 'FTT'
-        }
+        replacements = OrderedDict([
+            ('FAF', 'AFF'),
+            ('CFC', 'FCC'),
+            ('CPC', 'CCP'),
+            ('POP', 'PPO'),
+            ('TPT', 'TTP'),
+            ('TFT', 'FTT')
+        ])
         # employ replacement and propose warnings
         for old, new in replacements.items():
             if old.lower() in channel.lower():
@@ -579,7 +593,6 @@ def format_channel_names(input_string):
 
     # Define a function to preprocess channel names by removing leading/trailing whitespace and EEG-related prefixes/suffixes
     def preprocess_channel(channel):
-        channel = channel.replace(" ", "")
         for prefix_suffix in EEG_PREFIXES_SUFFIXES:
             if channel.startswith(prefix_suffix + "-"):
                 channel = channel[len(prefix_suffix + "-"):].strip()
@@ -594,7 +607,7 @@ def format_channel_names(input_string):
         return channel
 
     # Split the input string into a list of channel names
-    channels = input_string.split(',')
+    channels = [channel.strip() for channel in input_string.split(',')]
 
     # Initialize a set for formatted channel names and a set for seen channel names
     formatted_channels = []

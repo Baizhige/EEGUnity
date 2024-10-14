@@ -3,21 +3,24 @@ import copy
 import json
 import os
 import warnings
-
+import inspect
 import mne
 import numpy as np
 import pandas as pd
+import hashlib
+from pathlib import Path
 from typing import Callable, Union, Tuple, List, Dict, Optional
 
 from eegunity.module_eeg_batch.eeg_scores import calculate_eeg_quality_scores
-from eegunity.module_eeg_parser.eeg_parser import get_data_row, format_channel_names, extract_events, infer_channel_unit
+from eegunity.module_eeg_parser.eeg_parser import get_data_row, channel_name_parser, extract_events, infer_channel_unit
 from eegunity.share_attributes import UDatasetSharedAttributes
+from eegunity.utils.h5 import h5Dataset
 
 current_dir = os.path.dirname(__file__)
 json_file_path = os.path.join(current_dir, '..', 'module_eeg_parser', 'combined_montage.json')
 with open(json_file_path, 'r') as file:
     data = json.load(file)
-STANDARD_EEG_CHANNELS = list(data.keys())
+STANDARD_EEG_CHANNELS = sorted(data.keys(), key=len, reverse=True)
 
 
 class EEGBatch(UDatasetSharedAttributes):
@@ -530,12 +533,11 @@ class EEGBatch(UDatasetSharedAttributes):
             if channel_name in cache:
                 return cache[channel_name]
             else:
-                formatted_channel_name = format_channel_names(channel_name)
+                formatted_channel_name = channel_name_parser(channel_name)
                 cache[channel_name] = formatted_channel_name
                 return formatted_channel_name
 
         results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
-
         self.set_column("Channel Names", results)
 
     def filter(self,
@@ -548,7 +550,8 @@ class EEGBatch(UDatasetSharedAttributes):
                picks: str = 'all',
                miss_bad_data: bool = False,
                **kwargs) -> None:
-        r"""Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.
+        """
+        Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.
 
         Parameters
         ----------
@@ -575,36 +578,27 @@ class EEGBatch(UDatasetSharedAttributes):
         -------
         None
             The function modifies the dataset in place.
-
-        Raises
-        ------
-        ValueError
-            If an invalid `filter_type` is specified or if cutoff frequencies are inconsistent.
-
-        Note
-        ----
-        Ensure that the output path is accessible and that all necessary channels are specified for filtering.
-
-        Examples
-        --------
-        >>> unified_dataset.eeg_batch.filter('/path/to/save/', filter_type='bandpass', l_freq=1.0, h_freq=40.0)
         """
 
-        def con_func(row):
-            return True
-
-        def app_func(row, l_freq, h_freq, notch_freq, filter_type, output_path, auto_adjust_h_freq, picks,
-                     **kwargs):
+        def app_func(row, l_freq, h_freq, notch_freq, filter_type, output_path, auto_adjust_h_freq, picks, **kwargs):
             try:
+                # Construct file paths
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_filter.fif")
-                mne_raw = get_data_row(row)
 
-                # get sampling rate
+                # Get the argument signature for get_data_row
+                get_data_row_params = inspect.signature(get_data_row).parameters
+                # Filter kwargs for get_data_row
+                get_data_row_kwargs = {k: v for k, v in kwargs.items() if k in get_data_row_params}
+
+                # Call get_data_row with filtered kwargs
+                mne_raw = get_data_row(row, **get_data_row_kwargs)
+
+                # Get sampling frequency and Nyquist frequency
                 sfreq = mne_raw.info['sfreq']
                 nyquist_freq = sfreq / 2.0
 
-                # adjust high pass frequency based on nyquist frequency
+                # Adjust high-pass frequency if it exceeds the Nyquist frequency
                 if h_freq is not None and h_freq >= nyquist_freq:
                     if auto_adjust_h_freq:
                         warnings.warn(
@@ -614,46 +608,54 @@ class EEGBatch(UDatasetSharedAttributes):
                         raise ValueError(
                             f"High-pass frequency must be less than Nyquist frequency ({nyquist_freq} Hz).")
 
-                # add l_freq and h_freq to kwargs
-                if filter_type in ['lowpass', 'highpass', 'bandpass']:
-                    kwargs['l_freq'] = l_freq
-                    kwargs['h_freq'] = h_freq
-                    kwargs['fir_design'] = 'firwin'
+                # Get the argument signatures for mne_raw.filter and mne_raw.notch_filter
+                filter_params = inspect.signature(mne_raw.filter).parameters
+                notch_filter_params = inspect.signature(mne_raw.notch_filter).parameters
 
-                # apply the appropriate filter based on filter_type
+                # Filter kwargs for mne_raw.filter and mne_raw.notch_filter
+                filter_kwargs = {k: v for k, v in kwargs.items() if k in filter_params or k in notch_filter_params}
+
+                # Add l_freq and h_freq to kwargs if applicable
                 if filter_type in ['lowpass', 'highpass', 'bandpass']:
-                    mne_raw.filter(picks=picks, **kwargs)
+                    filter_kwargs['l_freq'] = l_freq
+                    filter_kwargs['h_freq'] = h_freq
+                    filter_kwargs['fir_design'] = 'firwin'
+
+                # Apply the appropriate filter based on filter_type
+                if filter_type in ['lowpass', 'highpass', 'bandpass']:
+                    mne_raw.filter(picks=picks, **filter_kwargs)
                 elif filter_type == 'notch':
                     if notch_freq is not None:
-                        mne_raw.notch_filter(freqs=notch_freq, picks=picks, **kwargs)
+                        mne_raw.notch_filter(freqs=notch_freq, picks=picks, **filter_kwargs)
                     else:
                         raise ValueError("notch_freq must be specified for notch filter.")
                 else:
                     raise ValueError("Invalid filter_type. Must be 'lowpass', 'highpass', 'bandpass', or 'notch'.")
 
-                # save filtered data
+                # Save filtered data
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
 
-                return new_file_path
+                return None
             except Exception as e:
                 if miss_bad_data:
                     print(f"Error processing file {row['File Path']}: {e}")
-                    return ""  # Return an empty path to indicate failure
+                    return None  # Return an empty path to indicate failure
                 else:
                     raise
 
-        new_path_list = self.batch_process(con_func,
-                                           lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
-                                                                output_path, auto_adjust_h_freq, picks,
-                                                                **kwargs),
-                                           is_patch=False,
-                                           result_type='value')
+        # Process the batch
+        self.batch_process(lambda row: True,
+                           lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
+                                                output_path, auto_adjust_h_freq, picks,
+                                                **kwargs),
+                           is_patch=False,
+                           result_type=None)
 
-        self.set_column("File Path", new_path_list)
-        locator_df = self.get_shared_attr()['locator']
-        locator_df = locator_df[locator_df['File Path'] != ""]
-        self.get_shared_attr()['locator'] = locator_df
+        # Update file paths in the dataset
+        self.get_shared_attr()["dataset_path"] = output_path
+        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
+            self.main_instance.eeg_parser._process_directory(output_path))})
 
     def ica(self, output_path: str, miss_bad_data: bool = False, **kwargs: Dict):
         r"""Apply ICA (Independent Component Analysis) to the specified file in the dataset.
@@ -929,8 +931,10 @@ class EEGBatch(UDatasetSharedAttributes):
         ----------
         output_path : str
             The path where the normalized file will be saved.
-        norm_type : {'sample-wise', 'domain-wise'}, optional
-            The type of normalization to apply. Defaults to 'sample-wise'.
+        norm_type : str
+            The type of normalization to perform. It can be:
+            - 'channel-wise': Normalize each channel individually based on its mean and standard deviation.
+            - 'sample-wise': Normalize all channels based on a common mean and standard deviation.
         miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs.
             Defaults to `False`.
@@ -1385,3 +1389,163 @@ class EEGBatch(UDatasetSharedAttributes):
 
         copied_instance.set_shared_attr({'locator': updated_locator})
         return copied_instance
+
+    def export_h5Dataset(self, output_path: str, name: str = 'EEGUnity_export', verbose: bool = False) -> None:
+        """
+        Export the dataset in HDF5 format to the specified output path.
+
+        This function processes all files in the dataset, ensuring that each file
+        is stored in a separate group with its own dataset and attributes.
+
+        Parameters
+        ----------
+        output_path : str
+            The directory path where the exported HDF5 files will be saved.
+            A `FileNotFoundError` is raised if the path does not exist.
+        name : str
+            The name of the HDF5 file. Must be a string. The default value is 'EEGUnity_export'.
+            Raises a `TypeError` if the value provided is not a string.
+        verbose : bool, optional
+            If True, prints the progress of the export process. Default is False.
+
+        Returns
+        -------
+        None
+            The function does not return any value.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the output path does not exist.
+        FileExistsError
+            If the HDF5 file already exists in the specified output path.
+        ValueError
+            If channel configurations or counts are inconsistent within a domain tag.
+        TypeError
+            If the `name` parameter is not a string.
+        """
+        if not isinstance(name, str):
+            raise TypeError(f"The name parameter must be a string, got {type(name).__name__} instead.")
+
+        if not os.path.exists(output_path):
+            raise FileNotFoundError(f"Output path does not exist: {output_path}")
+
+        # Create the HDF5 file path
+        h5_path = Path(output_path) / f"{name}.hdf5"
+
+        # Check if the HDF5 file already exists
+        if h5_path.exists():
+            raise FileExistsError(
+                f"The HDF5 file '{h5_path}' already exists. Please choose a different name or delete the existing file.")
+
+        # Create the HDF5 file handler
+        dataset = h5Dataset(Path(output_path), name)
+
+        def app_func(row):
+            # Extract channel information for the current file
+            current_channels = set([channel.strip() for channel in row['Channel Names'].split(',')])
+            current_sf = int(float(row['Sampling Rate']))
+
+            # Get EEG data
+            raw = get_data_row(row)
+            eeg_data = raw.get_data()
+
+            # Create a group and dataset in the HDF5 file for each file
+            grp = dataset.addGroup(grpName=os.path.basename(row['File Path']))
+            dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
+
+            # Add individual attributes for each dataset
+            dataset.addAttributes(dset, 'rsFreq', current_sf)  # Sampling rate may vary per file
+            dataset.addAttributes(dset, 'chOrder', list(current_channels))  # Channel order may vary per file
+
+            # Print progress if verbose is True
+            if verbose:
+                print(f"Processed file: {os.path.basename(row['File Path'])}")
+
+            return None  # No need to return any result
+
+        # Process batch data without domain_tag filtering, processing all files
+        self.batch_process(lambda row: True, app_func, is_patch=False, result_type=None)
+
+        # Save the dataset to disk
+        dataset.save()
+
+        # Print completion message if verbose is True
+        if verbose:
+            print(f"All data exported successfully to {h5_path}.")
+
+    def auto_domain(self):
+        """Automatically modify the 'Domain Tag' of each row based on 'Sampling Rate' and 'Channel Names'.
+
+        This function processes each row in the dataset and updates the 'Domain Tag'
+        by appending the 'Sampling Rate' and a unique encoded representation of the 'Channel Names'.
+        The 'Channel Names' are encoded using a hashing function to ensure uniqueness, and
+        the 'Domain Tag' is updated in the format:
+        `f"row['Domain Tag']-row['Sampling Rate']-ch_enc(row['Channel Names'])"`.
+
+        The function utilizes the `batch_process` method to apply these modifications
+        across the dataset.
+
+        Returns
+        -------
+        None
+            The function modifies the dataset in place by updating the 'Domain Tag' column.
+
+        Raises
+        ------
+        KeyError
+            If the required columns ('Domain Tag', 'Sampling Rate', 'Channel Names') are missing.
+
+        Examples
+        --------
+        >>> unified_dataset.eeg_batch.auto_domain()
+        """
+
+        def ch_enc(channel_names: str) -> str:
+            """Encodes the channel names into a short unique identifier.
+
+            The identifier includes the length of the channel names list (in digits) and
+            a 4-character hash that represents the content. Channel names order does not
+            affect the hash, ensuring only differences in content cause a different hash.
+            """
+            # Split the channel names string by comma, strip whitespace, and sort the list
+            channels = sorted([ch.strip() for ch in channel_names.split(',')])
+            length = len(channels)
+
+            # Join the sorted and stripped channel names back into a single string
+            sorted_channel_str = ','.join(channels)
+
+            # Hash the sorted channel string and take the first 4 characters of the hash
+            hash_object = hashlib.sha1(sorted_channel_str.encode('utf-8'))
+            hash_part = hash_object.hexdigest()[:4]  # Use the first 4 characters of the hash
+
+            # Combine the length of the list with the 4-character hash
+            return f"{length}-{hash_part}"
+
+        def con_func(row):
+            # Always return True as we want to process all rows
+            return True
+
+        def app_func(row):
+            # Get the necessary values from the row
+            domain_tag = row['Domain Tag']
+            sampling_rate = row['Sampling Rate']
+
+            try:
+                # Attempt to convert sampling rate to an integer after converting to float
+                sampling_rate = int(float(sampling_rate))
+            except (ValueError, TypeError):
+                # If conversion fails, fallback to a default value (optional)
+                sampling_rate = 0
+
+            channel_names = row['Channel Names']
+
+            # Generate the new domain tag using the provided format
+            new_domain_tag = f"{domain_tag}-{sampling_rate}-{ch_enc(channel_names)}"
+            return new_domain_tag
+
+        # Use batch_process to apply the function to each row
+        results = self.batch_process(con_func, app_func, is_patch=False, result_type="value")
+
+        # Update the 'Domain Tag' column with the new values
+        self.set_column("Domain Tag", results)
