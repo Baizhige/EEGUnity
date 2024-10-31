@@ -37,7 +37,7 @@ class EEGBatch(UDatasetSharedAttributes):
                       app_func: Callable,
                       is_patch: bool,
                       result_type: Union[str, None] = None):
-        r"""Process each row of the given dataframe locator based on conditions specified
+        r"""Process each row of locator based on conditions specified
         in `con_func` and apply `app_func` accordingly. This function handles both list
         and dataframe return types, ensuring the result aligns with the original locator's
         rows based on the `is_patch` flag.
@@ -46,9 +46,12 @@ class EEGBatch(UDatasetSharedAttributes):
         ----------
         con_func : Callable
             A function that takes a row of locator and returns `True` or `False` to determine
-            if `app_func` should be applied to that row.
+            if `app_func` should be applied to that row. The input is a single row from the
+            locator, which you can access like a dictionary. For example, to read the file
+            path attribute, use: file_path = row['File Path']
         app_func : Callable
-            A function that processes a row of locator and returns the result.
+            A function that processes a row of locator and returns the result. The input is same
+            as con_func.
         is_patch : bool
             If `True`, the returned list length or dataframe rows will match the locator's
             row count, using placeholder elements as needed.
@@ -69,6 +72,7 @@ class EEGBatch(UDatasetSharedAttributes):
 
         Note
         ----
+        This method is essential when designing a custom processing pipeline for the dataset.
         Ensure that `con_func` and `app_func` are compatible with the structure of the locator.
         If using `is_patch`, consider the implications on the data integrity.
 
