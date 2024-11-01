@@ -54,8 +54,4 @@ Once you have corrected any errors, reload the dataset using the updated locator
 ```python
 unified_dataset = UnifiedDataset(locator_path=r'./locator/my_dataset_format_channel_name.csv')
 ```
----
-## Summary
-By following these steps, you have successfully formatted and verified the channel names and metadata for your EEG dataset using EEGUnity. You can use this approach to ensure consistency in your EEG datasets, which is crucial for reliable data analysis.
-For additional documentation on the EEGUnity library, please refer to the [EEGUnity documentation](https://eegunity.readthedocs.io/en/latest/).
----
+
