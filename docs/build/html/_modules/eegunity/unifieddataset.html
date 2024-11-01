@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>eegunity.unifieddataset &mdash; EEGUnity 0.0.1 documentation</title>
+  <title>eegunity.unifieddataset &mdash; EEGUnity 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
@@ -12,7 +12,7 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/documentation_options.js?v=71d9d8e6"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -82,22 +82,18 @@
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset">[docs]</a>
 <span class="k">class</span> <span class="nc">UnifiedDataset</span><span class="p">(</span><span class="n">UDatasetSharedAttributes</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This is the kernel class to manage mutiple EEG dataset and associated processing tools.</span>
-
-<span class="sd">        This class allows for the initialization of EEG data using either a</span>
-<span class="sd">        dataset path or a locator path, with the option to unzip the potential zip file.</span>
-<span class="sd">        If a dataset path is provided, a domain tag must also be provided.</span>
+<span class="sd">        This is the kernel class to manage mutiple EEG datasets and associated processing tools.</span>
 
 <span class="sd">        Attributes:</span>
 <span class="sd">        -----------</span>
 <span class="sd">        dataset_path : str, optional</span>
-<span class="sd">            Path to the dataset. Should not be provided alongside locator_path.</span>
+<span class="sd">            Path to the dataset (folder). Should not be provided alongside locator_path.</span>
 <span class="sd">        locator_path : str, optional</span>
 <span class="sd">            Path to the locator. Should not be provided alongside dataset_path.</span>
 <span class="sd">        is_unzip : bool, optional</span>
-<span class="sd">            A flag indicating if the dataset should be unzipped (default is True).</span>
+<span class="sd">            If set to True, any Zip files in the specified dataset will be unzipped. Be aware that unzipping may modify the dataset.</span>
 <span class="sd">        domain_tag : str, optional</span>
-<span class="sd">            Domain tag, required when dataset_path is provided.</span>
+<span class="sd">            The domain tag identifies the dataset name and is required if you specify a dataset path.</span>
 <span class="sd">        verbose : str, optional</span>
 <span class="sd">            Level of verbosity for logging (default is &#39;CRITICAL&#39;).</span>
 <span class="sd">        eeg_parser : EEGParser</span>
@@ -119,11 +115,11 @@
 <span class="sd">        Parameters:</span>
 <span class="sd">        -----------</span>
 <span class="sd">        domain_tag : str, optional</span>
-<span class="sd">            The domain tag, required when dataset_path is provided.</span>
+<span class="sd">            The domain tag identifies the dataset name.  Note: Do not provide domain_tag if you are using locator_path.</span>
 <span class="sd">        dataset_path : str, optional</span>
-<span class="sd">            The path to the dataset. Should not be provided alongside locator_path.</span>
+<span class="sd">            Path to the dataset (folder). Note: Do not provide dataset_path if you are using locator_path.</span>
 <span class="sd">        locator_path : str, optional</span>
-<span class="sd">            The path to the locator. Should not be provided alongside dataset_path.</span>
+<span class="sd">            The file path to the locator (a CSV-like file) that stores all metadata for the UnifiedDataset in EEGUnity. Note: Do not provide locator_path if you are using dataset_path.</span>
 <span class="sd">        is_unzip : bool, optional</span>
 <span class="sd">            A flag indicating whether the dataset should be unzipped (default is True).</span>
 <span class="sd">        verbose : str, optional</span>
@@ -163,24 +159,59 @@
 <div class="viewcode-block" id="UnifiedDataset.copy">
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset.copy">[docs]</a>
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a deep copy of the UnifiedDataset instance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        UnifiedDataset</span>
+<span class="sd">            A deep copy of the current UnifiedDataset instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="UnifiedDataset.save_locator">
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset.save_locator">[docs]</a>
     <span class="k">def</span> <span class="nf">save_locator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the locator of this UnifiedDataset to a CSV file at the specified path. This file is helpful for checking the current status and metadata after data processing.</span>
+<span class="sd">        You can also reload the UnifiedDataset later by using this locator file, for example:</span>
+<span class="sd">        unified_dataset = UnifiedDataset(locator_path=&quot;your_locator_path&quot;)</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        path : str</span>
+<span class="sd">            The file path where the locator should be saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="UnifiedDataset.get_locator">
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset.get_locator">[docs]</a>
     <span class="k">def</span> <span class="nf">get_locator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the locator in DataFrame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        pandas.DataFrame</span>
+<span class="sd">            The locator DataFrame associated with the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="UnifiedDataset.set_locator">
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset.set_locator">[docs]</a>
     <span class="k">def</span> <span class="nf">set_locator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_locator</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set a new locator for this UnifiedDataset instance.</span>
+<span class="sd">        This allows you to update the metadata for the entire dataset without altering the original raw file.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        new_locator : pandas.DataFrame</span>
+<span class="sd">            The new locator DataFrame to associate with the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_shared_attr</span><span class="p">()[</span><span class="s1">&#39;locator&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_locator</span></div>
 </div>
 

@@ -9,22 +9,18 @@ from eegunity.share_attributes import UDatasetSharedAttributes
 
 class UnifiedDataset(UDatasetSharedAttributes):
     """
-        This is the kernel class to manage mutiple EEG dataset and associated processing tools.
-
-        This class allows for the initialization of EEG data using either a
-        dataset path or a locator path, with the option to unzip the potential zip file.
-        If a dataset path is provided, a domain tag must also be provided.
+        This is the kernel class to manage mutiple EEG datasets and associated processing tools.
 
         Attributes:
         -----------
         dataset_path : str, optional
-            Path to the dataset. Should not be provided alongside locator_path.
+            Path to the dataset (folder). Should not be provided alongside locator_path.
         locator_path : str, optional
             Path to the locator. Should not be provided alongside dataset_path.
         is_unzip : bool, optional
-            A flag indicating if the dataset should be unzipped (default is True).
+            If set to True, any Zip files in the specified dataset will be unzipped. Be aware that unzipping may modify the dataset.
         domain_tag : str, optional
-            Domain tag, required when dataset_path is provided.
+            The domain tag identifies the dataset name and is required if you specify a dataset path.
         verbose : str, optional
             Level of verbosity for logging (default is 'CRITICAL').
         eeg_parser : EEGParser
@@ -46,11 +42,11 @@ class UnifiedDataset(UDatasetSharedAttributes):
         Parameters:
         -----------
         domain_tag : str, optional
-            The domain tag, required when dataset_path is provided.
+            The domain tag identifies the dataset name.  Note: Do not provide domain_tag if you are using locator_path.
         dataset_path : str, optional
-            The path to the dataset. Should not be provided alongside locator_path.
+            Path to the dataset (folder). Note: Do not provide dataset_path if you are using locator_path.
         locator_path : str, optional
-            The path to the locator. Should not be provided alongside dataset_path.
+            The file path to the locator (a CSV-like file) that stores all metadata for the UnifiedDataset in EEGUnity. Note: Do not provide locator_path if you are using dataset_path.
         is_unzip : bool, optional
             A flag indicating whether the dataset should be unzipped (default is True).
         verbose : str, optional
@@ -88,13 +84,48 @@ class UnifiedDataset(UDatasetSharedAttributes):
         self.module_eeg_llm_booster = EEGLLMBooster(self)
 
     def copy(self):
+        """
+        Create a deep copy of the UnifiedDataset instance.
+
+        Returns:
+        --------
+        UnifiedDataset
+            A deep copy of the current UnifiedDataset instance.
+        """
         return copy.deepcopy(self)
 
     def save_locator(self, path):
+        """
+        Save the locator of this UnifiedDataset to a CSV file at the specified path. This file is helpful for checking the current status and metadata after data processing.
+        You can also reload the UnifiedDataset later by using this locator file, for example:
+        unified_dataset = UnifiedDataset(locator_path="your_locator_path")
+
+        Parameters:
+        -----------
+        path : str
+            The file path where the locator should be saved.
+        """
         self.get_shared_attr()['locator'].to_csv(path, index=False)
 
     def get_locator(self):
+        """
+        Return the locator in DataFrame.
+
+        Returns:
+        --------
+        pandas.DataFrame
+            The locator DataFrame associated with the dataset.
+        """
         return self.get_shared_attr()['locator']
 
     def set_locator(self, new_locator):
+        """
+        Set a new locator for this UnifiedDataset instance.
+        This allows you to update the metadata for the entire dataset without altering the original raw file.
+
+        Parameters:
+        -----------
+        new_locator : pandas.DataFrame
+            The new locator DataFrame to associate with the dataset.
+        """
         self.get_shared_attr()['locator'] = new_locator

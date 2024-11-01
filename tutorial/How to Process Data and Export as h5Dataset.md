@@ -1,4 +1,3 @@
-
 # EEG Dataset Processing Tutorial
 
 This section introduces two demos for processing EEG datasets using **EEGUnity** and exporting them as h5Dataset. The first demo follows a detailed step-by-step approach, while the second demo demonstrates a quicker processing method using a batch processing interface. Users can choose the appropriate method depending on their needs.
@@ -58,13 +57,14 @@ unified_dataset.eeg_batch.sample_filter(completeness_check='Completed')
 unified_dataset.eeg_batch.format_channel_names()
 
 # 4. Apply bandpass filtering (0.1-75Hz), select EEG channels
-unified_dataset.eeg_batch.filter(output_path=cache_bandpassfilter_path, filter_type='bandpass', l_freq=0.1, h_freq=75, is_set_channel_type=True, pick_types={'eeg': True})
+unified_dataset.eeg_batch.filter(output_path=cache_bandpassfilter_path, filter_type='bandpass', l_freq=0.1, h_freq=75,
+                                 get_data_row_params = {"is_set_channel_type":True, "pick_types":{'eeg': True}})
 
 # 5. Apply 50Hz notch filter (for powerline noise removal)
 unified_dataset.eeg_batch.filter(output_path=cache_notchfilter_path, filter_type='notch', notch_freq=50)
 
 # 6. Resample to 200Hz
-unified_dataset.eeg_batch.resample(output_path=cache_resample_path, sfreq=200)
+unified_dataset.eeg_batch.resample(output_path=cache_resample_path, resample_params={"sfreq":200})
 
 # 7-A. Calculate the mean and standard deviation for normalization
 unified_dataset.eeg_batch.process_mean_std(domain_mean=False)
