@@ -14,7 +14,7 @@ def run_tests(directory=None):
     # Get all .py files in the directory, excluding this script itself
     current_script = os.path.basename(__file__)
     py_files = [f for f in os.listdir(current_dir) if f.endswith('.py') and f != current_script]
-
+    print(py_files)
     failed_tests = []
 
     # Execute each .py file

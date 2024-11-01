@@ -3,14 +3,14 @@ import copy
 import json
 import os
 import warnings
-import inspect
 import mne
 import numpy as np
 import pandas as pd
 import hashlib
 from pathlib import Path
 from typing import Callable, Union, Tuple, List, Dict, Optional
-
+import pickle
+import h5py
 from eegunity.module_eeg_batch.eeg_scores import calculate_eeg_quality_scores
 from eegunity.module_eeg_parser.eeg_parser import get_data_row, channel_name_parser, extract_events, infer_channel_unit
 from eegunity.share_attributes import UDatasetSharedAttributes
@@ -277,8 +277,11 @@ class EEGBatch(UDatasetSharedAttributes):
                       output_path: str,
                       domain_tag: Union[str, None] = None,
                       format: str = 'fif',
-                      preserve_events: bool = True):  # New parameter to control event preservation
-        r"""Save data in the specified format ('fif' or 'csv') to the given output path.
+                      preserve_events: bool = True,
+                      get_data_row_params: Dict = None) -> 'UnifiedDataset':
+        r"""Save data in the specified format ('fif' or 'csv') to the given output path. If you want
+        to save as h5DF file, please use 'export_h5Dataset', because h5DF file is generally used to
+        save the whole dataset.
 
         Parameters
         ----------
@@ -294,6 +297,8 @@ class EEGBatch(UDatasetSharedAttributes):
         preserve_events : bool, optional
             If `True`, event markers will be included in the CSV file, and metadata will be adjusted.
             Defaults to `True`.
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
 
         Returns
         -------
@@ -316,6 +321,12 @@ class EEGBatch(UDatasetSharedAttributes):
         --------
         >>> new_locator = unified_dataset.eeg_batch.save_as_other('/path/to/output', domain_tag='example', format='fif')
         """
+        # Set default empty dictionary if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {'is_set_channel_type': False}
+        else:
+            get_data_row_params.setdefault('is_set_channel_type', False)
+
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
 
@@ -326,55 +337,70 @@ class EEGBatch(UDatasetSharedAttributes):
             return domain_tag is None or row['Domain Tag'] == domain_tag
 
         def app_func(row):
-            raw = get_data_row(row, is_set_channel_type=False)
-            file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
+            try:
+                raw = get_data_row(row, **get_data_row_params)
+                file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
 
-            if format == 'fif':
-                new_file_path = os.path.join(output_path, f"{file_name}.fif")
-                raw.save(new_file_path, overwrite=True)
-                row['File Path'] = new_file_path
-                row['File Type'] = "standard_data"
+                if format == 'fif':
+                    new_file_path = os.path.join(output_path, f"{file_name}.fif")
+                    raw.save(new_file_path, overwrite=True)
+                    row['File Path'] = new_file_path
+                    row['File Type'] = "standard_data"
 
-            elif format == 'csv':
-                new_file_path = os.path.join(output_path, f"{file_name}.csv")
+                elif format == 'csv':
+                    new_file_path = os.path.join(output_path, f"{file_name}.csv")
 
-                # Extract data and channel names from Raw object
-                data, times = raw.get_data(return_times=True)
-                channel_names = raw.info['ch_names']
+                    # Extract data and channel names from Raw object
+                    data, times = raw.get_data(return_times=True)
+                    channel_names = raw.info['ch_names']
 
-                # Create a DataFrame with 'date' column and channel data
-                df = pd.DataFrame(data.T, columns=channel_names)
-                df.insert(0, 'timestamp', times)  # Add 'date' as the first column
+                    # Create a DataFrame with 'timestamp' column and channel data
+                    df = pd.DataFrame(data.T, columns=channel_names)
+                    df.insert(0, 'timestamp', times)  # Add 'timestamp' as the first column
 
-                if preserve_events:
-                    # Extract events from raw data
-                    events, event_id = extract_events(raw)
+                    if preserve_events:
+                        # Extract events from raw data
+                        events, event_id = extract_events(raw)
 
-                    # Add a 'marker' column for event codes
-                    df['marker'] = np.nan
-                    for event in events:
-                        onset_sample = event[0]
-                        event_code = event[2]
-                        closest_time_idx = np.argmin(np.abs(times - raw.times[onset_sample]))
-                        df.at[closest_time_idx, 'marker'] = event_code
+                        # Add a 'marker' column for event codes
+                        df['marker'] = np.nan
+                        for event in events:
+                            onset_sample = event[0]
+                            event_code = event[2]
+                            closest_time_idx = np.argmin(np.abs(times - raw.times[onset_sample]))
+                            df.at[closest_time_idx, 'marker'] = event_code
 
-                    # Adjust metadata in 'row'
-                    row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
-                    row['Channel Names'] += ', marker'
-                    row['Channel Names'] = 'timestamp, ' + row['Channel Names']
-                    # Adjust 'Data Shape'
-                    data_shape = eval(row['Data Shape'])
-                    smaller_shape, larger_shape = min(data_shape), max(data_shape)
-                    updated_shape = f"({smaller_shape + 1}, {larger_shape})" if smaller_shape == data_shape[
-                        0] else f"({larger_shape}, {smaller_shape + 1})"
-                    row['Data Shape'] = updated_shape
+                        # Adjust metadata in 'row'
+                        row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
+                        row['Channel Names'] += ', marker'
+                        row['Channel Names'] = 'timestamp, ' + row['Channel Names']
+                        # Adjust 'Data Shape'
+                        data_shape = eval(row['Data Shape'])
+                        smaller_shape, larger_shape = min(data_shape), max(data_shape)
+                        updated_shape = f"({smaller_shape + 2}, {larger_shape})" if smaller_shape == data_shape[
+                            0] else f"({larger_shape}, {smaller_shape + 2})"
+                        row['Data Shape'] = updated_shape
 
-                # Save DataFrame to CSV
-                df.to_csv(new_file_path, index=False)
-                row['File Path'] = new_file_path
-                row['File Type'] = "csvData"
+                    else:
+                        # Include 'timestamp' in 'Channel Names' metadata
+                        row['Channel Names'] = 'timestamp, ' + ', '.join(channel_names)
+                        row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
+                        # Adjust 'Data Shape'
+                        data_shape = eval(row['Data Shape'])
+                        smaller_shape, larger_shape = min(data_shape), max(data_shape)
+                        updated_shape = f"({smaller_shape + 1}, {larger_shape})" if smaller_shape == data_shape[
+                            0] else f"({larger_shape}, {smaller_shape + 1})"
+                        row['Data Shape'] = updated_shape
 
-            return row
+                    # Save DataFrame to CSV
+                    df.to_csv(new_file_path, index=False)
+                    row['File Path'] = new_file_path
+                    row['File Type'] = "csvData"
+
+                return row
+            except Exception as e:
+                print(f"Error processing file {row['File Path']}: {e}")
+                return None  # Return None to indicate failure
 
         copied_instance = copy.deepcopy(self)
         new_locator = self.batch_process(con_func, app_func, is_patch=False, result_type='series')
@@ -501,10 +527,9 @@ class EEGBatch(UDatasetSharedAttributes):
 
         This function processes each row in the dataset, checks the 'Channel Names'
         column, and applies a formatting function to standardize the channel names.
-        A cache is used to avoid redundant formatting operations for channel names
-        that have already been processed. The function utilizes the `batch_process` method
-        to apply the formatting to each row, and the updated channel names are then saved
-        back to the 'Channel Names' column.
+        The function utilizes the `batch_process` method to apply the formatting to
+        each row of locator, and the updated channel names are then saved back to
+        the 'Channel Names' column.
 
         Returns
         -------
@@ -553,7 +578,9 @@ class EEGBatch(UDatasetSharedAttributes):
                auto_adjust_h_freq: bool = True,
                picks: str = 'all',
                miss_bad_data: bool = False,
-               **kwargs) -> None:
+               get_data_row_params: Dict = None,
+               filter_params: Dict = None,
+               notch_filter_params: Dict = None) -> None:
         """
         Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.
 
@@ -575,8 +602,12 @@ class EEGBatch(UDatasetSharedAttributes):
             Channels to be used for filtering. Defaults to 'all'.
         miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
-        **kwargs : dict
-            Additional keyword arguments for `mne_raw.filter()` and `mne_raw.notch_filter()`.
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
+        filter_params : dict, optional
+            Additional parameters for `mne_raw.filter()`.
+        notch_filter_params : dict, optional
+            Additional parameters for `mne_raw.notch_filter()`.
 
         Returns
         -------
@@ -584,24 +615,21 @@ class EEGBatch(UDatasetSharedAttributes):
             The function modifies the dataset in place.
         """
 
-        def app_func(row, l_freq, h_freq, notch_freq, filter_type, output_path, auto_adjust_h_freq, picks, **kwargs):
+        def app_func(row, l_freq, h_freq, notch_freq, filter_type, output_path, auto_adjust_h_freq, picks,
+                     get_data_row_params, filter_params, notch_filter_params, miss_bad_data):
             try:
                 # Construct file paths
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_filter.fif")
 
-                # Get the argument signature for get_data_row
-                get_data_row_params = inspect.signature(get_data_row).parameters
-                # Filter kwargs for get_data_row
-                get_data_row_kwargs = {k: v for k, v in kwargs.items() if k in get_data_row_params}
-
-                # Call get_data_row with filtered kwargs
-                mne_raw = get_data_row(row, **get_data_row_kwargs)
+                # Get the data
+                if get_data_row_params is None:
+                    get_data_row_params = {}
+                mne_raw = get_data_row(row, **get_data_row_params)
 
                 # Get sampling frequency and Nyquist frequency
                 sfreq = mne_raw.info['sfreq']
                 nyquist_freq = sfreq / 2.0
-
                 # Adjust high-pass frequency if it exceeds the Nyquist frequency
                 if h_freq is not None and h_freq >= nyquist_freq:
                     if auto_adjust_h_freq:
@@ -612,25 +640,36 @@ class EEGBatch(UDatasetSharedAttributes):
                         raise ValueError(
                             f"High-pass frequency must be less than Nyquist frequency ({nyquist_freq} Hz).")
 
-                # Get the argument signatures for mne_raw.filter and mne_raw.notch_filter
-                filter_params = inspect.signature(mne_raw.filter).parameters
-                notch_filter_params = inspect.signature(mne_raw.notch_filter).parameters
+                if notch_freq is not None and notch_freq >= nyquist_freq:
+                    if auto_adjust_h_freq:
+                        warnings.warn(
+                            f"Notch frequency ({notch_freq} Hz) is greater than or equal to Nyquist frequency ({nyquist_freq} Hz). Adjusting h_freq to {nyquist_freq - 1} Hz.")
+                        notch_freq = nyquist_freq - 1
+                    else:
+                        raise ValueError(
+                            f"Notch frequency must be less than Nyquist frequency ({nyquist_freq} Hz).")
 
-                # Filter kwargs for mne_raw.filter and mne_raw.notch_filter
-                filter_kwargs = {k: v for k, v in kwargs.items() if k in filter_params or k in notch_filter_params}
-
-                # Add l_freq and h_freq to kwargs if applicable
-                if filter_type in ['lowpass', 'highpass', 'bandpass']:
-                    filter_kwargs['l_freq'] = l_freq
-                    filter_kwargs['h_freq'] = h_freq
-                    filter_kwargs['fir_design'] = 'firwin'
 
                 # Apply the appropriate filter based on filter_type
                 if filter_type in ['lowpass', 'highpass', 'bandpass']:
-                    mne_raw.filter(picks=picks, **filter_kwargs)
+                    # Prepare filter parameters
+                    if filter_params is None:
+                        filter_params = {}
+                    filter_kwargs = filter_params.copy()
+                    filter_kwargs['l_freq'] = l_freq
+                    filter_kwargs['h_freq'] = h_freq
+                    filter_kwargs['picks'] = picks
+                    filter_kwargs.setdefault('fir_design', 'firwin')  # Use 'firwin' if not specified
+
+                    mne_raw.filter(**filter_kwargs)
                 elif filter_type == 'notch':
                     if notch_freq is not None:
-                        mne_raw.notch_filter(freqs=notch_freq, picks=picks, **filter_kwargs)
+                        if notch_filter_params is None:
+                            notch_filter_params = {}
+                        notch_kwargs = notch_filter_params.copy()
+                        notch_kwargs['freqs'] = notch_freq
+                        notch_kwargs['picks'] = picks
+                        mne_raw.notch_filter(**notch_kwargs)
                     else:
                         raise ValueError("notch_freq must be specified for notch filter.")
                 else:
@@ -652,7 +691,7 @@ class EEGBatch(UDatasetSharedAttributes):
         self.batch_process(lambda row: True,
                            lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
                                                 output_path, auto_adjust_h_freq, picks,
-                                                **kwargs),
+                                                get_data_row_params, filter_params, notch_filter_params, miss_bad_data),
                            is_patch=False,
                            result_type=None)
 
@@ -661,15 +700,18 @@ class EEGBatch(UDatasetSharedAttributes):
         self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
             self.main_instance.eeg_parser._process_directory(output_path))})
 
-    def ica(self, output_path: str, miss_bad_data: bool = False, **kwargs: Dict):
+    def ica(self, output_path: str, miss_bad_data: bool = False, get_params: Dict = None,
+            ica_params: Dict = None, fit_params: Dict = None, apply_params: Dict = None):
         r"""Apply ICA (Independent Component Analysis) to the specified file in the dataset.
 
-        This method applies ICA to clean the EEG data using parameters passed through **kwargs.
-        Please refer to the official documentation for `mne.preprocessing.ICA` and `ica.fit()` for the
-        complete list of available parameters.
+        This method applies ICA to clean the EEG data using parameters passed through `ica_params`, `fit_params`,
+        and `apply_params`. Please refer to the official documentation for `mne.preprocessing.ICA`, `ica.fit()`,
+        and `ica.apply()` for the complete list of available parameters.
 
         Documentation links:
         - `mne.preprocessing.ICA`: https://mne.tools/stable/generated/mne.preprocessing.ICA.html
+        - `ICA.fit`: https://mne.tools/stable/generated/mne.preprocessing.ICA.html#fitting-ica
+        - `ICA.apply`: https://mne.tools/stable/generated/mne.preprocessing.ICA.html#applying-ica
 
         Parameters
         ----------
@@ -677,9 +719,14 @@ class EEGBatch(UDatasetSharedAttributes):
             Path to save the processed file after applying ICA.
         miss_bad_data : bool, optional
             Whether to skip bad data files and continue processing the next one. Defaults to `False`.
-        **kwargs : dict
-            Additional parameters passed to `mne.preprocessing.ICA`, `ica.fit()`, and other MNE functions.
-            This includes `picks`, `n_components`, `method`, `random_state`, etc.
+        get_params : dict, optional
+            Additional parameters passed to `eegunity.module_eeg_parser.eeg_parser.get_data_row`,
+        ica_params : dict, optional
+            Additional parameters passed to `mne.preprocessing.ICA`, such as `n_components`, `method`, etc.
+        fit_params : dict, optional
+            Additional parameters passed to `ica.fit()`, such as `picks`, `decim`, etc.
+        apply_params : dict, optional
+            Additional parameters passed to `ica.apply()`, such as `exclude`, `include`, etc.
 
         Returns
         -------
@@ -689,7 +736,7 @@ class EEGBatch(UDatasetSharedAttributes):
         Raises
         ------
         ValueError
-            If the output path is invalid or if the specified parameters in `kwargs` are inconsistent.
+            If the output path is invalid or if the specified parameters are inconsistent.
 
         Note
         ----
@@ -698,7 +745,7 @@ class EEGBatch(UDatasetSharedAttributes):
 
         Examples
         --------
-        >>> unified_dataset.eeg_batch.ica('/path/to/save/', n_components=20)
+        >>> unified_dataset.eeg_batch.ica('/path/to/save/', ica_params={'n_components': 20}, fit_params={'picks': 'eeg'})
         """
 
         def con_func(row):
@@ -708,16 +755,16 @@ class EEGBatch(UDatasetSharedAttributes):
             try:
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_ica_cleaned_raw.fif")
-                mne_raw = get_data_row(row)
+                mne_raw = get_data_row(row, **(get_params or {}))
 
-                # Initialize ICA with additional kwargs
-                ica = mne.preprocessing.ICA(**kwargs)
+                # Initialize ICA with specific parameters
+                ica = mne.preprocessing.ICA(**(ica_params or {}))
 
-                # Fit ICA with kwargs
-                ica.fit(mne_raw, **kwargs)
+                # Fit ICA with specific parameters
+                ica.fit(mne_raw, **(fit_params or {}))
 
-                # Apply ICA to raw data with kwargs
-                ica.apply(mne_raw, **kwargs)
+                # Apply ICA to raw data with specific parameters
+                ica.apply(mne_raw, **(apply_params or {}))
 
                 # Save file and update path in locator
                 mne_raw.save(new_file_path, overwrite=True)
@@ -731,10 +778,12 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        new_path_list = self.batch_process(con_func,
-                                           lambda row: app_func(row, output_path),
-                                           is_patch=False,
-                                           result_type='value')
+        new_path_list = self.batch_process(
+            con_func,
+            lambda row: app_func(row, output_path),
+            is_patch=False,
+            result_type='value'
+        )
 
         # Update locator
         self.set_column("File Path", new_path_list)
@@ -742,7 +791,8 @@ class EEGBatch(UDatasetSharedAttributes):
         locator_df = locator_df[locator_df['File Path'] != ""]
         self.get_shared_attr()['locator'] = locator_df
 
-    def resample(self, output_path: str, miss_bad_data: bool = False, **kwargs) -> None:
+    def resample(self, output_path: str, miss_bad_data: bool = False, resample_params: Dict = None,
+                 get_data_row_params: Dict = None) -> None:
         r"""Resample the data using MNE's resampling functionality and save the processed data.
 
         Parameters
@@ -751,10 +801,10 @@ class EEGBatch(UDatasetSharedAttributes):
             The path where the resampled file will be saved.
         miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
-        **kwargs : dict
-            Additional parameters to be passed to the `mne_raw.resample()` function. For detailed information about
-            these parameters, refer to the MNE documentation:
-            https://mne.tools/stable/generated/mne.io.Raw.html#mne.io.Raw.resample
+        resample_params : dict, optional
+            Additional parameters to be passed to the `mne_raw.resample()` function.
+        get_data_row_params : dict, optional
+            Additional parameters to be passed to the `get_data_row()` function.
 
         Returns
         -------
@@ -772,8 +822,14 @@ class EEGBatch(UDatasetSharedAttributes):
 
         Examples
         --------
-        >>> unified_dataset.eeg_batch.resample('/path/to/save/', sfreq=256)
+        >>> unified_dataset.eeg_batch.resample('/path/to/save/', resample_params={'sfreq': 256})
         """
+
+        # Set default empty dictionaries if parameters are None
+        if resample_params is None:
+            resample_params = {}
+        if get_data_row_params is None:
+            get_data_row_params = {}
 
         def con_func(row) -> bool:
             return True
@@ -783,10 +839,10 @@ class EEGBatch(UDatasetSharedAttributes):
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_resampled_raw.fif")
 
-                mne_raw = get_data_row(row)
+                mne_raw = get_data_row(row, **get_data_row_params)
 
-                # Resample using the provided kwargs
-                mne_raw.resample(**kwargs)
+                # Resample using the provided resample_params
+                mne_raw.resample(**resample_params)
 
                 # Save resampled data and update locator
                 mne_raw.save(new_file_path, overwrite=True)
@@ -808,19 +864,23 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        new_locator = self.batch_process(con_func,
-                                         lambda row: app_func(row, output_path),
-                                         is_patch=False,
-                                         result_type='series')
-        self.get_shared_attr()['locator'] = new_locator
+        self.batch_process(con_func,
+            lambda row: app_func(row, output_path),
+            is_patch=False,
+            result_type=None
+        )
+        # Update file paths in the dataset
+        self.get_shared_attr()["dataset_path"] = output_path
+        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
+            self.main_instance.eeg_parser._process_directory(output_path))})
 
     def align_channel(self, output_path: str, channel_order: list, min_num_channels: int = 1,
-                      miss_bad_data: bool = False, **kwargs: Dict):
+                      miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
         r"""Adjust the channel order and perform interpolation on the data.
 
         This method realigns the EEG data channels based on the provided `channel_order`. It utilizes
         `get_data_row()` for retrieving the data. Additional parameters can be passed to `get_data_row()`
-        via `**kwargs`. For more information on available options, refer to the
+        via `get_data_row_params`. For more information on available options, refer to the
         :func:`get_data_row` function in this documentation.
 
         Parameters
@@ -834,7 +894,7 @@ class EEGBatch(UDatasetSharedAttributes):
         miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs.
             Defaults to `False`.
-        **kwargs : dict, optional
+        get_data_row_params : dict, optional
             Additional keyword arguments to be passed to :func:`get_data_row` for data fetching.
             This allows fine-tuning the data retrieval process.
 
@@ -858,6 +918,10 @@ class EEGBatch(UDatasetSharedAttributes):
         >>> unified_dataset.eeg_batch.align_channel('/path/to/save/', channel_order=['C3', 'C4', 'O1'], min_num_channels=3)
         """
 
+        # Set default empty dictionary if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+
         invalid_channels = [ch for ch in channel_order if ch not in STANDARD_EEG_CHANNELS]
         if invalid_channels:
             raise ValueError(
@@ -871,8 +935,8 @@ class EEGBatch(UDatasetSharedAttributes):
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_aligned.fif")
 
-                # Fetch the data using get_data_row and **kwargs
-                mne_raw = get_data_row(row, **kwargs)
+                # Fetch the data using get_data_row and get_data_row_params
+                mne_raw = get_data_row(row, **get_data_row_params)
 
                 existing_channels = mne_raw.ch_names
                 matched_channels = [ch for ch in channel_order if ch in existing_channels]
@@ -880,7 +944,7 @@ class EEGBatch(UDatasetSharedAttributes):
                 if len(matched_channels) < min_num_channels:
                     if miss_bad_data:
                         print(f"File {row['File Path']} skipped due to insufficient matching channels.")
-                        return None  # Return an empty path to indicate failure
+                        return None  # Return None to indicate failure
                     else:
                         raise ValueError(
                             f"File {row['File Path']} has insufficient matching channels. Required: {min_num_channels}, Found: {len(matched_channels)}")
@@ -918,14 +982,16 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        new_locator = self.batch_process(con_func,
-                                         lambda row: app_func(row, channel_order, output_path, min_num_channels),
-                                         is_patch=False,
-                                         result_type='series')
+        new_locator = self.batch_process(
+            con_func,
+            lambda row: app_func(row, channel_order, output_path, min_num_channels),
+            is_patch=False,
+            result_type='series'
+        )
         self.get_shared_attr()['locator'] = new_locator
 
     def normalize(self, output_path: str, norm_type: str = 'sample-wise', miss_bad_data: bool = False,
-                  domain_mean: bool = True, **kwargs):
+                  domain_mean: bool = True, get_data_row_params: Dict = None) -> None:
         r"""Normalize the data.
 
         This method normalizes the EEG data based on the specified normalization type. It can either
@@ -946,7 +1012,7 @@ class EEGBatch(UDatasetSharedAttributes):
             If True (default), the function aggregates the results by domain tags. Each domain contains the
             mean and standard deviation across all related EEG channels. If False, the function calculates
             and stores individual mean and standard deviation for each EEG recording.
-        **kwargs : dict, optional
+        get_data_row_params : dict, optional
             Additional keyword arguments passed to :func:`get_data_row`. This allows users to pass extra parameters
             required by the `get_data_row` function seamlessly. For details on the parameters, refer to the
             :func:`get_data_row()` function in this documentation.
@@ -967,8 +1033,12 @@ class EEGBatch(UDatasetSharedAttributes):
 
         Examples
         --------
-        >>> unified_dataset.eeg_batch.normalize('/path/to/save/', norm_type='domain-wise', domain_mean=True)
+        >>> unified_dataset.eeg_batch.normalize('/path/to/save/', norm_type='channel-wise', domain_mean=True)
         """
+
+        # Set default empty dictionary if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
 
         # Check if 'MEAN STD' column exists, if not process mean and std
         locator = self.get_shared_attr()['locator']
@@ -982,7 +1052,12 @@ class EEGBatch(UDatasetSharedAttributes):
             try:
                 file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
                 new_file_path = os.path.join(output_path, f"{file_name}_normed.fif")
-                mne_raw = get_data_row(row, norm_type=norm_type, **kwargs)
+
+                # Include norm_type in get_data_row_params
+                get_data_row_params_with_norm = get_data_row_params.copy()
+                get_data_row_params_with_norm['norm_type'] = norm_type
+
+                mne_raw = get_data_row(row, **get_data_row_params_with_norm)
                 mne_raw.save(new_file_path, overwrite=True)
                 row['File Path'] = new_file_path
                 row['File Type'] = "standard_data"
@@ -994,10 +1069,12 @@ class EEGBatch(UDatasetSharedAttributes):
                 else:
                     raise
 
-        new_locator = self.batch_process(con_func,
-                                         lambda row: app_func(row, norm_type, output_path),
-                                         is_patch=False,
-                                         result_type='series')
+        new_locator = self.batch_process(
+            con_func,
+            lambda row: app_func(row, norm_type, output_path),
+            is_patch=False,
+            result_type='series'
+        )
         self.get_shared_attr()['locator'] = new_locator
 
     def epoch_for_pretraining(self,
@@ -1006,9 +1083,11 @@ class EEGBatch(UDatasetSharedAttributes):
                               resample: Optional[int] = None,
                               overlap: float = 0.0,
                               exclude_bad: bool = True,
-                              baseline: Tuple[Optional[float], float] = (None, 0),
+                              baseline: Tuple[Optional[float], float] = None,
                               miss_bad_data: bool = False,
-                              **kwargs) -> None:
+                              get_data_row_params: Dict = None,
+                              resample_params: Dict = None,
+                              epoch_params: Dict = None) -> None:
         r"""Processes data by creating epochs for pretraining from raw EEG data, applying optional resampling and event
         segmentation.
 
@@ -1028,9 +1107,12 @@ class EEGBatch(UDatasetSharedAttributes):
             Baseline correction period, represented as a tuple (start, end). Default is (None, 0).
         miss_bad_data : bool, optional
             If True, skips files with errors instead of raising an exception.
-        **kwargs : dict, optional
-            Additional keyword arguments passed to `mne.Epochs()` and `raw_data.resample()`
-            for further filtering options. Refer to the respective functions' documentation for details.
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
+        resample_params : dict, optional
+            Additional parameters passed to `raw_data.resample()`.
+        epoch_params : dict, optional
+            Additional parameters passed to `mne.Epochs()`.
 
         Returns
         -------
@@ -1051,6 +1133,14 @@ class EEGBatch(UDatasetSharedAttributes):
         >>> unified_dataset.eeg_batch.epoch_for_pretraining('/path/to/save/', seg_sec=2.0, resample=256)
         """
 
+        # Set default empty dictionaries if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+        if resample_params is None:
+            resample_params = {}
+        if epoch_params is None:
+            epoch_params = {}
+
         def con_func(row) -> bool:
             """Condition function to always process the row."""
             return True
@@ -1062,27 +1152,42 @@ class EEGBatch(UDatasetSharedAttributes):
                      overlap: float = 0.0,
                      exclude_bad: bool = True,
                      baseline: Tuple[Optional[float], float] = None,
-                     **kwargs) -> Optional[None]:
+                     get_data_row_params: Dict = None,
+                     resample_params: Dict = None,
+                     epoch_params: Dict = None) -> Optional[None]:
             """
             Applies the epoch processing to a single row of data.
 
-            :param row: A dictionary representing a data row, including 'File Path' for raw EEG file.
-            :param output_path: Path to save the epoch data.
-            :param seg_sec: Length of each epoch in seconds.
-            :param resample: Optional resampling rate.
-            :param overlap: Overlap fraction between epochs.
-            :param exclude_bad: Whether to exclude bad epochs.
-            :param baseline: Baseline period for correction.
-            :param kwargs: Additional keyword arguments for filtering.
-            :return: None if successful, or skips file if an error occurs and miss_bad_data is True.
+            Parameters
+            ----------
+            row : dict
+                A dictionary representing a data row, including 'File Path' for raw EEG file.
+            output_path : str
+                Path to save the epoch data.
+            seg_sec : float
+                Length of each epoch in seconds.
+            resample : int, optional
+                Optional resampling rate.
+            overlap : float, optional
+                Overlap fraction between epochs.
+            exclude_bad : bool, optional
+                Whether to exclude bad epochs.
+            baseline : tuple, optional
+                Baseline period for correction.
+            get_data_row_params : dict, optional
+                Additional parameters for `get_data_row()`.
+            resample_params : dict, optional
+                Additional parameters for `raw_data.resample()`.
+            epoch_params : dict, optional
+                Additional parameters for `mne.Epochs()`.
             """
             try:
                 # Retrieve the raw data for processing
-                raw_data = get_data_row(row)
+                raw_data = get_data_row(row, **get_data_row_params)
 
                 # Apply resampling if specified
                 if resample:
-                    raw_data.resample(resample, **kwargs)
+                    raw_data.resample(resample, **resample_params)
 
                 # Calculate step size and event intervals
                 step_sec = seg_sec * (1 - overlap)
@@ -1091,10 +1196,9 @@ class EEGBatch(UDatasetSharedAttributes):
                 # Create events for fixed-length segments
                 events = mne.make_fixed_length_events(raw_data, start=start, stop=None, duration=step_sec)
                 event_id = {'segment': 1}
-
                 # Create epochs from raw data and events
                 epochs = mne.Epochs(raw_data, events, event_id, tmin=0, tmax=seg_sec,
-                                    baseline=baseline, preload=True, **kwargs)
+                                    baseline=baseline, preload=True, **epoch_params)
 
                 # Exclude bad epochs if specified
                 if exclude_bad:
@@ -1114,27 +1218,39 @@ class EEGBatch(UDatasetSharedAttributes):
                     raise
 
         # Batch process the data
-        self.batch_process(con_func,
-                           lambda row: app_func(row, output_path, seg_sec=seg_sec, resample=resample,
-                                                overlap=overlap, exclude_bad=exclude_bad,
-                                                baseline=baseline, **kwargs),
-                           is_patch=False,
-                           result_type=None)
+        self.batch_process(
+            con_func,
+            lambda row: app_func(
+                row,
+                output_path,
+                seg_sec=seg_sec,
+                resample=resample,
+                overlap=overlap,
+                exclude_bad=exclude_bad,
+                baseline=baseline,
+                get_data_row_params=get_data_row_params,
+                resample_params=resample_params,
+                epoch_params=epoch_params
+            ),
+            is_patch=False,
+            result_type=None
+        )
 
-    def get_events(self, miss_bad_data: bool = False, **kwargs) -> None:
+    def get_events(self, miss_bad_data: bool = False, get_data_row_params: Dict = None,
+                   extract_events_params: Dict = None) -> None:
         r"""Extract events and log them in the data rows.
 
         This method processes each data row by applying the `get_data_row()` and `extract_events()`
-        functions. The `**kwargs` parameters are passed seamlessly to both functions
-        to allow customization of data extraction and event handling.
+        functions. Additional parameters can be passed to these functions via `get_data_row_params` and `extract_events_params`.
 
         Parameters
         ----------
         miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
-        **kwargs : dict, optional
-            Additional keyword arguments that are passed to both `get_data_row()` and `extract_events()`
-            for advanced filtering and event extraction.
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
+        extract_events_params : dict, optional
+            Additional parameters passed to `extract_events()` for event extraction.
 
         Raises
         ------
@@ -1144,20 +1260,25 @@ class EEGBatch(UDatasetSharedAttributes):
         Note
         ----
         Please refer to the documentation of `get_data_row()` and `extract_events()`
-        for detailed descriptions of the available `kwargs` parameters.
+        for detailed descriptions of the available parameters.
         """
 
+        # Set default empty dictionaries if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+        if extract_events_params is None:
+            extract_events_params = {}
 
         def con_func(row):
             return True
 
         def app_func(row):
             try:
-                # Pass kwargs to get_data_row()
-                mne_raw = get_data_row(row, **kwargs)
+                # Pass get_data_row_params to get_data_row()
+                mne_raw = get_data_row(row, **get_data_row_params)
 
-                # Pass kwargs to extract_events()
-                events, event_id = extract_events(mne_raw, **kwargs)
+                # Pass extract_events_params to extract_events()
+                events, event_id = extract_events(mne_raw, **extract_events_params)
 
                 row["event_id"] = str(event_id)
                 event_id_num = {key: sum(events[:, 2] == val) for key, val in event_id.items()}
@@ -1171,14 +1292,19 @@ class EEGBatch(UDatasetSharedAttributes):
                     raise
 
         # Process all rows and update the locator attribute
-        new_locator = self.batch_process(con_func,
-                                         lambda row: app_func(row),
-                                         is_patch=False,
-                                         result_type='series')
+        new_locator = self.batch_process(
+            con_func,
+            lambda row: app_func(row),
+            is_patch=False,
+            result_type='series'
+        )
         self.get_shared_attr()['locator'] = new_locator
 
     def epoch_by_event(self, output_path: str, resample: int = None,
-                       exclude_bad=True, miss_bad_data=False, **epoch_params):
+                       exclude_bad: bool = True, miss_bad_data: bool = False,
+                       get_data_row_params: Dict = None,
+                       resample_params: Dict = None,
+                       epoch_params: Dict = None) -> None:
         r"""Batch process EEG data to create epochs based on events specified in the event_id column.
 
         Parameters
@@ -1191,7 +1317,11 @@ class EEGBatch(UDatasetSharedAttributes):
             Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is `True`.
         miss_bad_data : bool, optional
             Whether to skip files with processing errors. Default is `False`.
-        **epoch_params : dict, optional
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
+        resample_params : dict, optional
+            Additional parameters passed to `raw_data.resample()`.
+        epoch_params : dict, optional
             Additional parameters for `mne.Epochs`, excluding `raw_data`, `events`, and `event_id`.
 
         Returns
@@ -1205,27 +1335,44 @@ class EEGBatch(UDatasetSharedAttributes):
             If any parameters are inconsistent or if the specified output path is invalid.
         """
 
+        # Set default empty dictionaries if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+        if resample_params is None:
+            resample_params = {}
+        if epoch_params is None:
+            epoch_params = {}
+
         def con_func(row):
             return True
 
         def app_func(row, output_path: str, resample: int = None,
-                     exclude_bad=True, **epoch_params):
+                     exclude_bad: bool = True,
+                     get_data_row_params: Dict = None,
+                     resample_params: Dict = None,
+                     epoch_params: Dict = None):
             try:
-                # Load raw data
-                raw_data = get_data_row(row)
+                # Load raw data with additional parameters
+                raw_data = get_data_row(row, **get_data_row_params)
 
                 # Resample if needed
                 if resample:
-                    raw_data.resample(resample)
+                    raw_data.resample(resample, **resample_params)
 
                 # Extract event_id from row
                 event_id_str = row.get('event_id')
-                # Convert event_id string to dictionary
-                events, _ = extract_events(raw_data)
-                event_id = ast.literal_eval(event_id_str)
-                if not event_id_str or len(event_id) == 0:
+                if not event_id_str:
                     print(f"No event_id found for file {row['File Path']}")
                     return None
+
+                # Convert event_id string to dictionary
+                event_id = ast.literal_eval(event_id_str)
+                if not event_id:
+                    print(f"No valid event_id found for file {row['File Path']}")
+                    return None
+
+                # Extract events
+                events, _ = extract_events(raw_data)
 
                 # Create epochs with the passed epoch_params
                 epochs = mne.Epochs(raw_data, events, event_id, **epoch_params)
@@ -1251,13 +1398,22 @@ class EEGBatch(UDatasetSharedAttributes):
                     raise
 
         # Use batch_process to process data
-        self.batch_process(con_func,
-                           app_func=lambda row: app_func(row, output_path, resample=resample,
-                                                         exclude_bad=exclude_bad, **epoch_params),
-                           is_patch=False,
-                           result_type=None)
+        self.batch_process(
+            con_func,
+            lambda row: app_func(
+                row,
+                output_path,
+                resample=resample,
+                exclude_bad=exclude_bad,
+                get_data_row_params=get_data_row_params,
+                resample_params=resample_params,
+                epoch_params=epoch_params
+            ),
+            is_patch=False,
+            result_type=None
+        )
 
-    def infer_units(self, miss_bad_data: bool = False, **kwargs: dict) -> None:
+    def infer_units(self, miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
         r"""Infer the units of each channel and record them in the data line.
 
         Parameters
@@ -1265,10 +1421,9 @@ class EEGBatch(UDatasetSharedAttributes):
         miss_bad_data : bool, optional
             Whether to skip the current file and continue processing the next file when an error occurs.
             Defaults to `False`.
-
-        **kwargs : dict
+        get_data_row_params : dict, optional
             Additional parameters passed to `get_data_row()`. These allow for more flexible data processing
-            during the inference process. For more details on available options, refer to the `get_data_row()` function.
+            during the inference process.
 
         Raises
         ------
@@ -1281,13 +1436,17 @@ class EEGBatch(UDatasetSharedAttributes):
         based on the raw MNE data. The function handles errors gracefully if `miss_bad_data` is `True`.
         """
 
+        # Set default empty dictionary if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+
         def con_func(row):
             return True
 
         def app_func(row):
             try:
-                # Pass **kwargs to get_data_row
-                mne_raw = get_data_row(row, **kwargs)
+                # Pass get_data_row_params to get_data_row
+                mne_raw = get_data_row(row, **get_data_row_params)
 
                 units = {}
 
@@ -1320,7 +1479,7 @@ class EEGBatch(UDatasetSharedAttributes):
 
         self.get_shared_attr()['locator'] = new_locator
 
-    def get_quality(self, miss_bad_data: bool = False, **kwargs) -> None:
+    def get_quality(self, miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
         r"""Process the data quality of EEG files by calculating quality scores for each row in the dataset.
 
         Parameters
@@ -1329,8 +1488,8 @@ class EEGBatch(UDatasetSharedAttributes):
             If `True`, skips rows that contain bad data without raising an error.
             If `False`, raises an exception when encountering bad data.
 
-        **kwargs : dict
-            Additional keyword arguments passed to the `get_data_row()` function.
+        get_data_row_params : dict, optional
+            Additional parameters passed to the `get_data_row()` function.
             This allows fine-tuning of parameters such as unit conversion, data normalization, etc.
             For details, refer to the `get_data_row()` function documentation.
 
@@ -1340,13 +1499,17 @@ class EEGBatch(UDatasetSharedAttributes):
             The function modifies the dataset in place by updating quality scores for each row.
         """
 
+        # Set default empty dictionary if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+
         def con_func(row):
             return True
 
         def app_func(row):
             try:
-                # Pass **kwargs to get_data_row to ensure seamless integration
-                raw_data = get_data_row(row, **kwargs)
+                # Pass get_data_row_params to get_data_row to ensure seamless integration
+                raw_data = get_data_row(row, **get_data_row_params)
                 scores = calculate_eeg_quality_scores(raw_data)
                 score = np.mean(scores)
                 return str(score)
@@ -1394,7 +1557,8 @@ class EEGBatch(UDatasetSharedAttributes):
         copied_instance.set_shared_attr({'locator': updated_locator})
         return copied_instance
 
-    def export_h5Dataset(self, output_path: str, name: str = 'EEGUnity_export', verbose: bool = False) -> None:
+    def export_h5Dataset(self, output_path: str, name: str = 'EEGUnity_export', verbose: bool = False,
+                         get_data_row_params: Dict = None) -> None:
         """
         Export the dataset in HDF5 format to the specified output path.
 
@@ -1411,6 +1575,8 @@ class EEGBatch(UDatasetSharedAttributes):
             Raises a `TypeError` if the value provided is not a string.
         verbose : bool, optional
             If True, prints the progress of the export process. Default is False.
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
 
         Returns
         -------
@@ -1428,6 +1594,10 @@ class EEGBatch(UDatasetSharedAttributes):
         TypeError
             If the `name` parameter is not a string.
         """
+        # Set default empty dictionary if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+
         if not isinstance(name, str):
             raise TypeError(f"The name parameter must be a string, got {type(name).__name__} instead.")
 
@@ -1446,27 +1616,43 @@ class EEGBatch(UDatasetSharedAttributes):
         dataset = h5Dataset(Path(output_path), name)
 
         def app_func(row):
-            # Extract channel information for the current file
-            current_channels = set([channel.strip() for channel in row['Channel Names'].split(',')])
-            current_sf = int(float(row['Sampling Rate']))
+            try:
+                # Extract channel information for the current file
+                current_channels = [channel.strip() for channel in row['Channel Names'].split(',')]
+                current_sf = int(float(row['Sampling Rate']))
 
-            # Get EEG data
-            raw = get_data_row(row)
-            eeg_data = raw.get_data()
+                # Get EEG data with additional parameters
+                raw = get_data_row(row, **get_data_row_params)
+                eeg_data = raw.get_data()
 
-            # Create a group and dataset in the HDF5 file for each file
-            grp = dataset.addGroup(grpName=os.path.basename(row['File Path']))
-            dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
+                # Create a group and dataset in the HDF5 file for each file
+                grp = dataset.addGroup(grpName=os.path.basename(row['File Path']))
+                dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
 
-            # Add individual attributes for each dataset
-            dataset.addAttributes(dset, 'rsFreq', current_sf)  # Sampling rate may vary per file
-            dataset.addAttributes(dset, 'chOrder', list(current_channels))  # Channel order may vary per file
+                # Add individual attributes for each dataset
+                dataset.addAttributes(dset, 'rsFreq', current_sf)  # Sampling rate may vary per file
+                dataset.addAttributes(dset, 'chOrder', current_channels)  # Channel order may vary per file
 
-            # Print progress if verbose is True
-            if verbose:
-                print(f"Processed file: {os.path.basename(row['File Path'])}")
+                # Handle info attribute using pickle
 
-            return None  # No need to return any result
+                info_bytes = pickle.dumps(raw.info)
+                # Convert bytes to a NumPy array of uint8
+                info_array = np.frombuffer(info_bytes, dtype='uint8')
+                # Store the serialized info as a uint8 array
+                dataset.addDataset(grp, 'info', info_array, chunks=None)
+
+                # Print progress if verbose is True
+                if verbose:
+                    print(f"Processed file: {os.path.basename(row['File Path'])}")
+
+                return None  # No need to return any result
+
+            except Exception as e:
+                print(f"Error processing file {row['File Path']}: {e}")
+                if verbose:
+                    import traceback
+                    traceback.print_exc()
+                return None  # Return None to indicate failure
 
         # Process batch data without domain_tag filtering, processing all files
         self.batch_process(lambda row: True, app_func, is_patch=False, result_type=None)
@@ -1478,17 +1664,24 @@ class EEGBatch(UDatasetSharedAttributes):
         if verbose:
             print(f"All data exported successfully to {h5_path}.")
 
-    def auto_domain(self):
-        """Automatically modify the 'Domain Tag' of each row based on 'Sampling Rate' and 'Channel Names'.
+    def auto_domain(self, get_data_row_params: Dict = None) -> None:
+        """Automatically modify the 'Domain Tag' of each row based on 'Sampling Rate' and channel names.
 
         This function processes each row in the dataset and updates the 'Domain Tag'
-        by appending the 'Sampling Rate' and a unique encoded representation of the 'Channel Names'.
-        The 'Channel Names' are encoded using a hashing function to ensure uniqueness, and
-        the 'Domain Tag' is updated in the format:
-        `f"row['Domain Tag']-row['Sampling Rate']-ch_enc(row['Channel Names'])"`.
+        by appending the 'Sampling Rate' and a unique encoded representation of the channel names.
+        The channel names are retrieved using `get_data_row()` to ensure accuracy,
+        and parameters can be passed to `get_data_row()` via `get_data_row_params`.
+
+        The 'Domain Tag' is updated in the format:
+        `f"row['Domain Tag']-row['Sampling Rate']-ch_enc(channel_names)"`.
 
         The function utilizes the `batch_process` method to apply these modifications
         across the dataset.
+
+        Parameters
+        ----------
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
 
         Returns
         -------
@@ -1498,25 +1691,29 @@ class EEGBatch(UDatasetSharedAttributes):
         Raises
         ------
         KeyError
-            If the required columns ('Domain Tag', 'Sampling Rate', 'Channel Names') are missing.
+            If the required columns ('Domain Tag', 'Sampling Rate') are missing.
 
         Examples
         --------
-        >>> unified_dataset.eeg_batch.auto_domain()
+        >>> unified_dataset.eeg_batch.auto_domain(get_data_row_params={'preload': True})
         """
 
-        def ch_enc(channel_names: str) -> str:
+        # Set default empty dictionary if parameters are None
+        if get_data_row_params is None:
+            get_data_row_params = {}
+
+        def ch_enc(channel_names: List[str]) -> str:
             """Encodes the channel names into a short unique identifier.
 
-            The identifier includes the length of the channel names list (in digits) and
-            a 4-character hash that represents the content. Channel names order does not
+            The identifier includes the length of the channel names list and
+            a 4-character hash representing the content. Channel name order does not
             affect the hash, ensuring only differences in content cause a different hash.
             """
-            # Split the channel names string by comma, strip whitespace, and sort the list
-            channels = sorted([ch.strip() for ch in channel_names.split(',')])
+            # Sort the list
+            channels = sorted(channel_names)
             length = len(channels)
 
-            # Join the sorted and stripped channel names back into a single string
+            # Join the sorted channel names back into a single string
             sorted_channel_str = ','.join(channels)
 
             # Hash the sorted channel string and take the first 4 characters of the hash
@@ -1542,7 +1739,15 @@ class EEGBatch(UDatasetSharedAttributes):
                 # If conversion fails, fallback to a default value (optional)
                 sampling_rate = 0
 
-            channel_names = row['Channel Names']
+            try:
+                # Get the raw data using get_data_row with the specified parameters
+                mne_raw = get_data_row(row, **get_data_row_params)
+                # Get channel names from mne_raw
+                channel_names = mne_raw.info['ch_names']
+            except Exception as e:
+                # If get_data_row fails, fallback to using row['Channel Names']
+                print(f"Error retrieving data for file {row['File Path']}: {e}")
+                channel_names = [ch.strip() for ch in row['Channel Names'].split(',')]
 
             # Generate the new domain tag using the provided format
             new_domain_tag = f"{domain_tag}-{sampling_rate}-{ch_enc(channel_names)}"

@@ -1,4 +1,12 @@
 import json
+import os
+import sys
+# Get the parent directory of the script
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Add parent directory to sys.path
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 from eegunity.unifieddataset import UnifiedDataset
 
 # Obtain base config from file
@@ -31,9 +39,5 @@ for folder_name in remain_list:
     # Testing normalization while skipping bad data (miss_bad_data=True)
     unified_dataset.eeg_batch.normalize(output_path=CI_output_path, miss_bad_data=True)
     print(f"Test with miss_bad_data=True for {folder_name} completed.")
-
-    # Testing normalization with additional kwargs (custom parameters for `get_data_row`)
-    unified_dataset.eeg_batch.normalize(output_path=CI_output_path, norm_type='sample-wise', custom_param1='value1', custom_param2='value2')
-    print(f"Test with additional kwargs for {folder_name} completed.")
 
 print("Successfully completed all normalize tests.")
