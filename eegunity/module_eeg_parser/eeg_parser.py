@@ -80,6 +80,7 @@ class EEGParser(UDatasetSharedAttributes):
         files_locator = process_mat_files(files_locator)
         files_locator = process_csv_files(files_locator)
         files_locator = _clean_sampling_rate_(files_locator)
+        files_locator = files_locator.sort_values(by='File Path').reset_index(drop=True)
         return files_locator
 
     def _unzip_if_no_conflict(self, datasets_path):
@@ -120,7 +121,7 @@ class EEGParser(UDatasetSharedAttributes):
         else:
             return
 
-    def get_data(self, data_idx, norm_type=None, unit_convert=False):
+    def get_data(self, data_idx, **kwargs):
         """
         Retrieve data based on the specified index from the locator.
 
@@ -128,10 +129,7 @@ class EEGParser(UDatasetSharedAttributes):
         ----------
         data_idx : int
             Index of the row in the locator DataFrame to retrieve data from.
-        norm_type : str, optional
-            Type of normalization to apply to the data, if any.
-        unit_convert : bool, optional
-            Whether to convert the data units.
+
 
         Returns
         -------
@@ -139,7 +137,7 @@ class EEGParser(UDatasetSharedAttributes):
             The data retrieved and processed according to the specified parameters.
         """
         row = self.get_shared_attr()['locator'].iloc[data_idx]
-        return get_data_row(row, norm_type, self.get_shared_attr()['verbose'], unit_convert=unit_convert)
+        return get_data_row(row, **kwargs)
 
     def check_locator(self, locator):
         """
@@ -384,6 +382,8 @@ def set_channel_type(raw_data, channel_str):
             ch['kind'] = mne.io.constants.FIFF.FIFFV_ECG_CH
         elif ch_info[0].strip() == 'EOG':
             ch['kind'] = mne.io.constants.FIFF.FIFFV_EOG_CH
+        elif ch_info[0].strip() == 'STIM':
+            ch['kind'] = mne.io.constants.FIFF.FIFFV_STIM_CH
         else:
             ch['kind'] = mne.io.constants.FIFF.FIFFV_BIO_CH
     return raw_data
@@ -547,6 +547,10 @@ def channel_name_parser(input_string):
     def is_ecg_channel(channel):
         return "ecg" in channel.lower()
 
+    # Define a function to check if a channel is an ECG channel
+    def is_stim_channel(channel):
+        return "stim" in channel.lower()
+
     # Define a function to check if a channel is an DOUBLE channel
     def is_double_channel(channel):
         if '-' not in channel:
@@ -625,6 +629,8 @@ def channel_name_parser(input_string):
             formatted_channel = f"ECG:{channel.replace('ECG:', '').replace('ECG', '').replace('ecg', '')}"
         elif is_double_channel(channel):
             formatted_channel = f"EEGDual:{channel.replace('Dual:', '')}"
+        elif is_stim_channel(channel):
+            formatted_channel = f"STIM:{channel.replace('STIM:', '')}"
         else:
             re_channel = remap_standard_name(channel)
             matched = False

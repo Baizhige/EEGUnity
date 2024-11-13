@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-
+import numpy as np
 import pandas as pd
 
 
@@ -138,9 +138,9 @@ def process_csv_files(files_locator):
                     print(time_info)
                     time_cols = time_info[0]
                     files_locator.at[index, 'Sampling Rate'] = round(time_info[1])
-                    # Recording channel names, excluding time column and non-float columns
+                    # Recording channel names, excluding time column and non-numeric columns
                     channel_names = [col for col in df.columns if
-                                     col not in time_cols and df[col].dtype in [float, 'float64']]
+                                     col not in time_cols and np.issubdtype(df[col].dtype, np.number)]
                     if channel_names:
                         files_locator.at[index, 'Channel Names'] = ','.join(channel_names)
                         files_locator.at[index, 'Number of Channels'] = len(channel_names)
