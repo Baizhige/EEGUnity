@@ -7,11 +7,11 @@ import numpy as np
 import pandas as pd
 from scipy.signal import welch
 
-from eegunity.module_eeg_parser.eeg_parser import get_data_row
-from eegunity.share_attributes import UDatasetSharedAttributes
+from eegunity._modules.parser.eeg_parser import get_data_row
+from eegunity._share_attributes import _UDatasetSharedAttributes
 
 
-class EEGCorrection(UDatasetSharedAttributes):
+class EEGCorrection(_UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()
         self._shared_attr = main_instance._shared_attr

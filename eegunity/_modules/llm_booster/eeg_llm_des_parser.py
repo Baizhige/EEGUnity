@@ -1,11 +1,7 @@
 import csv
 import json
 import os
-
-import docx
 import pandas as pd
-import pdfplumber
-from openai import AzureOpenAI
 from scipy.io import loadmat
 
 
@@ -31,11 +27,13 @@ def _read_files(directory):
                         files.append({"file_path": file_path, "content": file_content})
                         print(f"read {file} complete, length：{len(file_content)}")
                     elif file_path.endswith('.docx'):
+                        import docx
                         doc = docx.Document(file_path)
                         file_content = "\n".join([para.text for para in doc.paragraphs])
                         files.append({"file_path": file_path, "content": file_content})
                         print(f"read {file} complete")
                     elif file_path.endswith('.pdf'):
+                        import pdfplumber
                         with pdfplumber.open(file_path) as pdf:
                             file_content = "\n".join([page.extract_text() or "" for page in pdf.pages])
                         files.append({"file_path": file_path, "content": file_content})
@@ -65,6 +63,8 @@ def _read_files(directory):
 
 
 def _filter_files_with_gpt(files, api_key, endpoint):
+    # Import OpenAI dynamically
+    from openai import AzureOpenAI
     client = AzureOpenAI(
         api_key=api_key,
         api_version="2023-03-15-preview",

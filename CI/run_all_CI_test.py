@@ -1,6 +1,5 @@
 import os
 import subprocess
-
 def run_tests(directory=None):
     # Use the provided directory if given, otherwise use the current directory
     if directory:
@@ -22,7 +21,7 @@ def run_tests(directory=None):
         print(f"Running test: {py_file}")
         try:
             # Execute the .py script and capture the output
-            result = subprocess.run(['python', os.path.join(current_dir, py_file)], capture_output=True, text=True)
+            result = subprocess.run(['/gpfs/work/int/chengxuanqin21/conda_envs/EEG/bin/python', os.path.join(current_dir, py_file)], capture_output=True, text=True)
 
             # If the script returns a non-zero exit code, consider it a failure
             if result.returncode != 0:

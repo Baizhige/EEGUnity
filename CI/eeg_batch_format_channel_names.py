@@ -15,7 +15,7 @@ with open('CI_config.json', 'r') as config_file:
 
 remain_list = config['test_data_list']
 locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']
+CI_output_path = config['CI_output_path']+"/format_channel_names"
 
 # Test function format_channel_names
 for folder_name in remain_list:
@@ -31,7 +31,7 @@ for folder_name in remain_list:
         channel_names_column = unified_dataset.get_locator().loc[:, 'Channel Names']
         assert channel_names_column.notnull().all(), "Channel Names column contains null values."
         print(f"Channel Names column format verification for {folder_name} passed.")
-
+        unified_dataset.save_locator(CI_output_path+"/CI_ftn.csv")
     except KeyError as e:
         print(f"Test failed for {folder_name}: {str(e)}")
 

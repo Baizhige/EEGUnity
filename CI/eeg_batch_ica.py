@@ -15,7 +15,7 @@ with open('CI_config.json', 'r') as config_file:
 
 remain_list = config['test_data_list']
 locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']
+CI_output_path = config['CI_output_path']+"/ica"
 
 # Create filter output directory if it doesn't exist
 ica_output_path = os.path.join(CI_output_path, 'ica')

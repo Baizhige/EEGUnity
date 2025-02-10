@@ -24,32 +24,32 @@ for folder_name in remain_list:
                                      is_unzip=False)
 
     # Default parameters (no overlap, exclude bad data, no resample)
-    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path,
+    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path+"/epoch_for_pretraining",
                                                     seg_sec=2.0)
     print(f"Test with default parameters for {folder_name} completed.")
 
     # Test with overlap
-    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path,
+    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path+"/epoch_for_pretraining",
                                                     seg_sec=2.0, overlap=0.5)
     print(f"Test with overlap=0.5 for {folder_name} completed.")
 
     # Test with resampling
-    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path,
+    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path+"/epoch_for_pretraining",
                                                     seg_sec=2.0, resample=100)
     print(f"Test with resample=100 Hz for {folder_name} completed.")
 
     # Test excluding bad data
-    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path,
+    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path+"/epoch_for_pretraining",
                                                     seg_sec=2.0, exclude_bad=True)
     print(f"Test with exclude_bad=True for {folder_name} completed.")
 
     # Test with baseline correction
-    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path,
+    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path+"/epoch_for_pretraining",
                                                     seg_sec=2.0, baseline=(None, 0.2))
     print(f"Test with baseline=(None, 0.2) for {folder_name} completed.")
 
     # Test skipping bad data
-    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path,
+    unified_dataset.eeg_batch.epoch_for_pretraining(output_path=CI_output_path+"/epoch_for_pretraining",
                                                     seg_sec=2.0, miss_bad_data=True)
     print(f"Test with miss_bad_data=True for {folder_name} completed.")
 

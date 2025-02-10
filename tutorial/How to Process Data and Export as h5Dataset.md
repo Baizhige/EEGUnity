@@ -94,9 +94,10 @@ This demo uses **UnifiedDataset.eeg_batch.batch_process()** to streamline the en
 8. Export the processed data as an h5Dataset.
 
 ### Code:
+
 ```python
 from eegunity.unifieddataset import UnifiedDataset
-from eegunity.module_eeg_parser.eeg_parser import get_data_row
+from eegunity._modules.parser import get_data_row
 from eegunity.utils.pipeline import Pipeline
 from eegunity.utils.normalize import normalize_mne
 import os
@@ -114,9 +115,10 @@ import os
 
 # Parameter settings
 input_path = r'path/to/dataset'  # Dataset directory
-domain_tag = "demo-tag"      # Domain tag for marking the dataset
+domain_tag = "demo-tag"  # Domain tag for marking the dataset
 cache_path = r"path/for/saving-dataset-by-pipeline"  # Cache path for batch processing
 output_path = r"path/for/saving-h5Dataset"  # Output path for h5Dataset
+
 
 # Define the processing function using the Pipeline for simplification
 def app_func(row, output_dir):
@@ -129,7 +131,7 @@ def app_func(row, output_dir):
         lambda mne_raw: mne_raw.filter(l_freq=0.1, h_freq=75),  # Apply bandpass filter (0.1-75 Hz)
         lambda mne_raw: mne_raw.notch_filter(freqs=50),  # Apply notch filter (50 Hz)
         lambda mne_raw: mne_raw.resample(sfreq=200),  # Resample to 200 Hz
-        normalize_mne   # Custom normalization function
+        normalize_mne  # Custom normalization function
     ])
     mne_raw = get_data_row(row, is_set_channel_type=True)  # Get and set channel types, for later mne_raw.pick_types（）
     processed_mne_raw = pipeline.forward(mne_raw)  # Process data based on custom pipeline
@@ -138,6 +140,7 @@ def app_func(row, output_dir):
     output_path = f"{output_dir}/{filename}_processed.fif"  # Define the output path
     processed_mne_raw.save(output_path, overwrite=True)  # Save the processed file
     return output_path
+
 
 # 1. Load the dataset directory
 unified_dataset = UnifiedDataset(dataset_path=input_path, domain_tag=domain_tag)

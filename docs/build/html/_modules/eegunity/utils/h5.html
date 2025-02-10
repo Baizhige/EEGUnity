@@ -76,37 +76,38 @@
 <div class="viewcode-block" id="h5Dataset">
 <a class="viewcode-back" href="../../../eegunity.utils.html#eegunity.utils.h5.h5Dataset">[docs]</a>
 <span class="k">class</span> <span class="nc">h5Dataset</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
-    
+
 <div class="viewcode-block" id="h5Dataset.addGroup">
 <a class="viewcode-back" href="../../../eegunity.utils.html#eegunity.utils.h5.h5Dataset.addGroup">[docs]</a>
-    <span class="k">def</span> <span class="nf">addGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grpName</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">addGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grpName</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">grpName</span><span class="p">)</span></div>
 
-    
+
 <div class="viewcode-block" id="h5Dataset.addDataset">
 <a class="viewcode-back" href="../../../eegunity.utils.html#eegunity.utils.h5.h5Dataset.addDataset">[docs]</a>
-    <span class="k">def</span> <span class="nf">addDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">:</span><span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span> <span class="n">dsName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">arr</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">chunks</span><span class="p">:</span><span class="nb">tuple</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">dsName</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">arr</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">addDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grp</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span> <span class="n">dsName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">chunks</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">dsName</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">arr</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-    
+
 <div class="viewcode-block" id="h5Dataset.addAttributes">
 <a class="viewcode-back" href="../../../eegunity.utils.html#eegunity.utils.h5.h5Dataset.addAttributes">[docs]</a>
-    <span class="k">def</span> <span class="nf">addAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span><span class="s1">&#39;h5py.Dataset|h5py.Group&#39;</span><span class="p">,</span> <span class="n">attrName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">attrValue</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">addAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;h5py.Dataset|h5py.Group&#39;</span><span class="p">,</span> <span class="n">attrName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attrValue</span><span class="p">):</span>
         <span class="n">src</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">attrName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrValue</span></div>
 
-    
+
 <div class="viewcode-block" id="h5Dataset.save">
 <a class="viewcode-back" href="../../../eegunity.utils.html#eegunity.utils.h5.h5Dataset.save">[docs]</a>
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span></div>
+
 
 
 </pre></div>

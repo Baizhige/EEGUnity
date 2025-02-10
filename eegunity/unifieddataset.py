@@ -1,13 +1,13 @@
 import copy
 
-from eegunity.module_eeg_batch.eeg_batch import EEGBatch
-from eegunity.module_eeg_correction.eeg_correction import EEGCorrection
-from eegunity.module_eeg_parser.eeg_parser import EEGParser
-from eegunity.module_eeg_llm_booster.eeg_llm_booster import EEGLLMBooster
-from eegunity.share_attributes import UDatasetSharedAttributes
+from eegunity._modules.batch.eeg_batch import EEGBatch
+from eegunity._modules.correction.eeg_correction import EEGCorrection
+from eegunity._modules.parser.eeg_parser import EEGParser
+from eegunity._modules.llm_booster.eeg_llm_booster import EEGLLMBooster
+from eegunity._share_attributes import _UDatasetSharedAttributes
 
 
-class UnifiedDataset(UDatasetSharedAttributes):
+class UnifiedDataset(_UDatasetSharedAttributes):
     """
         This is the kernel class to manage mutiple EEG datasets and associated processing tools.
 
@@ -29,7 +29,7 @@ class UnifiedDataset(UDatasetSharedAttributes):
             EEGBatch module
         eeg_correction : EEGCorrection
             EEGCorrection module
-        module_eeg_llm_booster : EEGLLMBooster
+        llm_booster : EEGLLMBooster
            EEGLLMBooster module
         """
 

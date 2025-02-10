@@ -54,7 +54,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.share_attributes">eegunity.share_attributes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#eegunity-share-attributes-module">eegunity.share_attributes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.unifieddataset">eegunity.unifieddataset module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity">Module contents</a></li>
 </ul>
@@ -102,12 +102,12 @@
 <dd><p>Concatenates the locator DataFrames of the given UnifiedDataset objects,
 and returns a new UnifiedDataset with the concatenated locator.</p>
 <p>The function checks if all elements in the input list are instances of
-the ‘UnifiedDataset’ class. It then calls the <cite>get_locator()</cite> method
-of each dataset, concatenates them, and sets the new locator in a
-copied version of the first dataset using <cite>set_locator()</cite>.</p>
+the ‘UnifiedDataset’ class without directly importing it. It then calls
+the <cite>get_locator()</cite> method of each dataset, concatenates them, and sets
+the new locator in a copied version of the first dataset using <cite>set_locator()</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>datasets</strong> (<em>list</em><em> of </em><a class="reference internal" href="eegunity.html#eegunity.unifieddataset.UnifiedDataset" title="eegunity.unifieddataset.UnifiedDataset"><em>UnifiedDataset</em></a>) – A list of UnifiedDataset instances to concatenate their locators.</p>
+<dd class="field-odd"><p><strong>datasets</strong> (<em>list</em>) – A list of UnifiedDataset instances to concatenate their locators.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A new UnifiedDataset with the concatenated locator.</p>
@@ -135,7 +135,7 @@ copied version of the first dataset using <cite>set_locator()</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="eegunity.utils.h5.h5Dataset.addDataset">
-<span class="sig-name descname"><span class="pre">addDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/utils/h5.html#h5Dataset.addDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.utils.h5.h5Dataset.addDataset" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">addDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsName</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/utils/h5.html#h5Dataset.addDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.utils.h5.h5Dataset.addDataset" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

@@ -55,7 +55,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.share_attributes">eegunity.share_attributes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#eegunity-share-attributes-module">eegunity.share_attributes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.unifieddataset">eegunity.unifieddataset module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity">Module contents</a></li>
 </ul>
@@ -95,113 +95,11 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 </section>
-<section id="module-eegunity.module_eeg_correction.eeg_correction">
-<span id="eegunity-module-eeg-correction-eeg-correction-module"></span><h2>eegunity.module_eeg_correction.eeg_correction module<a class="headerlink" href="#module-eegunity.module_eeg_correction.eeg_correction" title="Link to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="eegunity.module_eeg_correction.eeg_correction.EEGCorrection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_correction.eeg_correction.</span></span><span class="sig-name descname"><span class="pre">EEGCorrection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_correction/eeg_correction.html#EEGCorrection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_correction.eeg_correction.EEGCorrection" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="eegunity.html#eegunity.share_attributes.UDatasetSharedAttributes" title="eegunity.share_attributes.UDatasetSharedAttributes"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDatasetSharedAttributes</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="eegunity.module_eeg_correction.eeg_correction.EEGCorrection.report">
-<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_correction/eeg_correction.html#EEGCorrection.report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_correction.eeg_correction.EEGCorrection.report" title="Link to this definition">¶</a></dt>
-<dd><p>Generate a statistical report on the dataset, providing proportions for file types,
-sampling rates, channel configurations, and completeness checks. The report can be
-generated for the dataset as a whole or for individual groups based on domain tags.</p>
-<p>The report includes:
-- File Type Proportions (%)
-- Sampling Rate Proportions (%)
-- Channel Configuration Proportions (%)
-- Completeness Check Proportions (%)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p><strong>dict</strong> (<em>A dictionary containing the computed proportions for file types,</em>)</p></li>
-<li><p><em>sampling rates, channel configurations, and completeness checks for each domain or overall.</em></p></li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_correction</span><span class="o">.</span><span class="n">report</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="eegunity.module_eeg_correction.eeg_correction.EEGCorrection.visualization_channels_corr">
-<span class="sig-name descname"><span class="pre">visualization_channels_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_correction/eeg_correction.html#EEGCorrection.visualization_channels_corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_correction.eeg_correction.EEGCorrection.visualization_channels_corr" title="Link to this definition">¶</a></dt>
-<dd><p>Visualize the correlation between EEG data channels for different domains.</p>
-<p>This method computes and visualizes the correlation matrix between EEG channels for each domain
-available in the dataset. For each domain, a sample of EEG data is selected, and the correlation
-between channels is plotted as a matrix.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>max_sample</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum number of samples to visualize per domain. If the number of available samples
-exceeds this value, a random subset of samples is selected. Default is 16.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>This function does not return any value. It generates and displays a set of correlation matrix
-plots for each domain.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>This function uses the <cite>np.corrcoef</cite> method to compute the correlation matrix.</p></li>
-<li><p>The visualization is created using <cite>matplotlib</cite>, and the correlation values range from -1 to 1.</p></li>
-</ul>
-</div>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># To visualize the correlation matrices for up to 10 samples per domain:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">visualization_channels_corr</span><span class="p">(</span><span class="n">max_sample</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="eegunity.module_eeg_correction.eeg_correction.EEGCorrection.visualization_frequency">
-<span class="sig-name descname"><span class="pre">visualization_frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_correction/eeg_correction.html#EEGCorrection.visualization_frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_correction.eeg_correction.EEGCorrection.visualization_frequency" title="Link to this definition">¶</a></dt>
-<dd><p>Visualize the frequency spectrum for each domain in the dataset.</p>
-<p>For each domain in the dataset, this function computes and visualizes the
-amplitude spectrum of the data. The number of samples visualized per domain
-is limited by the <cite>max_sample</cite> parameter. If a domain contains more samples
-than this limit, a random subset will be selected.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>max_sample</strong> (<em>int</em><em>, </em><em>optional</em>) – The maximum number of samples to visualize per domain. If the number of
-samples in a domain exceeds this value, a random subset will be used.
-The default value is 10.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>This function does not return any value. It displays frequency spectrum
-plots for each domain in the dataset.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If a domain contains inconsistent sampling rates across its samples, the
-data will be resampled to the lowest sampling rate within the domain.
-Frequency bands for visualization are fixed as follows: 0-4 Hz, 4-8 Hz,
-and 8-13 Hz, 13-30 Hz.</p>
-</div>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">visualization_frequency</span><span class="p">(</span><span class="n">max_sample</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># This will visualize the frequency spectrum for up to 5 samples per domain from the dataset.</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
-
+<section id="eegunity-module-eeg-correction-eeg-correction-module">
+<h2>eegunity.module_eeg_correction.eeg_correction module<a class="headerlink" href="#eegunity-module-eeg-correction-eeg-correction-module" title="Link to this heading">¶</a></h2>
 </section>
-<section id="module-eegunity.module_eeg_correction">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity.module_eeg_correction" title="Link to this heading">¶</a></h2>
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 </section>
 </section>
 

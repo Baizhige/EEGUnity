@@ -15,7 +15,7 @@ with open('CI_config.json', 'r') as config_file:
 
 remain_list = config['test_data_list']
 locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']
+CI_output_path = config['CI_output_path']+"/save_as_other"
 
 # Test function with different parameter combinations
 for folder_name in remain_list:

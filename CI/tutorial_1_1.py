@@ -1,4 +1,4 @@
-from eegunity.unifieddataset import UnifiedDataset
+from eegunity import UnifiedDataset
 
 # This script demonstrates step-by-step EEG processing and h5Dataset generation using EEGUnity.
 # Main steps include:

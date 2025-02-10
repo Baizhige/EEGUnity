@@ -1,7 +1,7 @@
 {
   "test_data_list": [
-    "figshare_meng2019_CI"
+    "physionet_hmcsleepstaging"
   ],
-  "locator_base_path": "../locator",
+  "locator_base_path": ".",
   "CI_output_path": "../../EEGUnity_CI"
 }

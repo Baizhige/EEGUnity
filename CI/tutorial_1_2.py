@@ -1,7 +1,6 @@
 from eegunity.unifieddataset import UnifiedDataset
-from eegunity.module_eeg_parser.eeg_parser import get_data_row
+from eegunity._modules.parser import get_data_row
 from eegunity.utils.pipeline import Pipeline
-from eegunity.utils.normalize import normalize_mne
 import os
 
 # This script demonstrates the use of batch processing to handle EEG datasets efficiently.
@@ -15,7 +14,6 @@ import os
 # 7. Normalize data (mean = 0, variance = 1)
 # 8. Export the processed data as an h5Dataset
 
-# Parameter settings
 # Parameter settings
 input_path = r'../../raweeg/figshare_meng2019'  # Dataset directory
 domain_tag = "demp-tag"      # Domain tag for marking the dataset

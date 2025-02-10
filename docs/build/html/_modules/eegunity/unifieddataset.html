@@ -71,16 +71,16 @@
   <h1>Source code for eegunity.unifieddataset</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">copy</span>
 
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_batch.eeg_batch</span> <span class="kn">import</span> <span class="n">EEGBatch</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_correction.eeg_correction</span> <span class="kn">import</span> <span class="n">EEGCorrection</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_parser.eeg_parser</span> <span class="kn">import</span> <span class="n">EEGParser</span>
-<span class="kn">from</span> <span class="nn">eegunity.module_eeg_llm_booster.eeg_llm_booster</span> <span class="kn">import</span> <span class="n">EEGLLMBooster</span>
-<span class="kn">from</span> <span class="nn">eegunity.share_attributes</span> <span class="kn">import</span> <span class="n">UDatasetSharedAttributes</span>
+<span class="kn">from</span> <span class="nn">eegunity._modules.batch.eeg_batch</span> <span class="kn">import</span> <span class="n">EEGBatch</span>
+<span class="kn">from</span> <span class="nn">eegunity._modules.correction.eeg_correction</span> <span class="kn">import</span> <span class="n">EEGCorrection</span>
+<span class="kn">from</span> <span class="nn">eegunity._modules.parser.eeg_parser</span> <span class="kn">import</span> <span class="n">EEGParser</span>
+<span class="kn">from</span> <span class="nn">eegunity._modules.llm_booster.eeg_llm_booster</span> <span class="kn">import</span> <span class="n">EEGLLMBooster</span>
+<span class="kn">from</span> <span class="nn">eegunity._share_attributes</span> <span class="kn">import</span> <span class="n">_UDatasetSharedAttributes</span>
 
 
 <div class="viewcode-block" id="UnifiedDataset">
 <a class="viewcode-back" href="../../eegunity.html#eegunity.unifieddataset.UnifiedDataset">[docs]</a>
-<span class="k">class</span> <span class="nc">UnifiedDataset</span><span class="p">(</span><span class="n">UDatasetSharedAttributes</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">UnifiedDataset</span><span class="p">(</span><span class="n">_UDatasetSharedAttributes</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is the kernel class to manage mutiple EEG datasets and associated processing tools.</span>
 
@@ -102,7 +102,7 @@
 <span class="sd">            EEGBatch module</span>
 <span class="sd">        eeg_correction : EEGCorrection</span>
 <span class="sd">            EEGCorrection module</span>
-<span class="sd">        module_eeg_llm_booster : EEGLLMBooster</span>
+<span class="sd">        llm_booster : EEGLLMBooster</span>
 <span class="sd">           EEGLLMBooster module</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
