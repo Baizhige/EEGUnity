@@ -13,20 +13,20 @@ import scipy
 from typing import Union, Dict
 from collections import OrderedDict
 
-from eegunity.module_eeg_parser.eeg_parser_csv import process_csv_files
-from eegunity.module_eeg_parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
+from eegunity._modules.parser.eeg_parser_csv import process_csv_files
+from eegunity._modules.parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
     _condition_source_data
-from eegunity.share_attributes import UDatasetSharedAttributes
+from eegunity._share_attributes import _UDatasetSharedAttributes
 
 current_dir = os.path.dirname(__file__)
-json_file_path = os.path.join(current_dir, 'combined_montage.json')
+json_file_path = os.path.join(current_dir, '..', '..', '_resources','combined_montage.json')
 with open(json_file_path, 'r') as file:
     data = json.load(file)
 STANDARD_EEG_CHANNELS = sorted(data.keys(), key=len, reverse=True)
-EEG_PREFIXES_SUFFIXES = ["EEG", "REF", "LE"]
+EEG_PREFIXES_SUFFIXES = ["EEG", "REF", "LE", "-", "_", ":", "."]
 
 
-class EEGParser(UDatasetSharedAttributes):
+class EEGParser(_UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()
         self._shared_attr = main_instance._shared_attr
@@ -188,14 +188,27 @@ class EEGParser(UDatasetSharedAttributes):
                 return [f"Duplicate channels: {', '.join(duplicates)}"]
             return []
 
-        def check_channel_counts(data_shape, num_channels):
+        def check_channel_counts(row):
             try:
+                # Get data_shape and num_channels from the row
+                data_shape = row['Data Shape']
+                num_channels = row['Number of Channels']
+
+                # Get the channel names from the row and count the number of channels
+                channel_names = row['Channel Names']
+                num_channels_from_names = len(channel_names.split(','))
+
+                # Convert data_shape into a list of dimensions
                 dimensions = [int(dim) for dim in data_shape.strip('()').split(',')]
-                if min(dimensions) != int(float(num_channels)):
+                # Check if the minimum dimension matches the reported channel counts
+                if min(dimensions) == int(float(num_channels)) and min(dimensions) == num_channels_from_names:
+                    return []
+                else:
                     return ["Mismatch in reported and actual channel counts"]
             except ValueError:
+                # Return an error message if there's a value conversion issue
                 return ["Channel count or data shape format error"]
-            return []
+
 
         def check_duration(sampling_rate, duration, data_shape):
             try:
@@ -222,7 +235,7 @@ class EEGParser(UDatasetSharedAttributes):
                 errors.append("File does not exist")
 
             errors.extend(
-                check_channel_counts(row.get('Data Shape', '').strip(), row.get('Number of Channels', '').strip()))
+                check_channel_counts(row))
             errors.extend(check_duration(row.get('Sampling Rate', '').strip(), row.get('Duration', '').strip(),
                                          row.get('Data Shape', '').strip()))
             errors.extend(check_channel_duplicates(row.get('Channel Names', '').strip()))
@@ -368,7 +381,8 @@ def set_channel_type(raw_data, channel_str):
     channel_info = [ch.split(':') for ch in channel_str.split(',')]
     for ch in channel_info:
         if len(ch) != 2:
-            raise ValueError(f"Invalid channel format: {ch}. Each channel must be in 'type:name' format.")
+            raise ValueError(f"Invalid channel format: {ch}. Each channel must be in 'type:name' format."
+                             f"Please use UnifiedDataset.eeg_batch.format_channel_names() to format the channel names before setting the type to EEG channels")
 
     channel_mapping = {raw_channel: new_channel for raw_channel, new_channel in
                        zip(raw_data.info['ch_names'], [ch[1] for ch in channel_info])}
@@ -391,37 +405,44 @@ def set_channel_type(raw_data, channel_str):
 
 def get_data_row(row: dict,
                  norm_type: str = None,
-                 is_set_channel_type: bool = False,
+                 is_set_channel_type: Union[bool, None] = None,
                  is_set_montage: bool = False,
-                 verbose: str = 'CRITICAL',
-                 pick_types: dict = None,
+                 pick_types_params: dict = None,
                  unit_convert: str = None,
-                 **kwargs) -> mne.io.BaseRaw:
+                 read_raw_params: dict = None,
+                 handle_nonstandard_params: dict = None,
+                 preload: bool = True) -> mne.io.BaseRaw:
     """
     Process and return raw EEG data based on the input row information.
-    Allows handling of standard and non-standard data with options for
-    setting channel types, montage, normalization, and unit conversion.
+
+    This function handles both standard and non-standard data, with options for setting channel types,
+    montage, normalization, and unit conversion.
 
     Parameters
     ----------
     row : dict
-        Dictionary containing data attributes, such as file paths, file types,
-        and channel names.
+        Dictionary containing data attributes, such as file paths, file types, and channel names.
     norm_type : str, optional
         Type of normalization to apply, if any. Defaults to None.
-    is_set_channel_type : bool, optional
-        Whether to set channel types based on provided information. Defaults to False.
+    is_set_channel_type : bool or None, optional
+        Determines whether to set channel types based on the provided information.
+        - If `True`, channel types will be set explicitly.
+        - If `None`, the setting of channel types depends on whether the **File Path** in the locator follows the format
+        `"type:name"` (see `UnifiedDataset.EEGBatch.format_channel_names()` for details).
+        Defaults to `None`.
     is_set_montage : bool, optional
         Whether to set montage (electrode coordinates). Defaults to False.
-    verbose : str, optional
-        Verbosity level for MNE functions. Defaults to 'CRITICAL'.
-    pick_types : dict, optional
-        Dictionary specifying which channel types to include. The keys should
-        match the parameters of `raw.pick_types()`. Defaults to None.
+    pick_types_params : dict, optional
+        Dictionary specifying which channel types to include. The keys should match the parameters of
+        `raw.pick_types()`. Defaults to None.
     unit_convert : str, optional
         Conversion type for resetting channel units. Defaults to None.
-    kwargs : any
-        Additional keyword arguments to enhance flexibility and robustness.
+    read_raw_params : dict, optional
+        Additional parameters to pass to `mne.io.read_raw()` for standard data loading.
+    handle_nonstandard_params : dict, optional
+        Additional parameters to pass to `handle_nonstandard_data()` for non-standard data loading.
+    preload : bool, optional
+        Whether to preload the data into memory. Defaults to True.
 
     Returns
     -------
@@ -433,40 +454,49 @@ def get_data_row(row: dict,
     ValueError
         If the number of channels in the locator file does not match the metadata.
     Warning
-        If `pick_types` is not None but `is_set_channel_type` is False, a warning
-        will be issued to inform the user to set `is_set_channel_type=True`.
+        If `pick_types` is not None but `is_set_channel_type` is False, a warning will be issued
+        to inform the user to set `is_set_channel_type=True`.
     """
     filepath = row.get('File Path')
     file_type = row.get('File Type')
 
+    # Set default parameter dictionaries if None
+    if read_raw_params is None:
+        read_raw_params = {}
+    if handle_nonstandard_params is None:
+        handle_nonstandard_params = {}
+
     # Handle standard or non-standard data loading based on file type
-    if file_type == "standard_data":  # Read standard data supported by MNE-Python
-        raw_data = mne.io.read_raw(filepath, verbose=verbose, preload=True)
+    if file_type == "standard_data":  # Load standard data using MNE-Python
+        raw_data = mne.io.read_raw(filepath, verbose=read_raw_params.get('verbose', 'CRITICAL'),
+                                   preload=preload, **read_raw_params)
         channel_names = [name.strip() for name in row.get('Channel Names', '').split(',')]
         if len(channel_names) != len(raw_data.info['ch_names']):
-            raise ValueError(f"The number of channels marked in the locator file does not match the metadata: {filepath}")
+            raise ValueError(f"The number of channels in the locator file does not match metadata: {filepath}")
         channel_mapping = {original: new for original, new in zip(raw_data.info['ch_names'], channel_names)}
         raw_data.rename_channels(channel_mapping)
-    else:  # Handle non-standard data
-        raw_data = handle_nonstandard_data(row, verbose=verbose, **kwargs)
+    else:  # Handle non-standard data loading
+        raw_data = handle_nonstandard_data(row, verbose=handle_nonstandard_params.get('verbose', 'CRITICAL'),
+                                           **handle_nonstandard_params)
 
-    # Check if pick_types is provided without is_set_channel_type being True
-    if pick_types is not None and not is_set_channel_type:
-        warnings.warn("When `pick_types` is not None, it's recommended to set `is_set_channel_type=True`.")
+    # Warn if pick_types is provided but channel type setting is disabled
+    if pick_types_params is not None and not is_set_channel_type:
+        warnings.warn("When `pick_types` is not None, set `is_set_channel_type=True`.")
 
-    # Set channel types if required
-    if is_set_channel_type:
+    # Set channel types if specified
+    is_formated = len(row['Channel Names'].split(":")) == 2
+    if (is_set_channel_type is None and is_formated) or bool(is_set_channel_type):
         raw_data = set_channel_type(raw_data, row['Channel Names'])
 
-        # Apply pick types if provided
-        if pick_types is not None:
-            raw_data = raw_data.pick_types(**pick_types)  # Unpack the dictionary here
+    # Apply pick types if provided
+    if pick_types_params is not None:
+        raw_data = raw_data.pick_types(**pick_types_params)
 
-    # Set montage if required
+    # Set montage if specified2
     if is_set_montage:
         raw_data = set_montage_any(raw_data)
 
-    # Apply normalization if requested
+    # Apply normalization if specified
     if norm_type and 'MEAN STD' in row:
         raw_data = normalize_data(raw_data, row['MEAN STD'], norm_type)
 
@@ -475,7 +505,7 @@ def get_data_row(row: dict,
         raw_data = set_infer_unit(raw_data, row)
         raw_data = convert_unit(raw_data, unit_convert)
 
-    # Check and reset incorrect timestamps if needed
+    # Correct meas_date if it falls outside valid timestamp range
     if raw_data.info['meas_date'] is not None and isinstance(raw_data.info['meas_date'], datetime.datetime):
         timestamp = raw_data.info['meas_date'].timestamp()
         if timestamp < -2147483648 or timestamp > 2147483647:
@@ -597,17 +627,18 @@ def channel_name_parser(input_string):
 
     # Define a function to preprocess channel names by removing leading/trailing whitespace and EEG-related prefixes/suffixes
     def preprocess_channel(channel):
-        for prefix_suffix in EEG_PREFIXES_SUFFIXES:
-            if channel.startswith(prefix_suffix + "-"):
-                channel = channel[len(prefix_suffix + "-"):].strip()
-            if channel.startswith(prefix_suffix + ":"):
-                channel = channel[len(prefix_suffix + ":"):].strip()
-            if channel.startswith(prefix_suffix):
-                channel = channel[len(prefix_suffix):].strip()
-            if channel.endswith("-" + prefix_suffix):
-                channel = channel[:-len("-" + prefix_suffix)].strip()
-            if channel.endswith(prefix_suffix):
-                channel = channel[:-len(prefix_suffix)].strip()
+
+        # initialization
+        prefixes_suffixes = set(EEG_PREFIXES_SUFFIXES)
+
+        previous_length = -1
+        while len(channel) != previous_length:
+            previous_length = len(channel)
+            for prefix_suffix in prefixes_suffixes:
+                if channel.startswith(prefix_suffix):
+                    channel = channel[len(prefix_suffix):].strip()
+                if channel.endswith(prefix_suffix):
+                    channel = channel[:-len(prefix_suffix)].strip()
         return channel
 
     # Split the input string into a list of channel names
@@ -748,8 +779,8 @@ def extract_events(raw):
     """
     Extract events from an mne.io.Raw object.
 
-    Attempt to extract events using mne.find_events.
-    If it fails, use mne.events_from_annotations to extract events.
+    Attempt to extract events using mne.events_from_annotations.
+    If it fails, use mne.find_events to extract events without description.
 
     Parameters
     ----------
@@ -763,15 +794,14 @@ def extract_events(raw):
     event_id : dict
         Dictionary of event IDs.
     """
-    try:
-        # Attempt to extract events using mne.find_events
-        events = mne.find_events(raw)
-        # Automatically generate the event_id dictionary, assuming all events are valid
-        unique_event_ids = np.unique(events[:, 2])
-        event_id = {f'event_{event_id}': event_id for event_id in unique_event_ids}
-    except ValueError as e:
-        # Extract events using mne.events_from_annotations
-        events, event_id = mne.events_from_annotations(raw)
+    events, event_id = mne.events_from_annotations(raw)
+    if events.size == 0 or not event_id:
+        try:
+            events = mne.find_events(raw)
+            unique_event_ids = np.unique(events[:, 2])
+            event_id = {f'event_{event_id}': event_id for event_id in unique_event_ids}
+        except ValueError as e:
+            print(f"Events Not Found")
     return events, event_id
 
 

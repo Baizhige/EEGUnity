@@ -1,0 +1,2 @@
+File Path,Domain Tag,File Type,Data Shape,Channel Names,Number of Channels,Sampling Rate,Duration,Completeness Check
+/gpfs/work/int/chengxuanqin21/science_works/EEGUnity_CI/physionet_hmcsleepstaging/SN001_raw.fif,physionet-hmcsleepstaging,standard_data,"(8, 6566400)","EEG F4-M1, EEG C4-M1, EEG O2-M1, EEG C3-M2, EMG chin, EOG E1-M2, EOG E2-M2, ECG",8,256.0,25649.99609375,Completed

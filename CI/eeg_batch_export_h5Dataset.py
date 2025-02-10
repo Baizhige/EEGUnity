@@ -17,7 +17,7 @@ with open('CI_config.json', 'r') as config_file:
 
 remain_list = config['test_data_list']
 locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']
+CI_output_path = config['CI_output_path']+"/export_h5Dataset"
 
 # Initialize a flag to track test results
 all_tests_passed = True

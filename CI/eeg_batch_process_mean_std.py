@@ -15,7 +15,7 @@ with open('CI_config.json', 'r') as config_file:
 
 remain_list = config['test_data_list']
 locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']
+CI_output_path = config['CI_output_path']+"/process_mean_std"
 
 # Test function with different parameter combinations
 for folder_name in remain_list:
@@ -30,5 +30,6 @@ for folder_name in remain_list:
     # Test with domain_mean=False
     unified_dataset.eeg_batch.process_mean_std(domain_mean=False)
     print(f"Test with domain_mean=False for {folder_name} completed.")
+    unified_dataset.save_locator(CI_output_path+"/pns.csv")
 
 print("Successfully completed all process_mean_std tests.")

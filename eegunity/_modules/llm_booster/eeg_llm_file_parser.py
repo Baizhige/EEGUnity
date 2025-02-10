@@ -1,9 +1,6 @@
-# ----------------------------------------------------------------------
 import os
-
 import mne
 import pandas as pd
-from openai import AzureOpenAI
 
 
 def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iterations: int = 5):
@@ -64,7 +61,7 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
             return None
     else:
         raise ValueError("Unsupported file extension")
-
+    from openai import AzureOpenAI
     client = AzureOpenAI(
         api_key=api_key,
         api_version="2023-03-15-preview",

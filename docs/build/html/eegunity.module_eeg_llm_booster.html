@@ -55,7 +55,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.share_attributes">eegunity.share_attributes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#eegunity-share-attributes-module">eegunity.share_attributes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.unifieddataset">eegunity.unifieddataset module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity">Module contents</a></li>
 </ul>
@@ -95,108 +95,17 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 </section>
-<section id="module-eegunity.module_eeg_llm_booster.eeg_llm_booster">
-<span id="eegunity-module-eeg-llm-booster-eeg-llm-booster-module"></span><h2>eegunity.module_eeg_llm_booster.eeg_llm_booster module<a class="headerlink" href="#module-eegunity.module_eeg_llm_booster.eeg_llm_booster" title="Link to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="eegunity.module_eeg_llm_booster.eeg_llm_booster.EEGLLMBooster">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_llm_booster.eeg_llm_booster.</span></span><span class="sig-name descname"><span class="pre">EEGLLMBooster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_llm_booster/eeg_llm_booster.html#EEGLLMBooster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_llm_booster.eeg_llm_booster.EEGLLMBooster" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="eegunity.html#eegunity.share_attributes.UDatasetSharedAttributes" title="eegunity.share_attributes.UDatasetSharedAttributes"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDatasetSharedAttributes</span></code></a></p>
-</dd></dl>
-
+<section id="eegunity-module-eeg-llm-booster-eeg-llm-booster-module">
+<h2>eegunity.module_eeg_llm_booster.eeg_llm_booster module<a class="headerlink" href="#eegunity-module-eeg-llm-booster-eeg-llm-booster-module" title="Link to this heading">¶</a></h2>
 </section>
-<section id="module-eegunity.module_eeg_llm_booster.eeg_llm_des_parser">
-<span id="eegunity-module-eeg-llm-booster-eeg-llm-des-parser-module"></span><h2>eegunity.module_eeg_llm_booster.eeg_llm_des_parser module<a class="headerlink" href="#module-eegunity.module_eeg_llm_booster.eeg_llm_des_parser" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="eegunity.module_eeg_llm_booster.eeg_llm_des_parser.llm_description_file_parser">
-<span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_llm_booster.eeg_llm_des_parser.</span></span><span class="sig-name descname"><span class="pre">llm_description_file_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_llm_booster/eeg_llm_des_parser.html#llm_description_file_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_llm_booster.eeg_llm_des_parser.llm_description_file_parser" title="Link to this definition">¶</a></dt>
-<dd><p>Parse files in a specified directory to extract sampling rate and channel information using a Large Language Model (LLM) API.</p>
-<p>This function traverses a directory to read various file formats. It extracts sampling rates and channel names
-from the files using an LLM API (e.g., GPT-4), and processes the extracted information based on user inputs to resolve conflicts.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>api_key</strong> (<em>str</em>) – The API key used for authenticating with the LLM API.</p></li>
-<li><p><strong>endpoint</strong> (<em>str</em>) – The endpoint URL of the LLM service.</p></li>
-<li><p><strong>directory</strong> (<em>str</em>) – The directory path where the files are stored for processing.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>dict</strong> – Returns an error message if no files are selected or if all data is discarded due to conflicts.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dictionary containing the parsed sampling rate and channel information.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If no files are selected for further analysis or if there are conflicts in the extracted data.:</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">api_key</span> <span class="o">=</span> <span class="s2">&quot;your_api_key&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">azure_endpoint</span> <span class="o">=</span> <span class="s2">&quot;https://your/end/point&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">directory</span> <span class="o">=</span> <span class="s1">&#39;path/to/description/directory&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">llm_description_file_parser</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">azure_endpoint</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The end result:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-</pre></div>
-</div>
-<section id="contributor">
-<h3>Contributor<a class="headerlink" href="#contributor" title="Link to this heading">¶</a></h3>
-<p>Jingyi Ding (<a class="reference external" href="mailto:Jingyi&#46;Ding21&#37;&#52;&#48;student&#46;xjtlu&#46;edu&#46;cn">Jingyi<span>&#46;</span>Ding21<span>&#64;</span>student<span>&#46;</span>xjtlu<span>&#46;</span>edu<span>&#46;</span>cn</a>), on 2024-07-26.</p>
+<section id="eegunity-module-eeg-llm-booster-eeg-llm-des-parser-module">
+<h2>eegunity.module_eeg_llm_booster.eeg_llm_des_parser module<a class="headerlink" href="#eegunity-module-eeg-llm-booster-eeg-llm-des-parser-module" title="Link to this heading">¶</a></h2>
 </section>
-</dd></dl>
-
+<section id="eegunity-module-eeg-llm-booster-eeg-llm-file-parser-module">
+<h2>eegunity.module_eeg_llm_booster.eeg_llm_file_parser module<a class="headerlink" href="#eegunity-module-eeg-llm-booster-eeg-llm-file-parser-module" title="Link to this heading">¶</a></h2>
 </section>
-<section id="module-eegunity.module_eeg_llm_booster.eeg_llm_file_parser">
-<span id="eegunity-module-eeg-llm-booster-eeg-llm-file-parser-module"></span><h2>eegunity.module_eeg_llm_booster.eeg_llm_file_parser module<a class="headerlink" href="#module-eegunity.module_eeg_llm_booster.eeg_llm_file_parser" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="eegunity.module_eeg_llm_booster.eeg_llm_file_parser.llm_boost_parser">
-<span class="sig-prename descclassname"><span class="pre">eegunity.module_eeg_llm_booster.eeg_llm_file_parser.</span></span><span class="sig-name descname"><span class="pre">llm_boost_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azure_endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/module_eeg_llm_booster/eeg_llm_file_parser.html#llm_boost_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.module_eeg_llm_booster.eeg_llm_file_parser.llm_boost_parser" title="Link to this definition">¶</a></dt>
-<dd><p>Parses and processes an EEG data file using Azure OpenAI to generate a function
-that reads the data, calculates the sampling frequency, and extracts channel names.</p>
-<p>This function interacts with Azure OpenAI to automatically generate and refine a Python
-function that reads EEG data from a CSV or TXT file, determines the sampling frequency
-from timestamp columns, and extracts the relevant channel names. The function iterates
-through the process up to <cite>max_iterations</cite> times to refine the generated code in case
-of errors or unsatisfactory outputs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> (<em>str</em>) – Path to the CSV or TXT file.</p></li>
-<li><p><strong>api_key</strong> (<em>str</em>) – API key for Azure OpenAI.</p></li>
-<li><p><strong>azure_endpoint</strong> (<em>str</em>) – Endpoint URL for Azure OpenAI.</p></li>
-<li><p><strong>max_iterations</strong> (<em>(</em><em>int</em><em>, </em><em>optional</em><em>)</em>) – Maximum number of iterations to refine the generated function code. Default is 5.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>mne.io.Raw</strong></p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>An MNE RawArray object containing the processed EEG data.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>ValueError</strong> – If the file extension is not supported.:</p></li>
-<li><p><strong>FileNotFoundError</strong> – If the specified file is not found.:</p></li>
-<li><p><strong>RuntimeError</strong> – If the function code cannot be generated within the maximum iteration limit.:</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">api_key</span> <span class="o">=</span> <span class="s2">&quot;your_api_key&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">azure_endpoint</span> <span class="o">=</span> <span class="s2">&quot;https://your_endpoint&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">locator_path</span> <span class="o">=</span> <span class="s2">&quot;data_file.csv&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">llm_boost_parser</span><span class="p">(</span><span class="n">locator_path</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">azure_endpoint</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Extracted Data:&quot;</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">)</span>
-</pre></div>
-</div>
-<section id="id1">
-<h3>Contributor<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
-<p>Ziyi Jia (<a class="reference external" href="mailto:Ziyi&#46;Jia21&#37;&#52;&#48;student&#46;xjtlu&#46;edu&#46;cn">Ziyi<span>&#46;</span>Jia21<span>&#64;</span>student<span>&#46;</span>xjtlu<span>&#46;</span>edu<span>&#46;</span>cn</a>), on 2024-07-26.</p>
-</section>
-</dd></dl>
-
-</section>
-<section id="module-eegunity.module_eeg_llm_booster">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity.module_eeg_llm_booster" title="Link to this heading">¶</a></h2>
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 </section>
 </section>
 
