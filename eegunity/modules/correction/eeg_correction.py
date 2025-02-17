@@ -1,12 +1,10 @@
 import os
 import pprint
-from math import ceil, sqrt
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.signal import welch
-
+from math import ceil, sqrt
 from eegunity.modules.parser.eeg_parser import get_data_row
 from eegunity._share_attributes import _UDatasetSharedAttributes
 

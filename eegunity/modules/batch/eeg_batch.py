@@ -1,14 +1,13 @@
 import copy
-import json
 import os
 import warnings
 import mne
 import numpy as np
 import pandas as pd
 import hashlib
+import pickle
 from pathlib import Path
 from typing import Callable, Union, Tuple, List, Dict, Optional
-import pickle
 from eegunity.modules.batch.eeg_scores_shady import compute_quality_scores_shady
 from eegunity.modules.batch.eeg_scores_modified_mne import compute_quality_score_mne
 from eegunity.modules.parser.eeg_parser import get_data_row, channel_name_parser, extract_events, infer_channel_unit

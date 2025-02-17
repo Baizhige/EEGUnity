@@ -1,4 +1,5 @@
 import copy
+
 from eegunity.modules.batch.eeg_batch import EEGBatch
 from eegunity.modules.correction.eeg_correction import EEGCorrection
 from eegunity.modules.parser.eeg_parser import EEGParser

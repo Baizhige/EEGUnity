@@ -12,7 +12,6 @@ import pandas as pd
 import scipy
 from typing import Union, Dict
 from collections import OrderedDict
-
 from eegunity.modules.parser.eeg_parser_csv import process_csv_files
 from eegunity.modules.parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
     _condition_source_data
