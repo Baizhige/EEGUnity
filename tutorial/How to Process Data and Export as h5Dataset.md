@@ -19,7 +19,7 @@ This demo illustrates how to process EEG datasets step by step and export them a
 
 ### Code:
 ```python
-from eegunity.unifieddataset import UnifiedDataset
+from eegunity import UnifiedDataset
 
 # This script demonstrates step-by-step EEG processing and h5Dataset generation using EEGUnity.
 # Main steps include:
@@ -96,8 +96,8 @@ This demo uses **UnifiedDataset.eeg_batch.batch_process()** to streamline the en
 ### Code:
 
 ```python
-from eegunity.unifieddataset import UnifiedDataset
-from eegunity._modules.parser import get_data_row
+from eegunity import UnifiedDataset
+from eegunity.modules.parser import get_data_row
 from eegunity.utils.pipeline import Pipeline
 from eegunity.utils.normalize import normalize_mne
 import os

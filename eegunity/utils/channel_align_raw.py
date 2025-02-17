@@ -1,6 +1,6 @@
 import numpy as np
 import mne
-from eegunity._modules.parser.eeg_parser import set_montage_any
+from eegunity.modules.parser.eeg_parser import set_montage_any
 
 
 def channel_align_raw(mne_raw, channel_order, min_matched_channel=1):
