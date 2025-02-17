@@ -4,6 +4,14 @@ eegunity.utils package
 Submodules
 ----------
 
+eegunity.utils.channel\_align\_raw module
+-----------------------------------------
+
+.. automodule:: eegunity.utils.channel_align_raw
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 eegunity.utils.con\_udatasets module
 ------------------------------------
 
@@ -20,6 +28,22 @@ eegunity.utils.h5 module
    :undoc-members:
    :show-inheritance:
 
+eegunity.utils.handle\_errors module
+------------------------------------
+
+.. automodule:: eegunity.utils.handle_errors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eegunity.utils.log\_processing module
+-------------------------------------
+
+.. automodule:: eegunity.utils.log_processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 eegunity.utils.normalize module
 -------------------------------
 
@@ -32,6 +56,14 @@ eegunity.utils.pipeline module
 ------------------------------
 
 .. automodule:: eegunity.utils.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+eegunity.utils.split\_hdf5\_file module
+---------------------------------------
+
+.. automodule:: eegunity.utils.split_hdf5_file
    :members:
    :undoc-members:
    :show-inheritance:
