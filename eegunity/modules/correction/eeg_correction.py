@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import welch
 
-from eegunity._modules.parser.eeg_parser import get_data_row
+from eegunity.modules.parser.eeg_parser import get_data_row
 from eegunity._share_attributes import _UDatasetSharedAttributes
 
 

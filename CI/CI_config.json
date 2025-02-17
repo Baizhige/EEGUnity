@@ -1,6 +1,6 @@
 {
   "test_data_list": [
-    "physionet_hmcsleepstaging"
+    "bcic_iv_2a"
   ],
   "locator_base_path": ".",
   "CI_output_path": "../../EEGUnity_CI"

@@ -6,7 +6,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict
 import pickle
-from eegunity._modules.parser.eeg_parser import get_data_row, extract_events
+from eegunity.modules.parser.eeg_parser import get_data_row, extract_events
 from eegunity.utils.h5 import h5Dataset
 from eegunity.utils.handle_errors import handle_errors
 from eegunity.utils.log_processing import log_processing

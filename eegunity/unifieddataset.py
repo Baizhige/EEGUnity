@@ -1,9 +1,9 @@
 import copy
 
-from eegunity._modules.batch.eeg_batch import EEGBatch
-from eegunity._modules.correction.eeg_correction import EEGCorrection
-from eegunity._modules.parser.eeg_parser import EEGParser
-from eegunity._modules.llm_booster.eeg_llm_booster import EEGLLMBooster
+from eegunity.modules.batch.eeg_batch import EEGBatch
+from eegunity.modules.correction.eeg_correction import EEGCorrection
+from eegunity.modules.parser.eeg_parser import EEGParser
+from eegunity.modules.llm_booster.eeg_llm_booster import EEGLLMBooster
 from eegunity._share_attributes import _UDatasetSharedAttributes
 
 

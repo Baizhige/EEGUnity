@@ -6,53 +6,27 @@ EEGUnity is a Python package designed for processing and analyzing `large-scale 
 For more details on the motivation, concepts, and vision behind this project, please refer to the paper [EEGUnity: Open-Source Tool in Facilitating Unified EEG Datasets Towards Large-Scale EEG Model](https://arxiv.org/abs/2410.07196)
 
 ## Usage in Python Project
-(Notes: This repository is planned for release on PyPI and the Conda community once a stable version is achieved.)
-### Prerequisites
+### 1. Create a Python Environment
+Ensure you are using Python version 3.6 or higher.
 
-- Python 3.x
-- Git
-- See [requirements.txt](docs%2Frequirements.txt)
 
-### Clone the Repository
-
-First, clone the repository using Git:
-
-#### Windows, macOS and Linux:
+### 2. Install EEGUnity via pip
+Run the following command to install EEGUnity:
 ```bash
-git clone https://github.com/Baizhige/EEGUnity/.git
+pip install eegunity
 ```
 
-### Usage in Python Projects
-
-To use EEGUnity in your Python project, you will need to copy the `eegunity` folder to your project directory:
-
-1. **Copy the `eegunity` folder** from the cloned repository to your Python project's folder:
-   
-   #### Windows:
-   - Copy `EEGUnity\eegunity` into your project's directory.
-   
-   #### macOS and Linux:
-   - Copy `EEGUnity/eegunity` into your project's directory.
-
-2. Your project structure should resemble the following:
+### 3. Import EEGUnity in Your Python Project
+Use the following import statement to include the package:
+```python
+from eegunity import UnifiedDataset
 ```
-my_project/
-│
-├── eegunity/
-│   └── __init__.py
-└── your_script.py
-```
-3. Import the package in your Python project like this:
 
-   ```python
-   from eegunity.unifieddataset import UnifiedDataset
-   ```
-
-# Tutorial
+## Tutorial
 1. How to Format Channel Name and Inspect Channel Data: [Click here to view the tutorial](./tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.md)
 2. How to Process Data and Export as h5Dataset: [Click here to view the tutorial](./tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.md)
 3. How to Read h5Dataset: [Click here to view the tutorial](./tutorial/How%20to%20Read%20h5Dataset.md)
 
 
-# Project Documentation
+## Project Documentation
 You can view the project manual through the following link: [Click here to view the manual](https://eegunity.readthedocs.io/en/latest/)
