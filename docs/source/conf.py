@@ -1,43 +1,43 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../..'))  # 将项目根目录添加到模块查找路径中去
+sys.path.insert(0, os.path.abspath('../..'))
 
+# -- Project information -----------------------------------------------------
 project = 'EEGUnity'
-copyright = '2024, Wenlong You'
+copyright = '2025, Wenlong You'
 author = 'Wenlong You'
 release = '0.5.0'
 
 # -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'myst_parser',
 ]
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
-templates_path = ['_templates']
-exclude_patterns = []
+# autodoc_default_options = {
+#     'exclude-members': '__weakref__'
+# }
+#
+# templates_path = ['_templates']
+# exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-import sphinx_rtd_theme
+html_theme = 'pydata_sphinx_theme'
+version = "latest"
+html_theme_options = {
+    "switcher": {
+        "json_url": "_static/switcher.json",
+        "version_match": version,
 
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
-# html_theme = 'alabaster'
+    },
+    "navbar_start": ["navbar-logo", "version-switcher"]
+}
+html_logo = "_static/logo.png"
 html_static_path = ['_static']
-
-# Manually include jQuery if necessary
-html_js_files = [
-    'https://code.jquery.com/jquery-3.6.0.min.js',
-]
