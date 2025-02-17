@@ -7,7 +7,7 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 # Add parent directory to sys.path
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
-from eegunity.unifieddataset import UnifiedDataset
+from eegunity import UnifiedDataset
 
 # Obtain base config from file
 with open('CI_config.json', 'r') as config_file:

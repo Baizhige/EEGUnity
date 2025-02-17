@@ -8,4 +8,3 @@ def __convert_to_serializable__(value):
         return value.tolist()
     elif isinstance(value, bytes):
         return value.decode('utf-8')
-    return value

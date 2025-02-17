@@ -16,7 +16,7 @@ This tutorial guides you through using the EEGUnity library to format channel na
 Create an instance of `UnifiedDataset`, specifying the dataset path and a custom tag to represent this data.
 
 ```python
-from eegunity.unifieddataset import UnifiedDataset
+from eegunity import UnifiedDataset
 input_path = r'path/to/dataset'  # Specify the directory containing your dataset
 unified_dataset = UnifiedDataset(dataset_path=input_path, domain_tag="my_dataset")
 ```
