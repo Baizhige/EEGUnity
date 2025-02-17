@@ -1,21 +1,21 @@
 import copy
-import json
 import os
 import warnings
 import mne
 import numpy as np
 import pandas as pd
 import hashlib
+import pickle
 from pathlib import Path
 from typing import Callable, Union, Tuple, List, Dict, Optional
-import pickle
-from eegunity._modules.batch.eeg_scores import calculate_eeg_quality_scores
-from eegunity._modules.parser.eeg_parser import get_data_row, channel_name_parser, extract_events, infer_channel_unit
+from eegunity.modules.batch.eeg_scores_shady import compute_quality_scores_shady
+from eegunity.modules.batch.eeg_scores_modified_mne import compute_quality_score_mne
+from eegunity.modules.parser.eeg_parser import get_data_row, channel_name_parser, extract_events, infer_channel_unit
 from eegunity._share_attributes import _UDatasetSharedAttributes
 from eegunity.utils.h5 import h5Dataset
 from eegunity.utils.handle_errors import handle_errors
 from eegunity.utils.log_processing import log_processing
-from eegunity._modules.batch.method_mixin_epoch import EEGBatchMixinEpoch
+from eegunity.modules.batch.method_mixin_epoch import EEGBatchMixinEpoch
 
 
 class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
@@ -1290,7 +1290,11 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         self.get_shared_attr()['locator'] = new_locator
 
-    def get_quality(self, miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
+    def get_quality(self, miss_bad_data: bool = False,
+                    method: str = 'shady',
+                    ica_params: Dict = None,
+                    save_name: str = 'scores',
+                    get_data_row_params: Dict = None) -> None:
         r"""Process the data quality of EEG files by calculating quality scores for each row in the dataset.
 
         Parameters
@@ -1318,14 +1322,19 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         def app_func(row):
             # Pass get_data_row_params to get_data_row to ensure seamless integration
             raw_data = get_data_row(row, **get_data_row_params)
-            scores = calculate_eeg_quality_scores(raw_data)
-            score = np.mean(scores)
+            if method == 'shady':
+                scores = compute_quality_scores_shady(raw_data)
+                score = np.mean(scores)
+            elif method == 'ica':
+                score = compute_quality_score_mne(raw_data, ica_params=ica_params)
+            else:
+                raise ValueError('Paramether method must be "shady", "ica"')
             return str(score)
 
         results = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
-            app_func, is_patch=False, result_type="value")
-        self.set_metadata("Score", results)
+            app_func, is_patch=True, result_type="value")
+        self.set_metadata(save_name, results)
 
     def replace_paths(self, old_prefix, new_prefix):
         r"""Replace the prefix of file paths in the dataset according to the provided mapping.

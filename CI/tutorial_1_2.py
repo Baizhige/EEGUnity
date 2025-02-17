@@ -1,5 +1,5 @@
 from eegunity.unifieddataset import UnifiedDataset
-from eegunity._modules.parser import get_data_row
+from eegunity.modules.parser import get_data_row
 from eegunity.utils.pipeline import Pipeline
 import os
 

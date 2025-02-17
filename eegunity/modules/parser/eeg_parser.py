@@ -12,14 +12,13 @@ import pandas as pd
 import scipy
 from typing import Union, Dict
 from collections import OrderedDict
-
-from eegunity._modules.parser.eeg_parser_csv import process_csv_files
-from eegunity._modules.parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
+from eegunity.modules.parser.eeg_parser_csv import process_csv_files
+from eegunity.modules.parser.eeg_parser_mat import process_mat_files, _find_variables_by_condition, \
     _condition_source_data
 from eegunity._share_attributes import _UDatasetSharedAttributes
 
 current_dir = os.path.dirname(__file__)
-json_file_path = os.path.join(current_dir, '..', '..', '_resources','combined_montage.json')
+json_file_path = os.path.join(current_dir, '..', '..', 'resources','combined_montage.json')
 with open(json_file_path, 'r') as file:
     data = json.load(file)
 STANDARD_EEG_CHANNELS = sorted(data.keys(), key=len, reverse=True)
@@ -327,7 +326,7 @@ def set_montage_any(raw_data: mne.io.Raw, verbose='CRITICAL'):
     """
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    montage = create_montage_from_json(os.path.join(current_dir, 'combined_montage.json'))
+    montage = create_montage_from_json(os.path.join(current_dir, '..', '..', 'resources', 'combined_montage.json'))
     raw_data.set_montage(montage, on_missing='warn', verbose=verbose)
     return raw_data
 
@@ -484,7 +483,7 @@ def get_data_row(row: dict,
         warnings.warn("When `pick_types` is not None, set `is_set_channel_type=True`.")
 
     # Set channel types if specified
-    is_formated = len(row['Channel Names'].split(":")) == 2
+    is_formated = len(row['Channel Names'].split(":")) == len(row['Channel Names'].split(",")) + 1
     if (is_set_channel_type is None and is_formated) or bool(is_set_channel_type):
         raw_data = set_channel_type(raw_data, row['Channel Names'])
 

@@ -1,5 +1,5 @@
-from eegunity._modules.llm_booster.eeg_llm_des_parser import llm_description_file_parser
-from eegunity._modules.llm_booster.eeg_llm_file_parser import llm_boost_parser
+from eegunity.modules.llm_booster.eeg_llm_des_parser import llm_description_file_parser
+from eegunity.modules.llm_booster.eeg_llm_file_parser import llm_boost_parser
 from eegunity._share_attributes import _UDatasetSharedAttributes
 
 

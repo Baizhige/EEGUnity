@@ -97,7 +97,7 @@ This demo uses **UnifiedDataset.eeg_batch.batch_process()** to streamline the en
 
 ```python
 from eegunity.unifieddataset import UnifiedDataset
-from eegunity._modules.parser import get_data_row
+from eegunity.modules.parser import get_data_row
 from eegunity.utils.pipeline import Pipeline
 from eegunity.utils.normalize import normalize_mne
 import os

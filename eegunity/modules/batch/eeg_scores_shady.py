@@ -3,11 +3,6 @@ import numpy as np
 from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
 
-
-# matplotlib.use('TkAgg')
-
-
-# Design a Butterworth bandpass filter
 def butter_bandpass(lowcut, highcut, fs, order=4):
     """
     Design a Butterworth bandpass filter.
@@ -223,7 +218,8 @@ def calculate_dominant_frequency(signal, fs):
     Returns
     -------
     float
-        The dominant frequency of the signal, which is the frequency component that has the highest amplitude in the Fourier Transform of the signal.
+        The dominant frequency of the signal, which is the frequency component that has the highest amplitude in the
+        Fourier Transform of the signal.
 
     Note
     ----
@@ -245,7 +241,8 @@ def calculate_symmetry_score(data, channels_left, channels_right, fs):
     Parameters
     ----------
     data : ndarray
-        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.
+        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each
+        time point.
     channels_left : list of int
         List of indices for the left channels.
     channels_right : list of int
@@ -285,7 +282,8 @@ def calculate_beta_sinusoidal_score(fft_data):
     Parameters
     ----------
     fft_data : ndarray
-        The FFT results of the EEG data, expected to be a 2D array where each row represents the FFT results of a channel.
+        The FFT results of the EEG data, expected to be a 2D array where each row represents the FFT results of a
+        channel.
 
     Returns
     -------
@@ -363,7 +361,8 @@ def calculate_theta_amplitude_score(data, threshold=30):
     Parameters
     ----------
     data : ndarray
-        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.
+        The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each
+        time point.
     threshold : float, optional
         The amplitude threshold for considering a data point as not exceeding. Default is 30.
 
@@ -442,7 +441,7 @@ def classify_channels(channels):
     return score2_indices, channels_left_indices, channels_right_indices
 
 
-def calculate_eeg_quality_scores(mne_io_raw):
+def compute_quality_scores_shady(mne_io_raw):
     """
     Calculate EEG scores for the given data.
 
@@ -505,6 +504,5 @@ def calculate_eeg_quality_scores(mne_io_raw):
             beta_sinusoidal_score,
             theta_amplitude_score
         ]
-    print(scores)
 
     return scores
