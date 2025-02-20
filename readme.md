@@ -1,4 +1,4 @@
-<img src="./docs/source/_static/logo.png" alt="Project Logo" width="10%">
+<img src="./docs/source/_static/logo.png" alt="Project Logo" width="20%">
 
 ## Overview
 
