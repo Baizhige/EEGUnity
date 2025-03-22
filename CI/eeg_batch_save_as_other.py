@@ -32,6 +32,10 @@ for folder_name in remain_list:
     except ValueError as e:
         print(f"ValueError encountered for {folder_name}: {str(e)}")
 
+    unified_dataset = UnifiedDataset(domain_tag=folder_name,
+                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
+                                     is_unzip=False)
+
     # Test saving in 'csv' format
     try:
         unified_dataset.eeg_batch.save_as_other(output_path=CI_output_path, format='csv')
@@ -41,6 +45,10 @@ for folder_name in remain_list:
     except ValueError as e:
         print(f"ValueError encountered for {folder_name}: {str(e)}")
 
+    unified_dataset = UnifiedDataset(domain_tag=folder_name,
+                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
+                                     is_unzip=False)
+
     # Test saving with domain_tag specified
     try:
         unified_dataset.eeg_batch.save_as_other(output_path=CI_output_path, domain_tag=folder_name, format='fif')
@@ -49,13 +57,18 @@ for folder_name in remain_list:
         print(f"FileNotFoundError encountered for {folder_name} with domain_tag: {str(e)}")
     except ValueError as e:
         print(f"ValueError encountered for {folder_name} with domain_tag: {str(e)}")
-
+    unified_dataset = UnifiedDataset(domain_tag=folder_name,
+                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
+                                     is_unzip=False)
     # Test invalid format
     try:
         unified_dataset.eeg_batch.save_as_other(output_path=CI_output_path, format='unsupported_format')
     except ValueError as e:
         print(f"Correctly caught ValueError for unsupported format for {folder_name}: {str(e)}")
 
+    unified_dataset = UnifiedDataset(domain_tag=folder_name,
+                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
+                                     is_unzip=False)
     # Test with invalid output path
     try:
         unified_dataset.eeg_batch.save_as_other(output_path='/invalid/path', format='fif')

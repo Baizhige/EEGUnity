@@ -1543,7 +1543,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             return new_domain_tag
 
         # Use batch_process to apply the function to each row
-        results = self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable', app_func, is_patch=False,
+        results = self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable', app_func, is_patch=True,
                                      result_type="value")
 
         # Update the 'Domain Tag' column with the new values

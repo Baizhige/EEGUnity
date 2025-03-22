@@ -57,8 +57,9 @@ unified_dataset.eeg_batch.sample_filter(completeness_check='Completed')
 unified_dataset.eeg_batch.format_channel_names()
 
 # 4. Apply bandpass filtering (0.1-75Hz), select EEG channels
+# By default, all functions in the eeg_batch module perform in-place operations that modify the instance itself.
 unified_dataset.eeg_batch.filter(output_path=cache_bandpassfilter_path, filter_type='bandpass', l_freq=0.1, h_freq=75,
-                                 get_data_row_params = {"is_set_channel_type":True, "pick_types":{'eeg': True}})
+                                 get_data_row_params = {"is_set_channel_type":True, "pick_types_params":{'eeg': True}})
 
 # 5. Apply 50Hz notch filter (for powerline noise removal)
 unified_dataset.eeg_batch.filter(output_path=cache_notchfilter_path, filter_type='notch', notch_freq=50)
@@ -76,7 +77,7 @@ unified_dataset.eeg_batch.normalize(cache_norm_path, norm_type='channel-wise')
 unified_dataset.save_locator(locator_norm_path)
 
 # 8. Export the processed data as an h5Dataset
-unified_dataset.eeg_batch.export_h5Dataset(output_path, name=domain_tag, verbose=True)
+unified_dataset.eeg_batch.export_h5Dataset(output_path, name=domain_tag)
 ```
 
 ## Demo 2: Quick Batch Processing (`demo_make_h5Dataset_quick.py`)
