@@ -1,4 +1,4 @@
-# EEGUnity Tutorial: Formatting Channel Names and Inspecting Metadata
+# Formatting Channel Names and Inspecting Metadata
 
 This tutorial guides you through using the EEGUnity library to format channel names and inspect metadata in EEG datasets. By the end of this tutorial, you’ll know how to load a dataset, format channel names, and check metadata correctness.
 

@@ -1,6 +1,9 @@
-# Tutorial: Creating a Standardized FIF Dataset using EEGUnity
+# Creating a Standardized FIF Dataset using EEGUnity
 ## Prerequisites
 Before using this script, you should have:
+1. **Toolbox Installation**  
+   - Install EEGUnity toolbox.
+
 1. **Familiarity with Python syntax**  
    - Basic understanding of Python programming concepts and structures.
 
@@ -91,8 +94,8 @@ The script performs the following tasks:
 Below is the full sample script for standardizing the `bcic_iv_2a` dataset, you can copy it in your project and modify it based on your dataset: 
 ```python 
 import scipy.io as scio
-from eegunity.unifieddataset import UnifiedDataset
-from eegunity.modules.parser import get_data_row
+from eegunity import UnifiedDataset
+from eegunity import get_data_row
 import numpy as np
 import os
 import mne

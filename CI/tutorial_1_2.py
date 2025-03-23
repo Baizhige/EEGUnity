@@ -15,8 +15,8 @@ import os
 # 8. Export the processed data as an h5Dataset
 
 # Parameter settings
-input_path = r'../../raweeg/figshare_meng2019'  # Dataset directory
-domain_tag = "demp-tag"      # Domain tag for marking the dataset
+input_path = r'../../processed_raweeg_v2/bcic_iv_2a'  # Dataset directory
+domain_tag = "demo-tag"      # Domain tag for marking the dataset
 output_path = r'../../EEGUnity_CI/saving-h5Dataset'  # Output path for the h5Dataset
 cache_path = r"../../EEGUnity_CI/saving-dataset-by-pipeline"  # Cache path for batch processing
 
@@ -58,4 +58,4 @@ unified_dataset.eeg_batch.batch_process(
 
 # 4. Load the processed dataset and export as h5Dataset
 unified_dataset_process = UnifiedDataset(dataset_path=cache_path, domain_tag=domain_tag)
-unified_dataset_process.eeg_batch.export_h5Dataset(output_path, name=domain_tag+"T3", verbose=True)
+unified_dataset_process.eeg_batch.export_h5Dataset(output_path, name=domain_tag+"T3")

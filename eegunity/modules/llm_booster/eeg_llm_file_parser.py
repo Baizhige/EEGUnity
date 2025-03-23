@@ -3,7 +3,7 @@ import mne
 import pandas as pd
 
 
-def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iterations: int = 5):
+def llm_boost_parser(file_path: str, client_type: str, client_paras: dict, completion_para: dict, max_iterations: int = 5):
     """
     Parses and processes an EEG data file using Azure OpenAI to generate a function
     that reads the data, calculates the sampling frequency, and extracts channel names.
@@ -18,10 +18,13 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
     ----------
     file_path : str
         Path to the CSV or TXT file.
-    api_key : str
-        API key for Azure OpenAI.
-    azure_endpoint : str
-        Endpoint URL for Azure OpenAI.
+    client_type : str
+        Type of LLM client to use (e.g., 'AzureOpenAI', 'OpenAI').
+    client_paras : dict
+        Parameters for initializing the LLM client.
+    completion_para : dict
+        Parameters for initializing the LLM completion process. Note: Parameter 'messages' is generated
+        by this function, do not specify this parameter in 'completion_para'.
     max_iterations : (int, optional)
         Maximum number of iterations to refine the generated function code. Default is 5.
 
@@ -46,6 +49,7 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
     Contributor
     -----------
     Ziyi Jia (Ziyi.Jia21@student.xjtlu.edu.cn), on 2024-07-26.
+    EEGUnity Team modified this file, on 2025-03-22.
     """
     file_extension = os.path.splitext(file_path)[1]
     # Check if the file is a CSV or TXT file
@@ -61,13 +65,14 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
             return None
     else:
         raise ValueError("Unsupported file extension")
-    from openai import AzureOpenAI
-    client = AzureOpenAI(
-        api_key=api_key,
-        api_version="2023-03-15-preview",
-
-        azure_endpoint=azure_endpoint
-    )
+    if client_type == "AzureOpenAI":
+        from openai import AzureOpenAI
+        client = AzureOpenAI(**client_paras)
+    elif client_type == "OpenAI":
+        from openai import OpenAI
+        client = OpenAI(**client_paras)
+    else:
+        raise ValueError("Unsupported client_type. Supported types are 'AzureOpenAI' and 'OpenAI'.")
 
     # Base prompt for generating the function code
     prompt_base = (
@@ -90,7 +95,7 @@ def llm_boost_parser(file_path: str, api_key: str, azure_endpoint: str, max_iter
     # Iterate to refine the function code if necessary
     for iteration in range(max_iterations):
         response = client.chat.completions.create(
-            model="gpt-4o",
+            **completion_para,
             messages=[
                 {"role": "system", "content": "You are a coding assistant."},
                 {"role": "user", "content": conversation_history}

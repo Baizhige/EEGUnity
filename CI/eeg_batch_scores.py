@@ -24,7 +24,6 @@ for folder_name in remain_list:
                                      is_unzip=False)
     unified_dataset.eeg_batch.get_quality(miss_bad_data=True, method='shady', save_name='shady_scores')
     unified_dataset.eeg_batch.get_quality(miss_bad_data=True, method='ica', save_name='ica_scores')
-    unified_dataset.eeg_batch.get_quality(miss_bad_data=True, method='maxwell', save_name='maxwell_scores')
     unified_dataset.save_locator(CI_output_path+'/scores.csv')
 
 print("Successfully completed ICA Test")

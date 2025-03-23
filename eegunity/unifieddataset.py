@@ -1,5 +1,4 @@
 import copy
-
 from eegunity.modules.batch.eeg_batch import EEGBatch
 from eegunity.modules.correction.eeg_correction import EEGCorrection
 from eegunity.modules.parser.eeg_parser import EEGParser
@@ -33,7 +32,7 @@ class UnifiedDataset(_UDatasetSharedAttributes):
            EEGLLMBooster module
         """
 
-    def __init__(self, domain_tag: str = None, dataset_path: str = None, locator_path: str = None,
+    def __init__(self, dataset_path: str = None, locator_path: str = None, domain_tag: str = None,
                  is_unzip: bool = True, verbose: str = 'CRITICAL'):
         """
         Initialize the class with either dataset_path or locator_path. Only one of
@@ -41,12 +40,12 @@ class UnifiedDataset(_UDatasetSharedAttributes):
 
         Parameters:
         -----------
-        domain_tag : str, optional
-            The domain tag identifies the dataset name.  Note: Do not provide domain_tag if you are using locator_path.
         dataset_path : str, optional
             Path to the dataset (folder). Note: Do not provide dataset_path if you are using locator_path.
         locator_path : str, optional
             The file path to the locator (a CSV-like file) that stores all metadata for the UnifiedDataset in EEGUnity. Note: Do not provide locator_path if you are using dataset_path.
+        domain_tag : str, optional
+            The domain tag identifies the dataset name.  Note: Do not provide domain_tag if you are using locator_path.
         is_unzip : bool, optional
             A flag indicating whether the dataset should be unzipped (default is True).
         verbose : str, optional
@@ -56,7 +55,10 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         -------
         ValueError
             If both dataset_path and locator_path are provided, or neither is provided.
-            If dataset_path is provided without domain_tag.
+        Examples
+        --------
+        >>> unified_dataset = UnifiedDataset("path/to/your/dataset")
+        >>> unified_dataset_locator = UnifiedDataset(locator_path="path/to/your/locator.csv")
         """
         super().__init__()
 
@@ -68,7 +70,7 @@ class UnifiedDataset(_UDatasetSharedAttributes):
 
         # Ensure domain_tag is provided when dataset_path is used
         if dataset_path and not domain_tag:
-            raise ValueError("A 'domain_tag' must be provided when 'dataset_path' is specified.")
+            domain_tag = "not_specified"
 
         # Set attributes
         self.set_shared_attr({'dataset_path': dataset_path})
@@ -129,3 +131,30 @@ class UnifiedDataset(_UDatasetSharedAttributes):
             The new locator DataFrame to associate with the dataset.
         """
         self.get_shared_attr()['locator'] = new_locator
+
+    def group_by_domain(self):
+        """
+        Groups the locator data by the 'domain_tag' and returns multiple UnifiedDataset instances.
+
+        Returns:
+        --------
+        List[UnifiedDataset] : A list of UnifiedDataset instances, each grouped by domain.
+        """
+        locator = self.get_shared_attr()['locator']
+
+        if 'Domain Tag' not in locator.columns:
+            raise ValueError("Locator dataframe must have a 'Domain Tag' column.")
+
+        # Group the locator data by 'domain_tag'
+        grouped = locator.groupby('Domain Tag')
+
+        datasets = []
+        for domain, grouped_locator in grouped:
+            # Create a new UnifiedDataset instance
+            new_dataset = self.copy()
+            # Set the new locator for the instance
+            new_dataset.set_locator(grouped_locator)
+            # Add the new instance to the result list
+            datasets.append(new_dataset)
+
+        return datasets

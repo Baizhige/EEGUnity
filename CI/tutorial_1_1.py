@@ -12,7 +12,7 @@ from eegunity import UnifiedDataset
 # 8. Export the processed data as an h5Dataset
 
 # Parameter settings
-input_path = r'../../raweeg/figshare_meng2019'  # Dataset directory
+input_path = r'../../processed_raweeg_v2/bcic_iv_2a'  # Dataset directory
 domain_tag = "demp-tag"      # Domain tag for marking the dataset
 output_path = r'../../EEGUnity_CI/saving-h5Dataset'  # Output path for the h5Dataset
 
@@ -37,7 +37,7 @@ unified_dataset.eeg_batch.format_channel_names()
 
 # 4. Apply bandpass filtering (0.1-75Hz), select EEG channels
 unified_dataset.eeg_batch.filter(output_path=cache_bandpassfilter_path, filter_type='bandpass', l_freq=0.1, h_freq=75,
-                                 get_data_row_params = {"is_set_channel_type":True, "pick_types":{'eeg': True}})
+                                 get_data_row_params = {"is_set_channel_type":True, "pick_types_params":{'eeg': True}})
 
 # 5. Apply 50Hz notch filter (for powerline noise removal)
 unified_dataset.eeg_batch.filter(output_path=cache_notchfilter_path, filter_type='notch', notch_freq=50)
@@ -55,4 +55,4 @@ unified_dataset.eeg_batch.normalize(cache_norm_path, norm_type='channel-wise')
 unified_dataset.save_locator(locator_norm_path)
 
 # 8. Export the processed data as an h5Dataset
-unified_dataset.eeg_batch.export_h5Dataset(output_path, name=domain_tag, verbose=True)
+unified_dataset.eeg_batch.export_h5Dataset(output_path, name=domain_tag)
