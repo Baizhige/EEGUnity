@@ -30,4 +30,4 @@ from eegunity import UnifiedDataset
 4. How to Process Data and Export as h5Dataset: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.md)
 5. How to Process Data Using Multiple Computers with EEGUnity: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.md)
 6. How to Read h5Dataset: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Read%20h5Dataset.md)
-7. How to Speep Up with Multithread: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20peep%20Up%20with%20Multithread.md)
+7. How to Speep Up with Multithread: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Speep%20Up%20with%20Multithread.md)
