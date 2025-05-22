@@ -1,4 +1,3 @@
-import copy
 import os
 import warnings
 import mne
@@ -78,15 +77,15 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         Examples
         ---------
         >>> from eegunity import UnifiedDataset
-        >>> unified_dataset = UnifiedDataset(***)
+        >>> u_ds = UnifiedDataset(***)
         >>> # example1
-        >>> new_locator = unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='series')
+        >>> new_locator = u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='series')
         >>> print(new_locator)
         >>> # example2
-        >>> a_list = unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='value')
+        >>> a_list = u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='value')
         >>> print(a_list)
         >>> # example3
-        >>> unified_dataset.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type=None)
+        >>> u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type=None)
 
         """
 
@@ -303,10 +302,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         Returns
         -------
-        instance of the same class
-            A copied instance of the class with updated file paths and formats after the batch
-            processing is complete.
-
+        None
+            This method modifies internal state in-place and does not return any value.
         Raises
         ------
         FileNotFoundError
@@ -396,13 +393,12 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
             return row
 
-        copied_instance = copy.deepcopy(self)
         new_locator = self.batch_process(lambda row: domain_tag is None or row['Domain Tag'] == domain_tag,
                                          app_func,
                                          is_patch=False,
                                          result_type='series')
-        copied_instance.set_shared_attr({'locator': new_locator})
-        return copied_instance
+        self.set_shared_attr({'locator': new_locator})
+        return None
 
     def process_mean_std(self,
                          domain_mean: bool = True,
@@ -1337,7 +1333,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         self.set_metadata(save_name, results)
 
     def replace_paths(self, old_prefix, new_prefix):
-        r"""Replace the prefix of file paths in the dataset according to the provided mapping.
+        r"""Replace the prefix of file paths in the dataset according to the provided mapping (in-place).
+        "This function is generally used in the context of multi-server or multi-user coordination.
 
         Parameters
         ----------
@@ -1349,8 +1346,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         Returns
         -------
-        object
-            A new UnifiedDataset with updated locator.
+        None
+            This method modifies internal state in-place and does not return any value.
         """
 
         def replace_func(row):
@@ -1362,13 +1359,11 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             row['File Path'] = new_path
             return row
 
-        copied_instance = copy.deepcopy(self)
-
         # Process the dataset, applying the path replacement function to each row
         updated_locator = self.batch_process(lambda row: True, replace_func, is_patch=False, result_type='series')
 
-        copied_instance.set_shared_attr({'locator': updated_locator})
-        return copied_instance
+        self.set_shared_attr({'locator': updated_locator})
+        return None
 
     def export_h5Dataset(self, output_path: str, name: str = 'EEGUnity_export',
                          get_data_row_params: Dict = None, miss_bad_data: bool = False) -> None:
@@ -1548,3 +1543,56 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         # Update the 'Domain Tag' column with the new values
         self.set_metadata("Domain Tag", results)
+
+    def get_file_hashes(self) -> None:
+        """
+        Generate and store unique file identifiers for EEG data files.
+
+        This method processes each row in the dataset by reading the file at the
+        specified path and computing its SHA-256 hash. The hash serves as a unique
+        identifier for the file, which is then stored in the metadata under the
+        key "Source Hash".
+
+        The method uses `batch_process` to apply the hash function to all rows,
+        and updates the metadata using `set_metadata`.
+
+        Raises:
+            FileNotFoundError: If a file at the specified path cannot be found.
+            IOError: If a file cannot be read due to permission or corruption issues.
+        """
+
+        def app_func(row):
+            """
+            Compute the SHA-256 hash of a file's content.
+
+            Args:
+                row (dict): A dictionary containing file metadata, must include
+                            the key 'File path' with the path to the file.
+
+            Returns:
+                str: The SHA-256 hash of the file content as a hexadecimal string.
+            """
+            file_path = row['File Path']
+
+            sha256_hash = hashlib.sha256()
+            try:
+                with open(file_path, "rb") as f:
+                    for chunk in iter(lambda: f.read(8192), b""):
+                        sha256_hash.update(chunk)
+            except FileNotFoundError:
+                raise FileNotFoundError(f"File not found: {file_path}")
+            except IOError as e:
+                raise IOError(f"Cannot read file {file_path}: {e}")
+
+            return sha256_hash.hexdigest()
+
+        # Apply the app_func to each row and collect the resulting hash values
+        results = self.batch_process(
+            lambda row: True,  # Process all rows
+            app_func,
+            is_patch=True,
+            result_type="value"
+        )
+
+        # Store the results in the metadata under the key "Source Hash"
+        self.set_metadata("Source Hash", results)

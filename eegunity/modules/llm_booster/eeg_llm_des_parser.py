@@ -254,7 +254,8 @@ def llm_description_file_parser(directory: str, client_type: str, client_paras: 
 
     This function traverses a directory to read various file formats. It extracts sampling rates and channel names
     from the files using an LLM API (e.g., GPT-4), and processes the extracted information based on user inputs to
-    resolve conflicts.
+    resolve conflicts. Contributor: Jingyi Ding (Jingyi.Ding21@student.xjtlu.edu.cn), on 2024-07-26. EEGUnity Team
+    modified it on 2025-02-23
 
     Parameters
     ----------
@@ -284,11 +285,6 @@ def llm_description_file_parser(directory: str, client_type: str, client_paras: 
     >>> client_type = "AzureOpenAI"
     >>> result = llm_description_file_parser(directory, client_paras, client_type)
     >>> print("The end result:", json.dumps(result, indent=4, ensure_ascii=False))
-
-    Contributor
-    -----------
-    Jingyi Ding (Jingyi.Ding21@student.xjtlu.edu.cn), on 2024-07-26.
-    EEGUnity Team modified it on 2025-02-23
     """
     files = _read_files(directory)
     processed_files = _filter_files_with_gpt(files, client_paras=client_paras, client_type=client_type, completion_para=completion_para)
