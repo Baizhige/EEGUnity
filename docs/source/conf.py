@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'EEGUnity'
 copyright = '2025, Wenlong You'
 author = 'Wenlong You'
-release = '0.5.4'
+release = '0.5.5'
 
 # -- General configuration ---------------------------------------------------
 extensions = [
