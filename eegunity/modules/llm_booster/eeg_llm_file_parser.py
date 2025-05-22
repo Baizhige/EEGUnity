@@ -12,7 +12,8 @@ def llm_boost_parser(file_path: str, client_type: str, client_paras: dict, compl
     function that reads EEG data from a CSV or TXT file, determines the sampling frequency
     from timestamp columns, and extracts the relevant channel names. The function iterates
     through the process up to `max_iterations` times to refine the generated code in case
-    of errors or unsatisfactory outputs.
+    of errors or unsatisfactory outputs. Contributor: Ziyi Jia (Ziyi.Jia21@student.xjtlu.edu.cn), on 2024-07-26.
+    EEGUnity Team modified this file, on 2025-03-22.
 
     Parameters
     ----------
@@ -45,11 +46,6 @@ def llm_boost_parser(file_path: str, client_type: str, client_paras: dict, compl
     >>> locator_path = "data_file.csv"
     >>> raw_data = llm_boost_parser(locator_path, api_key, azure_endpoint)
     >>> print("Extracted Data:", raw_data)
-
-    Contributor
-    -----------
-    Ziyi Jia (Ziyi.Jia21@student.xjtlu.edu.cn), on 2024-07-26.
-    EEGUnity Team modified this file, on 2025-03-22.
     """
     file_extension = os.path.splitext(file_path)[1]
     # Check if the file is a CSV or TXT file

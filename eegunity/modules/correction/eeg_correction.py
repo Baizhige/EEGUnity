@@ -10,6 +10,12 @@ from eegunity._share_attributes import _UDatasetSharedAttributes
 
 
 class EEGCorrection(_UDatasetSharedAttributes):
+    """
+    This is a key module of `UnifiedDataset` class, with focus on data correction.
+    This `EEGCorrection` class has the same attributes as the UnifiedDataset class. In this
+    class, we define the functions relative to data correction.
+    """
+
     def __init__(self, main_instance):
         super().__init__()
         self._shared_attr = main_instance._shared_attr
@@ -140,7 +146,7 @@ class EEGCorrection(_UDatasetSharedAttributes):
 
         Example
         -------
-        >>> unified_dataset.eeg_batch.visualization_frequency(max_sample=5)
+        >>> unified_dataset.eeg_correction.visualization_frequency(max_sample=5)
         >>> # This will visualize the frequency spectrum for up to 5 samples per domain from the dataset.
         """
         def compute_amplitude_spectrum(data, sfreq):

@@ -4,6 +4,11 @@ from eegunity._share_attributes import _UDatasetSharedAttributes
 
 
 class EEGLLMBooster(_UDatasetSharedAttributes):
+    """
+    This is a key module of `UnifiedDataset` class, with focus on large language boosting.
+    This `EEGLLMBooster` class has the same attributes as the UnifiedDataset class. In this
+    class, we define the functions relative to large language boosting.
+    """
     def __init__(self, main_instance):
         super().__init__()
         self._shared_attr = main_instance._shared_attr

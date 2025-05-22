@@ -10,8 +10,7 @@ You can view the API Reference and Tutorial through the following link: [Click h
 
 ## Usage in Python Project
 ### 1. Create a Python Environment
-Ensure you are using Python version 3.6 or higher.
-
+"Ensure you are using Python version 3.6 or higher. Due to compatibility issues with the latest version of NumPy, Python 3.13 is currently not supported.
 ### 2. Install EEGUnity via pip
 Run the following command to install EEGUnity:
 ```bash
@@ -25,7 +24,10 @@ from eegunity import UnifiedDataset
 ```
 
 ## Tutorial
-1. How to Format Channel Name and Inspect Channel Data: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.md)
-2. How to Process Data and Export as h5Dataset: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.md)
-3. How to Read h5Dataset: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Read%20h5Dataset.md)
-4. How to Make Standard Datasets: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Make%20Standard%20Datasets.md)
+1. How does EEGUnity support multi-modal data: [Click here to view the tutorial](./docs/source/tutorial/How%20does%20EEGUnity%20support%20multi-modal%20data.md)
+2. How to Format Channel Name and Inspect MetaData: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.md)
+3. How to Make Standard Datasets: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Make%20Standard%20Datasets.md)
+4. How to Process Data and Export as h5Dataset: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.md)
+5. How to Process Data Using Multiple Computers with EEGUnity: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.md)
+6. How to Read h5Dataset: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20Read%20h5Dataset.md)
+7. How to Speep Up with Multithread: [Click here to view the tutorial](./docs/source/tutorial/How%20to%20peep%20Up%20with%20Multithread.md)

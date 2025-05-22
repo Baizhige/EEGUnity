@@ -566,19 +566,23 @@ def channel_name_parser(input_string):
     """
     # Define a function to check if a channel is an EOG channel
     def is_eog_channel(channel):
-        return "eog" in channel.lower()
+        return "eog" in channel.lower() or "loc" in channel.lower()  or "roc" in channel.lower()
 
     # Define a function to check if a channel is an MEG channel
     def is_meg_channel(channel):
         return "meg" in channel.lower()
 
+    # Define a function to check if a channel is an EMG channel
+    def is_emg_channel(channel):
+        return "emg" in channel.lower()
+
     # Define a function to check if a channel is an ECG channel
     def is_ecg_channel(channel):
-        return "ecg" in channel.lower()
+        return "ecg" in channel.lower() or "ekg" in channel.lower() # update: EKG is also known as ECG
 
     # Define a function to check if a channel is an ECG channel
     def is_stim_channel(channel):
-        return "stim" in channel.lower()
+        return "stim" in channel.lower() or "event" in channel.lower() or "marker" in channel.lower()
 
     # Define a function to check if a channel is an DOUBLE channel
     def is_double_channel(channel):
@@ -588,7 +592,7 @@ def channel_name_parser(input_string):
         if len(parts) != 2:
             return False
 
-        valid_channels = ["REF", "LE", "EEG", "ECG", "EOG", "EMG"]
+        valid_channels = ["REF", "LE", "EEG", "ECG", "EOG", "EMG", "EKG", "MEG"]
 
         # Convert both parts to upper case for case-insensitive comparison
         part1, part2 = parts[0].upper(), parts[1].upper()
@@ -655,10 +659,12 @@ def channel_name_parser(input_string):
             formatted_channel = f"EOG:{channel.replace('EOG:', '').replace('EOG', '').replace('eog', '')}"
         elif is_meg_channel(channel):
             formatted_channel = f"MEG:{channel.replace('MEG:', '').replace('MEG', '').replace('meg', '')}"
+        elif is_emg_channel(channel):
+            formatted_channel = f"EMG:{channel.replace('EMG:', '').replace('EMG', '').replace('emg', '')}"
         elif is_ecg_channel(channel):
             formatted_channel = f"ECG:{channel.replace('ECG:', '').replace('ECG', '').replace('ecg', '')}"
         elif is_double_channel(channel):
-            formatted_channel = f"EEGDual:{channel.replace('Dual:', '')}"
+            formatted_channel = f"EEG:{channel.replace('Dual:', '')}"
         elif is_stim_channel(channel):
             formatted_channel = f"STIM:{channel.replace('STIM:', '')}"
         else:

@@ -3,19 +3,21 @@ import mne
 
 def compute_quality_score_mne(raw, ica_params=None):
     """
-    Use MNE's built-in artifact detection methods to compute a data quality score.
+    Compute a data quality score using MNE's built-in artifact detection methods.
 
-    Parameters:
-    raw: mne.io.Raw
+    Parameters
+    ----------
+    raw : mne.io.Raw
         The EEG raw data.
-    method: str
-        The method to use for artifact detection. Options: "ica", "maxwell".
-    plot: bool
+    method : str
+        The method to use for artifact detection. Options are "ica" and "maxwell".
+    plot : bool
         Whether to plot artifact scores and diagnostics.
 
-    Returns:
-    results: dict
-        Dictionary containing the quality score, artifact ratio, and individual artifact counts.
+    Returns
+    -------
+    dict
+        A dictionary containing the quality score, artifact ratio, and individual artifact counts.
     """
     if ica_params is None:
         ica_params = {}
