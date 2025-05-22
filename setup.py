@@ -6,7 +6,7 @@ setup(
     packages=find_packages(include=['eegunity', 'eegunity.*']),
     install_requires=[
         'mne>=1.5.1',
-        'numpy>=1.21.0,<2.0.0',
+        'numpy>=1.21.0,<2.0.0', # Required due to compatibility limits of NumPy and MNE with Python 3.13
         'matplotlib>=3.7.3',
         'h5py>=3.12.1',
         'openai==1.35.1',
