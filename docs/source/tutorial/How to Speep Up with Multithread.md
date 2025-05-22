@@ -18,8 +18,11 @@ Multithreading is useful when you need to perform many similar tasks that are no
 
 ### Step 1: Group Dataset by Domain
 
-Use EEGUnity’s built-in method to group the dataset before parallel processing:
+Before you start parallel processing, you need to divide the dataset into smaller parts. EEGUnity provides a method to group the dataset by domain, using the `Domain Tag` column in your locator file.
 
+> ⚠️ Make sure your locator file contains multiple entries with different values in the `Domain Tag` column.  
+> If not, you can automatically split the dataset based on sampling rate and electrode configuration using `u_dataset.eeg_batch.auto_domain()`.
+> Alternatively, you can group the data manually by assigning different values to the `Domain Tag` column in your locator file.
 ```python
 from eegunity import UnifiedDataset
 
@@ -31,7 +34,7 @@ u_dataset_list = u_dataset.group_by_domain()  # Returns a list of UnifiedDataset
 
 ### Step 2: Define the Task Function
 
-This function handles the export process for each grouped dataset:
+This function handles the specific task (For exmaple, `u_dataset_grouped.eeg_batch.export_h5Dataset()`) for each grouped dataset:
 
 ```python
 def export_task(u_dataset_grouped):
@@ -72,11 +75,3 @@ with ThreadPoolExecutor(max_workers=max_threads) as executor:
 Using `ThreadPoolExecutor` with grouped EEGUnity datasets is a convenient way to speed up exporting. Make sure your task is I/O-bound or lightweight enough to benefit from multithreading.
 
 If your tasks are CPU-intensive, consider using `ProcessPoolExecutor` instead.
-
----
-
-## 5. Learn More
-
-- [Python `concurrent.futures` Documentation](https://docs.python.org/3/library/concurrent.futures.html)
-- [Multithreading vs Multiprocessing in Python (Real Python)](https://realpython.com/python-concurrency/)
-- [EEGUnity GitHub Repository](https://github.com/935963004/LaBraM) - Source for EEGUnity
