@@ -908,7 +908,6 @@ def convert_unit(data: mne.io.Raw, unit: str) -> mne.io.Raw:
 
     return data
 
-
 def process_mne_files(files_locator, verbose):
     """
     Process MNE files based on a locator DataFrame.
@@ -929,13 +928,20 @@ def process_mne_files(files_locator, verbose):
         filepath = row['File Path']
         try:
             data = mne.io.read_raw(filepath, verbose=verbose)
+            nchan = int(data.info['nchan'])
+            n_times = int(data.n_times)
+
             files_locator.at[index, 'File Type'] = 'standard_data'
-            files_locator.at[index, 'Data Shape'] = str((data.info['nchan'], data.n_times))
-            files_locator.at[index, 'Channel Names'] = ', '.join(data.info['ch_names'])
-            files_locator.at[index, 'Number of Channels'] = len(data.info['ch_names'])
-            files_locator.at[index, 'Sampling Rate'] = data.info['sfreq']
-            files_locator.at[index, 'Duration'] = data.times[-1]
-            print(f"Retrieved channel sequence {data.info['ch_names']}")
-        except Exception:
+            files_locator.at[index, 'Data Shape'] = str((nchan, n_times))
+            files_locator.at[index, 'Channel Names'] = ', '.join(data.info.get('ch_names', []))
+            files_locator.at[index, 'Number of Channels'] = nchan
+            files_locator.at[index, 'Sampling Rate'] = float(data.info.get('sfreq', 0.0))
+            files_locator.at[index, 'Duration'] = float(data.times[-1]) if len(data.times) > 0 else 0.0
+
+            print(f"Retrieved channel sequence: {data.info.get('ch_names', [])}")
+        except Exception as e:
             files_locator.at[index, 'File Type'] = 'unknown'
+            files_locator.at[index, 'Data Shape'] = 'error'
+            files_locator.at[index, 'Error'] = str(e)
+            print(f"Failed to process file {filepath}: {e}")
     return files_locator
