@@ -466,6 +466,150 @@ class EEGBatchMixinEpoch:
             json.dump(event_info, f, indent=4)
         print(f"Event information saved to {event_info_path}")
 
+    def epoch_by_segmentation_hdf5(self, output_path: str,
+                                   exclude_bad: bool = True,
+                                   file_name_prefix: str = "EpochData",
+                                   miss_bad_data: bool = False,
+                                   get_data_row_params: Dict = None,
+                                   resample_params: Dict = None,
+                                   segment_params: Dict = None,
+                                   epoch_params: Dict = None) -> None:
+        """
+        Batch process EEG data to create epochs by sliding window segmentation,
+        save the results in HDF5 format, and generate a JSON file with event counts.
+
+        Parameters
+        ----------
+        output_path : str
+            Directory to save the processed epochs.
+        exclude_bad : bool, optional
+            Whether to exclude bad epochs. Default is `True`.
+        file_name_prefix : str, optional
+            The filename prefix to save hdf5 and event info file. Default is `EpochData`.
+        miss_bad_data : bool, optional
+            Whether to skip files with processing errors. Default is `False`.
+        get_data_row_params : dict, optional
+            Additional parameters passed to `get_data_row()` for data retrieval.
+        resample_params : dict, optional
+            Parameters for resampling the raw data. Must include `sfreq` for the target sampling frequency.
+        segment_params : dict, optional
+            Parameters for segmentation. Must include 'segment_length' (in seconds) and 'overlap' (float between 0-1).
+            Example: `{'segment_length': 2.0, 'overlap': 0.5}`.
+        epoch_params : dict, optional
+            Additional parameters for `mne.Epochs`, excluding 'raw', 'events', and 'event_id'.
+
+        Returns
+        -------
+        None
+        """
+        if get_data_row_params is None:
+            get_data_row_params = {}
+        if resample_params is None:
+            resample_params = {}
+        if segment_params is None:
+            segment_params = {}
+        if epoch_params is None:
+            epoch_params = {}
+
+        if 'segment_length' not in segment_params or 'overlap' not in segment_params:
+            raise ValueError("segment_params must include 'segment_length' and 'overlap' keys.")
+
+
+        output_path = os.path.abspath(output_path)
+        os.makedirs(output_path, exist_ok=True)
+
+        dataset = h5Dataset(Path(output_path), name=file_name_prefix)
+        event_info = {}
+
+        @handle_errors(miss_bad_data)
+        @log_processing
+        def app_func(row, exclude_bad: bool = True,
+                     get_data_row_params: Dict = None,
+                     resample_params: Dict = None,
+                     segment_params: Dict = None,
+                     epoch_params: Dict = None):
+            """
+            Process an individual file to create and save sliding window epochs.
+            """
+            raw_data = get_data_row(row, **get_data_row_params)
+
+            if 'sfreq' in resample_params:
+                raw_data.resample(**resample_params)
+
+            sfreq = raw_data.info['sfreq']
+            n_samples = raw_data.n_times
+
+            segment_length = segment_params['segment_length']
+            overlap = segment_params['overlap']
+
+            window_size = int(segment_length * sfreq)
+            step_size = int(window_size * (1 - overlap))
+
+            onset_samples = np.arange(0, n_samples - window_size + 1, step_size)
+            n_segments = len(onset_samples)
+
+            file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
+            segment_event_name = f"{file_name}_Segment"
+
+            # MNE event structure: (onset_sample, 0, event_id)
+            events = np.zeros((n_segments, 3), dtype=int)
+            events[:, 0] = onset_samples
+            events[:, 2] = 1  # dummy event value (required but not actually used later)
+
+            event_id = {segment_event_name: 1}
+
+            epochs = mne.Epochs(raw_data, events, event_id,
+                                tmin=0, tmax=segment_length, **epoch_params)
+
+            if exclude_bad:
+                epochs.drop_bad()
+
+            grp = dataset.addGroup(grpName=file_name)
+
+            info_bytes = pickle.dumps(raw_data.info)
+            info_array = np.frombuffer(info_bytes, dtype='uint8')
+            dataset.addDataset(grp, 'info', info_array, chunks=None)
+
+            try:
+                epoch_data = epochs.get_data()
+
+                if epoch_data.ndim != 3:
+                    raise ValueError("Epoch data is not three-dimensional.")
+
+                dset = dataset.addDataset(grp, segment_event_name, epoch_data, chunks=epoch_data.shape)
+
+                dataset.addAttributes(dset, 'rsFreq', raw_data.info['sfreq'])
+                dataset.addAttributes(dset, 'chOrder', epochs.info['ch_names'])
+
+                # Update event counts
+                event_info[segment_event_name] = event_info.get(segment_event_name, 0) + len(epochs)
+
+                print(f"Processed and saved {len(epochs)} segments for event: {segment_event_name}")
+
+            except Exception as e:
+                print(f"Error processing segmented epochs: {e}")
+
+        self.batch_process(
+            lambda row: True,
+            lambda row: app_func(
+                row,
+                exclude_bad=exclude_bad,
+                get_data_row_params=get_data_row_params,
+                resample_params=resample_params,
+                segment_params=segment_params,
+                epoch_params=epoch_params
+            ),
+            is_patch=False,
+            result_type=None
+        )
+
+        dataset.save()
+        print(f"HDF5 dataset saved to {output_path}")
+
+        event_info_path = os.path.join(output_path, file_name_prefix + "_event_info.json")
+        with open(event_info_path, 'w') as f:
+            json.dump(event_info, f, indent=4)
+        print(f"Event information saved to {event_info_path}")
 
     def epoch_by_long_event_hdf5(self, output_path: str,
                                  overlap: float,
