@@ -33,7 +33,7 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         """
 
     def __init__(self, dataset_path: str = None, locator_path: str = None, domain_tag: str = None,
-                 is_unzip: bool = True, verbose: str = 'CRITICAL'):
+                 is_unzip: bool = True, verbose: str = 'CRITICAL', num_workers: int = 0):
         """
         Initialize the class with either dataset_path or locator_path. Only one of
         these parameters should be provided. If dataset_path is provided, domain_tag is required.
@@ -50,6 +50,10 @@ class UnifiedDataset(_UDatasetSharedAttributes):
             A flag indicating whether the dataset should be unzipped (default is True).
         verbose : str, optional
             The verbosity level for logging (default is 'CRITICAL').
+        num_workers : int, optional
+            Number of worker threads for parallel processing (default is 0).
+            0 means sequential execution in the main thread.
+            >0 uses a ThreadPoolExecutor with the specified number of workers.
 
         Raises:
         -------
@@ -61,6 +65,10 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         >>> unified_dataset_locator = UnifiedDataset(locator_path="path/to/your/locator.csv")
         """
         super().__init__()
+
+        # Validate num_workers
+        if not isinstance(num_workers, int) or num_workers < 0:
+            raise ValueError("'num_workers' must be a non-negative integer.")
 
         # Ensure only one of dataset_path or locator_path is provided
         if dataset_path and locator_path:
@@ -78,6 +86,7 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         self.set_shared_attr({'is_unzip': is_unzip})
         self.set_shared_attr({'domain_tag': domain_tag})
         self.set_shared_attr({'verbose': verbose})
+        self.set_shared_attr({'num_workers': num_workers})
 
         # Initialize associated modules
         self.eeg_parser = EEGParser(self)

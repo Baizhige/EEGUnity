@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import hashlib
 import pickle
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Callable, Union, Tuple, List, Dict, Optional
 from eegunity.modules.batch.eeg_scores_shady import compute_quality_scores_shady
@@ -94,17 +95,41 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             if result_type not in ["series", "value", None]:
                 raise ValueError("Invalid result_type. Must be 'series', 'value', or None.")
 
-        results = []
-        for index, row in self.get_shared_attr()['locator'].iterrows():
-            if con_func(row):
-                result = app_func(row)
-            else:
-                if is_patch and result_type == "series":
-                    result = row
-                else:
-                    result = None
+        num_workers = self.get_shared_attr().get('num_workers', 0)
+        locator = self.get_shared_attr()['locator']
 
-            results.append(result)
+        # Build list of (index, row, should_apply) tuples
+        tasks = []
+        for index, row in locator.iterrows():
+            should_apply = con_func(row)
+            tasks.append((index, row, should_apply))
+
+        if num_workers > 0:
+            # Parallel execution using ThreadPoolExecutor
+            def _process_row(task):
+                idx, row, should_apply = task
+                if should_apply:
+                    return app_func(row)
+                else:
+                    if is_patch and result_type == "series":
+                        return row
+                    else:
+                        return None
+
+            with ThreadPoolExecutor(max_workers=num_workers) as executor:
+                results = list(executor.map(_process_row, tasks))
+        else:
+            # Sequential execution (original behavior)
+            results = []
+            for idx, row, should_apply in tasks:
+                if should_apply:
+                    result = app_func(row)
+                else:
+                    if is_patch and result_type == "series":
+                        result = row
+                    else:
+                        result = None
+                results.append(result)
 
         if result_type == "series":
             # Check if all elements in results are None
@@ -1439,38 +1464,55 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         # Create the HDF5 file handler
         dataset = h5Dataset(Path(output_path), name)
 
-        @handle_errors(miss_bad_data=miss_bad_data)
-        @log_processing
-        def app_func(row):
-            # Extract channel information for the current file
-            current_channels = [channel.strip() for channel in row['Channel Names'].split(',')]
-            current_sf = int(float(row['Sampling Rate']))
+        num_workers = self.get_shared_attr().get('num_workers', 0)
 
-            # Get EEG data with additional parameters
-            raw = get_data_row(row, **get_data_row_params)
-            eeg_data = raw.get_data()
+        if num_workers > 0:
+            # Parallel read + sequential write for thread safety
+            @handle_errors(miss_bad_data=miss_bad_data)
+            @log_processing
+            def app_func(row):
+                current_channels = [channel.strip() for channel in row['Channel Names'].split(',')]
+                current_sf = int(float(row['Sampling Rate']))
+                raw = get_data_row(row, **get_data_row_params)
+                eeg_data = raw.get_data()
+                info_bytes = pickle.dumps(raw.info)
+                info_array = np.frombuffer(info_bytes, dtype='uint8')
+                file_name = os.path.basename(row['File Path'])
+                return (file_name, eeg_data, info_array, current_sf, current_channels)
 
-            # Create a group and dataset in the HDF5 file for each file
-            grp = dataset.addGroup(grpName=os.path.basename(row['File Path']))
-            dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
+            results = self.batch_process(
+                lambda row: row['Completeness Check'] != 'Unavailable',
+                app_func, is_patch=False, result_type='value')
 
-            # Add individual attributes for each dataset
-            dataset.addAttributes(dset, 'rsFreq', current_sf)  # Sampling rate may vary per file
-            dataset.addAttributes(dset, 'chOrder', current_channels)  # Channel order may vary per file
+            # Sequential HDF5 write in main thread
+            for item in results:
+                if item is None:
+                    continue
+                file_name, eeg_data, info_array, current_sf, current_channels = item
+                grp = dataset.addGroup(grpName=file_name)
+                dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
+                dataset.addAttributes(dset, 'rsFreq', current_sf)
+                dataset.addAttributes(dset, 'chOrder', current_channels)
+                dataset.addDataset(grp, 'info', info_array, chunks=None)
+        else:
+            @handle_errors(miss_bad_data=miss_bad_data)
+            @log_processing
+            def app_func(row):
+                current_channels = [channel.strip() for channel in row['Channel Names'].split(',')]
+                current_sf = int(float(row['Sampling Rate']))
+                raw = get_data_row(row, **get_data_row_params)
+                eeg_data = raw.get_data()
+                grp = dataset.addGroup(grpName=os.path.basename(row['File Path']))
+                dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
+                dataset.addAttributes(dset, 'rsFreq', current_sf)
+                dataset.addAttributes(dset, 'chOrder', current_channels)
+                info_bytes = pickle.dumps(raw.info)
+                info_array = np.frombuffer(info_bytes, dtype='uint8')
+                dataset.addDataset(grp, 'info', info_array, chunks=None)
+                return None
 
-            # Handle info attribute using pickle
-
-            info_bytes = pickle.dumps(raw.info)
-            # Convert bytes to a NumPy array of uint8
-            info_array = np.frombuffer(info_bytes, dtype='uint8')
-            # Store the serialized info as a uint8 array
-            dataset.addDataset(grp, 'info', info_array, chunks=None)
-
-            return None  # No need to return any result
-
-        # Process batch data without domain_tag filtering, processing all files
-        self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable',
-                           app_func, is_patch=False, result_type=None)
+            self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable',
+                               app_func, is_patch=False, result_type=None)
 
         # Save the dataset to disk
         dataset.save()

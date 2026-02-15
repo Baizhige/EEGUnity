@@ -63,7 +63,6 @@ class EEGBatchMixinEpoch:
 
         # Initialize index.csv
         index_path = os.path.join(output_path, "index.csv")
-        index_data = []
 
         @handle_errors(miss_bad_data)
         def app_func(row, output_path: str,
@@ -89,6 +88,9 @@ class EEGBatchMixinEpoch:
             if exclude_bad:
                 epochs.drop_bad()
 
+            # Collect index entries for this file
+            local_index_data = []
+
             # Iterate through each event type
             for event in event_id:
                 event_epochs = epochs[event]
@@ -112,7 +114,7 @@ class EEGBatchMixinEpoch:
                 # Gather metadata for index.csv
                 description = json.loads(epochs.info['description'])
                 eegunity_desc = description['eegunity_description']
-                index_data.append({
+                local_index_data.append({
                     "File Path": file_path,
                     "Class Name": event,
                     "Number of Epoch": len(event_epochs),
@@ -125,8 +127,10 @@ class EEGBatchMixinEpoch:
                     "Comment": ""
                 })
 
-        # Use batch_process to process data
-        self.batch_process(
+            return local_index_data
+
+        # Use batch_process to process data and collect results
+        results = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(
                 row,
@@ -137,8 +141,14 @@ class EEGBatchMixinEpoch:
                 epoch_params=epoch_params
             ),
             is_patch=False,
-            result_type=None
+            result_type='value'
         )
+
+        # Merge index_data from all results in main thread
+        index_data = []
+        for item in results:
+            if item is not None and isinstance(item, list):
+                index_data.extend(item)
 
         # Save index.csv
         pd.DataFrame(index_data).to_csv(index_path, index=False)
@@ -202,7 +212,6 @@ class EEGBatchMixinEpoch:
 
         # Initialize index.csv
         index_path = os.path.join(output_path, "index.csv")
-        index_data = []
 
         @handle_errors(miss_bad_data)
         def app_func(row, output_path: str,
@@ -268,6 +277,9 @@ class EEGBatchMixinEpoch:
 
             available_descriptions = list(epochs.event_id.keys())
 
+            # Collect index entries for this file
+            local_index_data = []
+
             # Save each segmented epoch
             for description in available_descriptions:
                 event_epochs = epochs[description]
@@ -289,7 +301,7 @@ class EEGBatchMixinEpoch:
                     print(f"Epoch File was saved to {file_path}")
 
                     # Gather metadata for index.csv
-                    index_data.append({
+                    local_index_data.append({
                         "File Path": file_path,
                         "Class Name": description,
                         "Number of Epoch": len(event_epochs),
@@ -297,7 +309,7 @@ class EEGBatchMixinEpoch:
                         "Comment": ""
                     })
                 except Exception as e:
-                    index_data.append({
+                    local_index_data.append({
                         "File Path": file_path,
                         "Class Name": description,
                         "Number of Epoch": "",
@@ -305,8 +317,10 @@ class EEGBatchMixinEpoch:
                         "Comment": str(e)
                     })
 
-        # Use batch_process to process data
-        self.batch_process(
+            return local_index_data
+
+        # Use batch_process to process data and collect results
+        results = self.batch_process(
             lambda row: True,
             lambda row: app_func(
                 row,
@@ -318,8 +332,14 @@ class EEGBatchMixinEpoch:
                 epoch_params=epoch_params
             ),
             is_patch=False,
-            result_type=None
+            result_type='value'
         )
+
+        # Merge index_data from all results in main thread
+        index_data = []
+        for item in results:
+            if item is not None and isinstance(item, list):
+                index_data.extend(item)
 
         # Save index.csv
         pd.DataFrame(index_data).to_csv(index_path, index=False)
