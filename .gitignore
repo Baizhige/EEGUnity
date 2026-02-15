@@ -25,6 +25,7 @@ dist/
 # ignore logs
 *.log
 *.log.*
+.claude
 
 # ignore
 *.swp
