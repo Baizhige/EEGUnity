@@ -1,89 +1,430 @@
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EEGUnity documentation &mdash; EEGUnity 0.3.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>EEGUnity documentation &#8212; EEGUnity 0.6.0 documentation</title>
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
   
-        <script src="_static/documentation_options.js?v=71d9d8e6"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/js/theme.js"></script>
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="eegunity" href="modules.html" /> 
-</head>
+    <link rel="next" title="eegunity" href="modules.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
-          
-          
-          <a href="#" class="icon icon-home">
-            EEGUnity
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">eegunity</a></li>
-</ul>
 
-        </div>
-      </div>
-    </nav>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">EEGUnity</a>
-      </nav>
+  
+    
+  
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">EEGUnity documentation</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
-      </li>
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
   </ul>
-  <hr/>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none"></div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <section id="eegunity-documentation">
-<h1>EEGUnity documentation<a class="headerlink" href="#eegunity-documentation" title="Link to this heading">¶</a></h1>
+<h1>EEGUnity documentation<a class="headerlink" href="#eegunity-documentation" title="Link to this heading">#</a></h1>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">eegunity</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.html">eegunity package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.html">eegunity package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.html">eegunity.modules package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.resources.html">eegunity.resources package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity.unifieddataset">eegunity.unifieddataset module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.html#eegunity.unifieddataset.UnifiedDataset"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.html#module-eegunity">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20does%20EEGUnity%20support%20multi-modal%20data.html">EEGUnity: Supporting Multi-Modal Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20does%20EEGUnity%20support%20multi-modal%20data.html#special-notes">Special Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20does%20EEGUnity%20support%20multi-modal%20data.html#multimodal-support">Multimodal Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20does%20EEGUnity%20support%20multi-modal%20data.html#custom-batch-processing">Custom Batch Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20does%20EEGUnity%20support%20multi-modal%20data.html#recommendations">Recommendations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html">Formatting Channel Names and Inspecting Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html#step-1-load-the-dataset">Step 1: Load the Dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html#step-2-save-the-initial-locator-file">Step 2: Save the Initial Locator File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html#step-3-select-eeg-data">Step 3: Select EEG data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html#step-4-format-channel-names">Step 4: Format Channel Names</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html#step-7-reload-the-dataset">Step 7: Reload the Dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html">Creating a Standardized FIF Dataset using EEGUnity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html#purpose">Purpose</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html#step-0-prepare-a-python-environment">🚀 Step 0: Prepare a Python Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html#step-1-prepare-a-python-project">Step 1 Prepare a Python Project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html#step-2-make-standard-script-for-datasets">Step 2 Make Standard Script for Datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html#detailed-explanation-of-the-code">Detailed Explanation of the Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Make%20Standard%20Datasets.html#key-points-to-remember">Key Points to Remember</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html">Cooperation with Multiple Computers or Servers using EEGUnity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html#assumptions">Assumptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html#for-researcher-a">For Researcher A</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html#for-researcher-b">For Researcher B</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html">EEG Dataset Processing Tutorial</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html#demo-1-detailed-processing-workflow-demo-make-h5dataset-py">Demo 1: Detailed Processing Workflow (<code class="docutils literal notranslate"><span class="pre">demo_make_h5Dataset.py</span></code>)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html#key-steps">Key Steps:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html#code">Code:</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html#demo-2-quick-batch-processing-demo-make-h5dataset-quick-py">Demo 2: Quick Batch Processing (<code class="docutils literal notranslate"><span class="pre">demo_make_h5Dataset_quick.py</span></code>)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html#id1">Key Steps:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html#id2">Code:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20to%20Read%20h5Dataset.html">Reading EEGUnity HDF5 Files: A Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Read%20h5Dataset.html#introduction">1. Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Read%20h5Dataset.html#what-is-hdf5">2. What is HDF5?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Read%20h5Dataset.html#understanding-data-saving-in-hdf5">3. Understanding Data Saving in HDF5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Read%20h5Dataset.html#sample-script-to-read-hdf5-files">4. Sample Script to Read HDF5 Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html">EEGUnity Kernels: Dataset-Specific In-Memory Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#introduction">1. Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#why-use-kernels">2. Why Use Kernels?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#how-kernels-work">3. How Kernels Work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#kernel-file-requirements">4. Kernel File Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#recommended-naming-convention">5. Recommended Naming Convention</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#kernel-interface-specification">6. Kernel Interface Specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#determining-dataset-root">7. Determining Dataset Root</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#writing-robust-kernels">8. Writing Robust Kernels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#minimal-kernel-template">9. Minimal Kernel Template</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html#summary">10. Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html">How to Speed Up EEGUnity with Built-in Multithreading</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#introduction">1. Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#basic-usage">2. Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#where-multithreading-is-applied">3. Where Multithreading Is Applied</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#dataset-scanning-parser-stage">3.1 Dataset Scanning (Parser Stage)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#batch-processing-eegbatch-stage">3.2 Batch Processing (EEGBatch Stage)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#internal-execution-model">4. Internal Execution Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#choosing-num-workers">5. Choosing num_workers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#general-recommendations">General Recommendations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#practical-example">6. Practical Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#important-notes">7. Important Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial/How%20to%20Speep%20Up%20with%20Multithread.html#summary">8. Summary</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </div>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">#</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
@@ -92,33 +433,113 @@
 </section>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-right" title="eegunity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2024, Wenlong You.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="modules.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">eegunity</p>
       </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-</body>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">EEGUnity documentation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
 </html>

@@ -137,8 +137,29 @@ class EEGParser(_UDatasetSharedAttributes):
         Any
             The data retrieved and processed according to the specified parameters.
         """
+        # --- anchor: EEGParser.get_data kernel hook ---
         row = self.get_shared_attr()['locator'].iloc[data_idx]
-        return get_data_row(row, **kwargs)
+        raw = get_data_row(row, **kwargs)
+
+        kernel = self.get_shared_attr().get('kernel', None)
+        if kernel is None:
+            return raw
+
+        try:
+            return kernel.apply(self, raw, row)
+        except Exception as e:
+            kid = getattr(kernel, "KERNEL_ID", kernel.__class__.__name__)
+            domain_tag = row.get("Domain Tag", "unknown")
+            file_path = row.get("File Path", "unknown")
+            warnings.warn(
+                (
+                    f"Kernel '{kid}' is not compatible with this dataset (or this record). "
+                    f"Domain Tag: {domain_tag}. File Path: {file_path}. "
+                    f"Error: {e}. Please adjust the kernel or download a dataset version "
+                    f"that matches the kernel."
+                )
+            )
+            return raw
 
     def check_locator(self, locator):
         """

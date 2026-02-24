@@ -1,0 +1,608 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>eegunity.modules.llm_booster &#8212; EEGUnity 0.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'eegunity.modules.llm_booster';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="eegunity.modules.parser" href="eegunity.modules.parser.html" />
+    <link rel="prev" title="eegunity.modules.correction" href="eegunity.modules.correction.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="eegunity.html">eegunity package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="eegunity.modules.html">eegunity.modules package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html">eegunity.modules.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.correction.html">eegunity.modules.correction</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">eegunity.modules.llm_booster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html">eegunity.modules.parser</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.resources.html">eegunity.resources package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="modules.html" class="nav-link">eegunity</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="eegunity.html" class="nav-link">eegunity package</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="eegunity.modules.html" class="nav-link">eegunity.modules package</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">eegunity.modules.llm_booster</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="eegunity-modules-llm-booster">
+<h1>eegunity.modules.llm_booster<a class="headerlink" href="#eegunity-modules-llm-booster" title="Link to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-eegunity.modules.llm_booster.eeg_llm_booster">
+<span id="eegunity-modules-llm-booster-eeg-llm-booster-module"></span><h2>eegunity.modules.llm_booster.eeg_llm_booster module<a class="headerlink" href="#module-eegunity.modules.llm_booster.eeg_llm_booster" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eegunity.modules.llm_booster.eeg_llm_booster.EEGLLMBooster">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.modules.llm_booster.eeg_llm_booster.</span></span><span class="sig-name descname"><span class="pre">EEGLLMBooster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/llm_booster/eeg_llm_booster.html#EEGLLMBooster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.llm_booster.eeg_llm_booster.EEGLLMBooster" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_UDatasetSharedAttributes</span></code></p>
+<p>This is a key module of <cite>UnifiedDataset</cite> class, with focus on large language boosting.
+This <cite>EEGLLMBooster</cite> class has the same attributes as the UnifiedDataset class. In this
+class, we define the functions relative to large language boosting.</p>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.llm_booster.eeg_llm_des_parser">
+<span id="eegunity-modules-llm-booster-eeg-llm-des-parser-module"></span><h2>eegunity.modules.llm_booster.eeg_llm_des_parser module<a class="headerlink" href="#module-eegunity.modules.llm_booster.eeg_llm_des_parser" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.llm_booster.eeg_llm_des_parser.llm_description_file_parser">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.llm_booster.eeg_llm_des_parser.</span></span><span class="sig-name descname"><span class="pre">llm_description_file_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_paras</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/llm_booster/eeg_llm_des_parser.html#llm_description_file_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.llm_booster.eeg_llm_des_parser.llm_description_file_parser" title="Link to this definition">#</a></dt>
+<dd><p>Parse files in a specified directory to extract sampling rate and channel information using a Large Language Model
+(LLM) API.</p>
+<p>This function traverses a directory to read various file formats. It extracts sampling rates and channel names
+from the files using an LLM API (e.g., GPT-4), and processes the extracted information based on user inputs to
+resolve conflicts. Contributor: Jingyi Ding (<a class="reference external" href="mailto:Jingyi&#46;Ding21&#37;&#52;&#48;student&#46;xjtlu&#46;edu&#46;cn">Jingyi<span>&#46;</span>Ding21<span>&#64;</span>student<span>&#46;</span>xjtlu<span>&#46;</span>edu<span>&#46;</span>cn</a>), on 2024-07-26. EEGUnity Team
+modified it on 2025-02-23</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory path where the files are stored for processing. Generally speaking, it will be the root directory
+of the dataset</p></li>
+<li><p><strong>client_type</strong> (<em>str</em>) – The type of LLM client to use (e.g., “AzureOpenAI”, “OpenAI”).</p></li>
+<li><p><strong>client_paras</strong> (<em>dict</em>) – A dictionary containing the parameters needed to initialize the LLM API client. Please refer to OpenAI
+documentation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dict</strong> – Returns an error message if no files are selected or if all data is discarded due to conflicts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the parsed sampling rate and channel information.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If no files are selected for further analysis or if there are conflicts in the extracted data.:</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">directory</span> <span class="o">=</span> <span class="s1">&#39;path/to/description/directory&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client_paras</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;api_key&quot;</span><span class="p">:</span> <span class="s2">&quot;your_api_key&quot;</span><span class="p">,</span> <span class="s2">&quot;api_version&quot;</span><span class="p">:</span> <span class="s2">&quot;2023-03-15-preview&quot;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client_type</span> <span class="o">=</span> <span class="s2">&quot;AzureOpenAI&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">llm_description_file_parser</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">client_paras</span><span class="p">,</span> <span class="n">client_type</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The end result:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.llm_booster.eeg_llm_file_parser">
+<span id="eegunity-modules-llm-booster-eeg-llm-file-parser-module"></span><h2>eegunity.modules.llm_booster.eeg_llm_file_parser module<a class="headerlink" href="#module-eegunity.modules.llm_booster.eeg_llm_file_parser" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.llm_booster.eeg_llm_file_parser.llm_boost_parser">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.llm_booster.eeg_llm_file_parser.</span></span><span class="sig-name descname"><span class="pre">llm_boost_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_paras</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/llm_booster/eeg_llm_file_parser.html#llm_boost_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.llm_booster.eeg_llm_file_parser.llm_boost_parser" title="Link to this definition">#</a></dt>
+<dd><p>Parses and processes an EEG data file using Azure OpenAI to generate a function
+that reads the data, calculates the sampling frequency, and extracts channel names.</p>
+<p>This function interacts with Azure OpenAI to automatically generate and refine a Python
+function that reads EEG data from a CSV or TXT file, determines the sampling frequency
+from timestamp columns, and extracts the relevant channel names. The function iterates
+through the process up to <cite>max_iterations</cite> times to refine the generated code in case
+of errors or unsatisfactory outputs. Contributor: Ziyi Jia (<a class="reference external" href="mailto:Ziyi&#46;Jia21&#37;&#52;&#48;student&#46;xjtlu&#46;edu&#46;cn">Ziyi<span>&#46;</span>Jia21<span>&#64;</span>student<span>&#46;</span>xjtlu<span>&#46;</span>edu<span>&#46;</span>cn</a>), on 2024-07-26.
+EEGUnity Team modified this file, on 2025-03-22.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – Path to the CSV or TXT file.</p></li>
+<li><p><strong>client_type</strong> (<em>str</em>) – Type of LLM client to use (e.g., ‘AzureOpenAI’, ‘OpenAI’).</p></li>
+<li><p><strong>client_paras</strong> (<em>dict</em>) – Parameters for initializing the LLM client.</p></li>
+<li><p><strong>completion_para</strong> (<em>dict</em>) – Parameters for initializing the LLM completion process. Note: Parameter ‘messages’ is generated
+by this function, do not specify this parameter in ‘completion_para’.</p></li>
+<li><p><strong>max_iterations</strong> (<em>(</em><em>int</em><em>, </em><em>optional</em><em>)</em>) – Maximum number of iterations to refine the generated function code. Default is 5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mne.io.Raw</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An MNE RawArray object containing the processed EEG data.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the file extension is not supported.:</p></li>
+<li><p><strong>FileNotFoundError</strong> – If the specified file is not found.:</p></li>
+<li><p><strong>RuntimeError</strong> – If the function code cannot be generated within the maximum iteration limit.:</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">api_key</span> <span class="o">=</span> <span class="s2">&quot;your_api_key&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">azure_endpoint</span> <span class="o">=</span> <span class="s2">&quot;https://your_endpoint&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">locator_path</span> <span class="o">=</span> <span class="s2">&quot;data_file.csv&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">llm_boost_parser</span><span class="p">(</span><span class="n">locator_path</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">azure_endpoint</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Extracted Data:&quot;</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.llm_booster">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity.modules.llm_booster" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="eegunity.modules.correction.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">eegunity.modules.correction</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="eegunity.modules.parser.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">eegunity.modules.parser</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.llm_booster.eeg_llm_booster">eegunity.modules.llm_booster.eeg_llm_booster module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.llm_booster.eeg_llm_booster.EEGLLMBooster"><code class="docutils literal notranslate"><span class="pre">EEGLLMBooster</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.llm_booster.eeg_llm_des_parser">eegunity.modules.llm_booster.eeg_llm_des_parser module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.llm_booster.eeg_llm_des_parser.llm_description_file_parser"><code class="docutils literal notranslate"><span class="pre">llm_description_file_parser()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.llm_booster.eeg_llm_file_parser">eegunity.modules.llm_booster.eeg_llm_file_parser module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.llm_booster.eeg_llm_file_parser.llm_boost_parser"><code class="docutils literal notranslate"><span class="pre">llm_boost_parser()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.llm_booster">Module contents</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/eegunity.modules.llm_booster.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

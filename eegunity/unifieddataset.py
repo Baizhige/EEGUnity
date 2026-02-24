@@ -4,6 +4,7 @@ from eegunity.modules.correction.eeg_correction import EEGCorrection
 from eegunity.modules.parser.eeg_parser import EEGParser
 from eegunity.modules.llm_booster.eeg_llm_booster import EEGLLMBooster
 from eegunity._share_attributes import _UDatasetSharedAttributes
+from eegunity.modules.kernel.kernel_loader import load_kernel_object
 
 
 class UnifiedDataset(_UDatasetSharedAttributes):
@@ -33,7 +34,7 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         """
 
     def __init__(self, dataset_path: str = None, locator_path: str = None, domain_tag: str = None,
-                 is_unzip: bool = True, verbose: str = 'CRITICAL', num_workers: int = 0):
+                 is_unzip: bool = True, verbose: str = 'CRITICAL', num_workers: int = 0 , kernel_spec: str = None):
         """
         Initialize the class with either dataset_path or locator_path. Only one of
         these parameters should be provided. If dataset_path is provided, domain_tag is required.
@@ -87,6 +88,12 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         self.set_shared_attr({'domain_tag': domain_tag})
         self.set_shared_attr({'verbose': verbose})
         self.set_shared_attr({'num_workers': num_workers})
+        # --- anchor: after set_shared_attr(...) in __init__ ---
+        self.set_shared_attr({'kernel_spec': kernel_spec})
+        self.set_shared_attr({'kernel': None})
+
+        if kernel_spec:
+            self.load_kernel(kernel_spec)
 
         # Initialize associated modules
         self.eeg_parser = EEGParser(self)
@@ -118,6 +125,47 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         """
         self.get_shared_attr()['locator'].to_csv(path, index=False)
 
+    # --- anchor: UnifiedDataset kernel methods ---
+    def load_kernel(self, kernel_spec: str):
+        """Load an external kernel and bind it to this dataset.
+
+        Parameters
+        ----------
+        kernel_spec
+            Spec string in the form ``"<path_or_module>:<object_name>"``.
+            This can be called at construction time or any time later.
+
+        Returns
+        -------
+        Any
+            The loaded kernel object.
+
+        Raises
+        ------
+        ValueError
+            If the loaded object does not implement ``apply(udataset, raw, row)``.
+        """
+        # --- anchor: UnifiedDataset.load_kernel new loader contract ---
+        kernel, normalized_spec = load_kernel_object(kernel_spec)
+
+        if not hasattr(kernel, "apply") or not callable(getattr(kernel, "apply")):
+            raise ValueError(
+                "Invalid kernel object. The module-level variable `KERNEL` must provide "
+                "a callable `apply(udataset, raw, row)` method."
+            )
+
+        self.set_shared_attr({'kernel_spec': normalized_spec})
+        self.set_shared_attr({'kernel': kernel})
+        return kernel
+
+    def clear_kernel(self):
+        """Unbind the current kernel from this dataset."""
+        self.set_shared_attr({'kernel_spec': None})
+        self.set_shared_attr({'kernel': None})
+
+    def get_kernel(self):
+        """Return the currently bound kernel object or None."""
+        return self.get_shared_attr().get('kernel', None)
     def get_locator(self):
         """
         Return the locator in DataFrame.

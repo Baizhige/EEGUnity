@@ -3,5 +3,10 @@
     "bcic_iv_2a"
   ],
   "locator_base_path": ".",
-  "CI_output_path": "../../EEGUnity_CI"
+  "CI_output_path": "../../EEGUnity_CI",
+  "kernel_spec_map": {
+    "bcic_iv_2a": "./kernels/bcic_iv_2a.py",
+    "figshare_largemi": "./kernels/figshare_largemi.py",
+    "figshare_meng2019": "./kernels/figshare_meng2019.py"
+  }
 }

@@ -1,0 +1,624 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>eegunity.modules package &#8212; EEGUnity 0.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'eegunity.modules';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="eegunity.modules.batch" href="eegunity.modules.batch.html" />
+    <link rel="prev" title="eegunity package" href="eegunity.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="eegunity.html">eegunity package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">eegunity.modules package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html">eegunity.modules.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.correction.html">eegunity.modules.correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html">eegunity.modules.llm_booster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html">eegunity.modules.parser</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.resources.html">eegunity.resources package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="modules.html" class="nav-link">eegunity</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="eegunity.html" class="nav-link">eegunity package</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">eegunity.modules package</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="eegunity-modules-package">
+<h1>eegunity.modules package<a class="headerlink" href="#eegunity-modules-package" title="Link to this heading">#</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="eegunity.modules.batch.html">eegunity.modules.batch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.batch.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.eeg_batch">eegunity.modules.batch.eeg_batch module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch"><code class="docutils literal notranslate"><span class="pre">EEGBatch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.align_channel"><code class="docutils literal notranslate"><span class="pre">EEGBatch.align_channel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.auto_domain"><code class="docutils literal notranslate"><span class="pre">EEGBatch.auto_domain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.batch_process"><code class="docutils literal notranslate"><span class="pre">EEGBatch.batch_process()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.epoch_for_pretraining"><code class="docutils literal notranslate"><span class="pre">EEGBatch.epoch_for_pretraining()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.export_h5Dataset"><code class="docutils literal notranslate"><span class="pre">EEGBatch.export_h5Dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.filter"><code class="docutils literal notranslate"><span class="pre">EEGBatch.filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.format_channel_names"><code class="docutils literal notranslate"><span class="pre">EEGBatch.format_channel_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.get_events"><code class="docutils literal notranslate"><span class="pre">EEGBatch.get_events()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.get_file_hashes"><code class="docutils literal notranslate"><span class="pre">EEGBatch.get_file_hashes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.get_quality"><code class="docutils literal notranslate"><span class="pre">EEGBatch.get_quality()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.ica"><code class="docutils literal notranslate"><span class="pre">EEGBatch.ica()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.infer_units"><code class="docutils literal notranslate"><span class="pre">EEGBatch.infer_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.normalize"><code class="docutils literal notranslate"><span class="pre">EEGBatch.normalize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.process_mean_std"><code class="docutils literal notranslate"><span class="pre">EEGBatch.process_mean_std()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.replace_paths"><code class="docutils literal notranslate"><span class="pre">EEGBatch.replace_paths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.resample"><code class="docutils literal notranslate"><span class="pre">EEGBatch.resample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.sample_filter"><code class="docutils literal notranslate"><span class="pre">EEGBatch.sample_filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.save_as_other"><code class="docutils literal notranslate"><span class="pre">EEGBatch.save_as_other()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_batch.EEGBatch.set_metadata"><code class="docutils literal notranslate"><span class="pre">EEGBatch.set_metadata()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.eeg_scores_modified_mne">eegunity.modules.batch.eeg_scores_modified_mne module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_modified_mne.compute_quality_score_mne"><code class="docutils literal notranslate"><span class="pre">compute_quality_score_mne()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.eeg_scores_shady">eegunity.modules.batch.eeg_scores_shady module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.butter_bandpass"><code class="docutils literal notranslate"><span class="pre">butter_bandpass()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.butter_bandpass_filter"><code class="docutils literal notranslate"><span class="pre">butter_bandpass_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.calculate_beta_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_beta_amplitude_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.calculate_beta_sinusoidal_score"><code class="docutils literal notranslate"><span class="pre">calculate_beta_sinusoidal_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.calculate_dominant_frequency"><code class="docutils literal notranslate"><span class="pre">calculate_dominant_frequency()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.calculate_general_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_general_amplitude_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.calculate_highest_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_highest_amplitude_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.calculate_symmetry_score"><code class="docutils literal notranslate"><span class="pre">calculate_symmetry_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.calculate_theta_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_theta_amplitude_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.classify_channels"><code class="docutils literal notranslate"><span class="pre">classify_channels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.compute_quality_scores_shady"><code class="docutils literal notranslate"><span class="pre">compute_quality_scores_shady()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.eeg_scores_shady.plot_radar_chart"><code class="docutils literal notranslate"><span class="pre">plot_radar_chart()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.method_mixin_epoch">eegunity.modules.batch.method_mixin_epoch module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_event()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event_hdf5"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_event_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_long_event()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event_hdf5"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_long_event_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_segmentation_hdf5"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_segmentation_hdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.process_epochs"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.process_epochs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.utils">eegunity.modules.batch.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="eegunity.modules.correction.html">eegunity.modules.correction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.correction.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.correction.html#module-eegunity.modules.correction.eeg_correction">eegunity.modules.correction.eeg_correction module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.correction.html#eegunity.modules.correction.eeg_correction.EEGCorrection"><code class="docutils literal notranslate"><span class="pre">EEGCorrection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.correction.html#eegunity.modules.correction.eeg_correction.EEGCorrection.report"><code class="docutils literal notranslate"><span class="pre">EEGCorrection.report()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.correction.html#eegunity.modules.correction.eeg_correction.EEGCorrection.visualization_channels_corr"><code class="docutils literal notranslate"><span class="pre">EEGCorrection.visualization_channels_corr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.correction.html#eegunity.modules.correction.eeg_correction.EEGCorrection.visualization_frequency"><code class="docutils literal notranslate"><span class="pre">EEGCorrection.visualization_frequency()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.correction.html#module-eegunity.modules.correction">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="eegunity.modules.llm_booster.html">eegunity.modules.llm_booster</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.llm_booster.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster.eeg_llm_booster">eegunity.modules.llm_booster.eeg_llm_booster module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html#eegunity.modules.llm_booster.eeg_llm_booster.EEGLLMBooster"><code class="docutils literal notranslate"><span class="pre">EEGLLMBooster</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster.eeg_llm_des_parser">eegunity.modules.llm_booster.eeg_llm_des_parser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html#eegunity.modules.llm_booster.eeg_llm_des_parser.llm_description_file_parser"><code class="docutils literal notranslate"><span class="pre">llm_description_file_parser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster.eeg_llm_file_parser">eegunity.modules.llm_booster.eeg_llm_file_parser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html#eegunity.modules.llm_booster.eeg_llm_file_parser.llm_boost_parser"><code class="docutils literal notranslate"><span class="pre">llm_boost_parser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="eegunity.modules.parser.html">eegunity.modules.parser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.parser.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser">eegunity.modules.parser.eeg_parser module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.EEGParser"><code class="docutils literal notranslate"><span class="pre">EEGParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.EEGParser.check_locator"><code class="docutils literal notranslate"><span class="pre">EEGParser.check_locator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.EEGParser.get_data"><code class="docutils literal notranslate"><span class="pre">EEGParser.get_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.channel_name_parser"><code class="docutils literal notranslate"><span class="pre">channel_name_parser()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.convert_unit"><code class="docutils literal notranslate"><span class="pre">convert_unit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.create_montage_from_json"><code class="docutils literal notranslate"><span class="pre">create_montage_from_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.extract_events"><code class="docutils literal notranslate"><span class="pre">extract_events()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.get_data_row"><code class="docutils literal notranslate"><span class="pre">get_data_row()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.handle_nonstandard_data"><code class="docutils literal notranslate"><span class="pre">handle_nonstandard_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.infer_channel_unit"><code class="docutils literal notranslate"><span class="pre">infer_channel_unit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.normalize_data"><code class="docutils literal notranslate"><span class="pre">normalize_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.process_mne_files"><code class="docutils literal notranslate"><span class="pre">process_mne_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.set_channel_type"><code class="docutils literal notranslate"><span class="pre">set_channel_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.set_infer_unit"><code class="docutils literal notranslate"><span class="pre">set_infer_unit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser.set_montage_any"><code class="docutils literal notranslate"><span class="pre">set_montage_any()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser_config">eegunity.modules.parser.eeg_parser_config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser_csv">eegunity.modules.parser.eeg_parser_csv module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser_csv.calculate_interval"><code class="docutils literal notranslate"><span class="pre">calculate_interval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser_csv.identify_time_columns"><code class="docutils literal notranslate"><span class="pre">identify_time_columns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser_csv.is_datetime_format"><code class="docutils literal notranslate"><span class="pre">is_datetime_format()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser_csv.process_csv_files"><code class="docutils literal notranslate"><span class="pre">process_csv_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser_mat">eegunity.modules.parser.eeg_parser_mat module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html#eegunity.modules.parser.eeg_parser_mat.process_mat_files"><code class="docutils literal notranslate"><span class="pre">process_mat_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-eegunity.modules">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity.modules" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="eegunity.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">eegunity package</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="eegunity.modules.batch.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">eegunity.modules.batch</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules">Module contents</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/eegunity.modules.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
