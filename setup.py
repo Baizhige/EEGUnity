@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='eegunity',
-    version='0.5.5',
+    version='0.6.0',
     packages=find_packages(include=['eegunity', 'eegunity.*']),
     install_requires=[
         'mne>=1.5.1',

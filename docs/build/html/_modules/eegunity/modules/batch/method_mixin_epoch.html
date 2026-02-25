@@ -1,0 +1,1299 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eegunity.modules.batch.method_mixin_epoch &#8212; EEGUnity 0.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../../_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/eegunity/modules/batch/method_mixin_epoch';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="../../../../_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">eegunity.modules.batch.method_mixin_epoch</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for eegunity.modules.batch.method_mixin_epoch</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">mne</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">eegunity.modules.parser.eeg_parser</span> <span class="kn">import</span> <span class="n">get_data_row</span><span class="p">,</span> <span class="n">extract_events</span>
+<span class="kn">from</span> <span class="nn">eegunity.utils.h5</span> <span class="kn">import</span> <span class="n">h5Dataset</span>
+<span class="kn">from</span> <span class="nn">eegunity.utils.handle_errors</span> <span class="kn">import</span> <span class="n">handle_errors</span>
+<span class="kn">from</span> <span class="nn">eegunity.utils.log_processing</span> <span class="kn">import</span> <span class="n">log_processing</span>
+<div class="viewcode-block" id="EEGBatchMixinEpoch">
+<a class="viewcode-back" href="../../../../eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch">[docs]</a>
+<span class="k">class</span> <span class="nc">EEGBatchMixinEpoch</span><span class="p">:</span>
+<div class="viewcode-block" id="EEGBatchMixinEpoch.epoch_by_event">
+<a class="viewcode-back" href="../../../../eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event">[docs]</a>
+    <span class="k">def</span> <span class="nf">epoch_by_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                       <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">miss_bad_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Batch process EEG data to create epochs based on events specified in the event_id column. The output is saved in</span>
+<span class="sd">        multiple .npy files for clarity and ease of use. This function serves as one of the available interfaces for</span>
+<span class="sd">        epoch processing. Given the existence of multiple interfaces for handling epochs, we recommend using the</span>
+<span class="sd">        unified processing interface designed specifically for this purpose. For more details, please refer to the</span>
+<span class="sd">        documentation for UnifiedDataset.EEGBatch.process_epochs().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : str</span>
+<span class="sd">            Directory to save the processed epochs.</span>
+<span class="sd">        exclude_bad : bool, optional</span>
+<span class="sd">            Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is `True`.</span>
+<span class="sd">        miss_bad_data : bool, optional</span>
+<span class="sd">            Whether to skip files with processing errors. Default is `False`.</span>
+<span class="sd">        get_data_row_params : dict, optional</span>
+<span class="sd">            Additional parameters passed to `get_data_row()` for data retrieval.</span>
+<span class="sd">        resample_params : dict, optional</span>
+<span class="sd">            Parameters for resampling the raw data. Must include `sfreq` for the target sampling frequency.</span>
+<span class="sd">            Example: `{&#39;sfreq&#39;: 256, &#39;npad&#39;: &#39;auto&#39;}`.</span>
+<span class="sd">        epoch_params : dict, optional</span>
+<span class="sd">            Additional parameters for `mne.Epochs`, excluding `raw_data`, `events`, and `event_id`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The function modifies the dataset in place by creating and saving the epochs.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any parameters are inconsistent or if the specified output path is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set default empty dictionaries if parameters are None</span>
+        <span class="k">if</span> <span class="n">get_data_row_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">get_data_row_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">resample_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resample_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">epoch_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epoch_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Convert output_path to an absolute path</span>
+        <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+
+        <span class="c1"># Initialize index.csv</span>
+        <span class="n">index_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;index.csv&quot;</span><span class="p">)</span>
+
+        <span class="nd">@handle_errors</span><span class="p">(</span><span class="n">miss_bad_data</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Apply function to process individual rows.&quot;&quot;&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing File: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Load raw data with additional parameters</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="o">**</span><span class="n">get_data_row_params</span><span class="p">)</span>
+
+            <span class="c1"># Resample if resample_params includes `sfreq`</span>
+            <span class="k">if</span> <span class="s1">&#39;sfreq&#39;</span> <span class="ow">in</span> <span class="n">resample_params</span><span class="p">:</span>
+                <span class="n">raw_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="o">**</span><span class="n">resample_params</span><span class="p">)</span>
+
+            <span class="c1"># Extract events</span>
+            <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span> <span class="o">=</span> <span class="n">extract_events</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+            <span class="c1"># Create epochs with the passed epoch_params</span>
+            <span class="n">epochs</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Epochs</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">)</span>
+
+            <span class="c1"># Exclude bad epochs</span>
+            <span class="k">if</span> <span class="n">exclude_bad</span><span class="p">:</span>
+                <span class="n">epochs</span><span class="o">.</span><span class="n">drop_bad</span><span class="p">()</span>
+
+            <span class="c1"># Collect index entries for this file</span>
+            <span class="n">local_index_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Iterate through each event type</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_id</span><span class="p">:</span>
+                <span class="n">event_epochs</span> <span class="o">=</span> <span class="n">epochs</span><span class="p">[</span><span class="n">event</span><span class="p">]</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">event_output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">event_output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1"># Construct absolute file path for saving</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">event_output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2">_epoch.npy&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="c1"># Validate data export</span>
+                <span class="n">epoch_data</span> <span class="o">=</span> <span class="n">event_epochs</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">epoch_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Epoch data is not three-dimensional.&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Save data</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">epoch_data</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch File was saved to </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Gather metadata for index.csv</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">epochs</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">])</span>
+                <span class="n">eegunity_desc</span> <span class="o">=</span> <span class="n">description</span><span class="p">[</span><span class="s1">&#39;eegunity_description&#39;</span><span class="p">]</span>
+                <span class="n">local_index_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s2">&quot;File Path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+                    <span class="s2">&quot;Class Name&quot;</span><span class="p">:</span> <span class="n">event</span><span class="p">,</span>
+                    <span class="s2">&quot;Number of Epoch&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_epochs</span><span class="p">),</span>
+                    <span class="s2">&quot;Channel Names&quot;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">event_epochs</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]),</span>
+                    <span class="s2">&quot;Amplifer&quot;</span><span class="p">:</span> <span class="n">eegunity_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;amplifier&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                    <span class="s2">&quot;Cap&quot;</span><span class="p">:</span> <span class="n">eegunity_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cap&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                    <span class="s2">&quot;Age&quot;</span><span class="p">:</span> <span class="n">eegunity_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                    <span class="s2">&quot;Gender&quot;</span><span class="p">:</span> <span class="n">eegunity_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sex&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                    <span class="s2">&quot;Handeness&quot;</span><span class="p">:</span> <span class="n">eegunity_desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;handedness&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+                    <span class="s2">&quot;Comment&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+                <span class="p">})</span>
+
+            <span class="k">return</span> <span class="n">local_index_data</span>
+
+        <span class="c1"># Use batch_process to process data and collect results</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Completeness Check&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Unavailable&#39;</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span>
+                <span class="n">row</span><span class="p">,</span>
+                <span class="n">output_path</span><span class="p">,</span>
+                <span class="n">exclude_bad</span><span class="o">=</span><span class="n">exclude_bad</span><span class="p">,</span>
+                <span class="n">get_data_row_params</span><span class="o">=</span><span class="n">get_data_row_params</span><span class="p">,</span>
+                <span class="n">resample_params</span><span class="o">=</span><span class="n">resample_params</span><span class="p">,</span>
+                <span class="n">epoch_params</span><span class="o">=</span><span class="n">epoch_params</span>
+            <span class="p">),</span>
+            <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;value&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Merge index_data from all results in main thread</span>
+        <span class="n">index_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">index_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+        <span class="c1"># Save index.csv</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index_data</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Index file saved to </span><span class="si">{</span><span class="n">index_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="EEGBatchMixinEpoch.epoch_by_long_event">
+<a class="viewcode-back" href="../../../../eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event">[docs]</a>
+    <span class="k">def</span> <span class="nf">epoch_by_long_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                            <span class="n">overlap</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                            <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="n">miss_bad_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Batch process EEG data to create epochs for long-duration events with overlapping segments.</span>
+<span class="sd">        This function serves as one of the available interfaces for epoch processing. Given the existence of multiple</span>
+<span class="sd">        interfaces for handling epochs, we recommend using the unified processing interface designed specifically for</span>
+<span class="sd">        this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : str</span>
+<span class="sd">            Directory to save the processed epochs.</span>
+<span class="sd">        overlap : float</span>
+<span class="sd">            Proportion of overlap between consecutive segments (0.0 to 1.0).</span>
+<span class="sd">        exclude_bad : bool, optional</span>
+<span class="sd">            Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is `True`.</span>
+<span class="sd">        miss_bad_data : bool, optional</span>
+<span class="sd">            Whether to skip files with processing errors. Default is `False`.</span>
+<span class="sd">        get_data_row_params : dict, optional</span>
+<span class="sd">            Additional parameters passed to `get_data_row()` for data retrieval.</span>
+<span class="sd">        resample_params : dict, optional</span>
+<span class="sd">            Parameters for resampling the raw data. Must include `sfreq` for the target sampling frequency.</span>
+<span class="sd">            Example: `{&#39;sfreq&#39;: 256, &#39;npad&#39;: &#39;auto&#39;}`.</span>
+<span class="sd">        epoch_params : dict, optional</span>
+<span class="sd">            Additional parameters for `mne.Epochs`, excluding `raw_data`, `events`, and `event_id`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The function modifies the dataset in place by creating and saving the epochs.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any parameters are inconsistent or if the specified output path is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set default empty dictionaries if parameters are None</span>
+        <span class="k">if</span> <span class="n">get_data_row_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">get_data_row_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">resample_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resample_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">epoch_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epoch_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Overlap must be between 0.0 (no overlap) and less than 1.0.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Convert output_path to an absolute path</span>
+        <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+
+        <span class="c1"># Initialize index.csv</span>
+        <span class="n">index_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;index.csv&quot;</span><span class="p">)</span>
+
+        <span class="nd">@handle_errors</span><span class="p">(</span><span class="n">miss_bad_data</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">overlap</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                     <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Apply function to process individual rows.&quot;&quot;&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing File: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Load raw data with additional parameters</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="o">**</span><span class="n">get_data_row_params</span><span class="p">)</span>
+
+            <span class="c1"># Resample if resample_params includes `sfreq`</span>
+            <span class="k">if</span> <span class="s1">&#39;sfreq&#39;</span> <span class="ow">in</span> <span class="n">resample_params</span><span class="p">:</span>
+                <span class="n">raw_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="o">**</span><span class="n">resample_params</span><span class="p">)</span>
+
+            <span class="c1"># Check for annotations in the raw data</span>
+            <span class="n">annotations</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">annotations</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">annotations</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No annotations found in the raw data for </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Extract epoch length from epoch_params</span>
+            <span class="n">t_min</span> <span class="o">=</span> <span class="n">epoch_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tmin&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">t_max</span> <span class="o">=</span> <span class="n">epoch_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tmax&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">epoch_length</span> <span class="o">=</span> <span class="n">t_max</span> <span class="o">-</span> <span class="n">t_min</span>  <span class="c1"># Duration in seconds</span>
+
+            <span class="c1"># Create temporary annotations for segmentation of long events</span>
+            <span class="n">temp_annotations</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">onset</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">description</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">annotations</span><span class="o">.</span><span class="n">onset</span><span class="p">,</span> <span class="n">annotations</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span>
+                                                    <span class="n">annotations</span><span class="o">.</span><span class="n">description</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">duration</span> <span class="o">&gt;</span> <span class="n">epoch_length</span><span class="p">:</span>
+                    <span class="c1"># Calculate the step size based on overlap</span>
+                    <span class="n">step</span> <span class="o">=</span> <span class="n">epoch_length</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span>
+                    <span class="n">num_segments</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">duration</span> <span class="o">-</span> <span class="n">epoch_length</span><span class="p">)</span> <span class="o">//</span> <span class="n">step</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_segments</span><span class="p">):</span>
+                        <span class="n">segment_start</span> <span class="o">=</span> <span class="n">onset</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">step</span>
+                        <span class="n">temp_annotations</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">segment_start</span><span class="p">,</span> <span class="n">epoch_length</span><span class="p">,</span> <span class="n">description</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">temp_annotations</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;For long events (such as sleep stages), the duration must be greater than (t_max - t_min). &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Current duration is </span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">s, while the segmentation length is </span><span class="si">{</span><span class="n">t_max</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t_min</span><span class="si">}</span><span class="s2">s. &quot;</span>
+                    <span class="s2">&quot;Please check the event duration or the &#39;epoch_param&#39; settings.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Convert the temporary annotations to mne.Annotations</span>
+            <span class="n">long_event_annotations</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Annotations</span><span class="p">(</span>
+                <span class="n">onset</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">temp_annotations</span><span class="p">],</span>
+                <span class="n">duration</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">temp_annotations</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">temp_annotations</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">raw_data</span><span class="o">.</span><span class="n">set_annotations</span><span class="p">(</span><span class="n">long_event_annotations</span><span class="p">)</span>
+
+            <span class="c1"># Create epochs based on the temporary annotations</span>
+            <span class="n">events</span><span class="p">,</span> <span class="n">event_id_map</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">events_from_annotations</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+            <span class="n">epochs</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Epochs</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id_map</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">)</span>
+
+            <span class="c1"># Exclude bad epochs</span>
+            <span class="k">if</span> <span class="n">exclude_bad</span><span class="p">:</span>
+                <span class="n">epochs</span><span class="o">.</span><span class="n">drop_bad</span><span class="p">()</span>
+
+            <span class="n">available_descriptions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">epochs</span><span class="o">.</span><span class="n">event_id</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+            <span class="c1"># Collect index entries for this file</span>
+            <span class="n">local_index_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Save each segmented epoch</span>
+            <span class="k">for</span> <span class="n">description</span> <span class="ow">in</span> <span class="n">available_descriptions</span><span class="p">:</span>
+                <span class="n">event_epochs</span> <span class="o">=</span> <span class="n">epochs</span><span class="p">[</span><span class="n">description</span><span class="p">]</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">event_output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">event_output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">event_output_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">_epoch.npy&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Validate data export</span>
+                    <span class="n">epoch_data</span> <span class="o">=</span> <span class="n">event_epochs</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">epoch_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Epoch data is not three-dimensional.&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># Save data</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">epoch_data</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch File was saved to </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># Gather metadata for index.csv</span>
+                    <span class="n">local_index_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s2">&quot;File Path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+                        <span class="s2">&quot;Class Name&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                        <span class="s2">&quot;Number of Epoch&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_epochs</span><span class="p">),</span>
+                        <span class="s2">&quot;Channel Names&quot;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">event_epochs</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">]),</span>
+                        <span class="s2">&quot;Comment&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+                    <span class="p">})</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">local_index_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s2">&quot;File Path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+                        <span class="s2">&quot;Class Name&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+                        <span class="s2">&quot;Number of Epoch&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;Channel Names&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;Comment&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="p">})</span>
+
+            <span class="k">return</span> <span class="n">local_index_data</span>
+
+        <span class="c1"># Use batch_process to process data and collect results</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span>
+                <span class="n">row</span><span class="p">,</span>
+                <span class="n">output_path</span><span class="p">,</span>
+                <span class="n">overlap</span><span class="p">,</span>
+                <span class="n">exclude_bad</span><span class="o">=</span><span class="n">exclude_bad</span><span class="p">,</span>
+                <span class="n">get_data_row_params</span><span class="o">=</span><span class="n">get_data_row_params</span><span class="p">,</span>
+                <span class="n">resample_params</span><span class="o">=</span><span class="n">resample_params</span><span class="p">,</span>
+                <span class="n">epoch_params</span><span class="o">=</span><span class="n">epoch_params</span>
+            <span class="p">),</span>
+            <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;value&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Merge index_data from all results in main thread</span>
+        <span class="n">index_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">index_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+        <span class="c1"># Save index.csv</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index_data</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Index file saved to </span><span class="si">{</span><span class="n">index_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="EEGBatchMixinEpoch.epoch_by_event_hdf5">
+<a class="viewcode-back" href="../../../../eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event_hdf5">[docs]</a>
+    <span class="k">def</span> <span class="nf">epoch_by_event_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                            <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="n">file_name_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;EpochData&quot;</span><span class="p">,</span>
+                            <span class="n">miss_bad_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Batch process EEG data to create epochs based on events specified in the event_id column,</span>
+<span class="sd">        save the results in HDF5 format, and generate a JSON file with event counts.</span>
+<span class="sd">        This function serves as one of the available interfaces for epoch processing. Given the existence of multiple</span>
+<span class="sd">        interfaces for handling epochs, we recommend using the unified processing interface designed specifically for</span>
+<span class="sd">        this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : str</span>
+<span class="sd">            Directory to save the processed epochs.</span>
+<span class="sd">        exclude_bad : bool, optional</span>
+<span class="sd">            Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is `True`.</span>
+<span class="sd">        file_name_prefix : str, optional</span>
+<span class="sd">            The filename prefix to save hdf5 and event info file. Default is `EpochData`.</span>
+<span class="sd">        miss_bad_data : bool, optional</span>
+<span class="sd">            Whether to skip files with processing errors. Default is `False`.</span>
+<span class="sd">        get_data_row_params : dict, optional</span>
+<span class="sd">            Additional parameters passed to `get_data_row()` for data retrieval.</span>
+<span class="sd">        resample_params : dict, optional</span>
+<span class="sd">            Parameters for resampling the raw data. Must include `sfreq` for the target sampling frequency.</span>
+<span class="sd">            Example: `{&#39;sfreq&#39;: 256, &#39;npad&#39;: &#39;auto&#39;}`.</span>
+<span class="sd">        epoch_params : dict, optional</span>
+<span class="sd">            Additional parameters for `mne.Epochs`, excluding `raw_data`, `events`, and `event_id`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The function modifies the dataset in place by creating and saving the epochs in HDF5 format,</span>
+<span class="sd">            and generates an event_info.json file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set default empty dictionaries if parameters are None</span>
+        <span class="k">if</span> <span class="n">get_data_row_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">get_data_row_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">resample_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resample_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">epoch_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epoch_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Ensure output_path exists</span>
+        <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Initialize HDF5 dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5Dataset</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">file_name_prefix</span><span class="p">)</span>
+
+        <span class="c1"># Dictionary to keep track of event counts</span>
+        <span class="n">event_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="nd">@handle_errors</span><span class="p">(</span><span class="n">miss_bad_data</span><span class="p">)</span>
+        <span class="nd">@log_processing</span>
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Process an individual file to create and save epochs.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="o">**</span><span class="n">get_data_row_params</span><span class="p">)</span>
+
+            <span class="c1"># Resample raw data if necessary</span>
+            <span class="k">if</span> <span class="s1">&#39;sfreq&#39;</span> <span class="ow">in</span> <span class="n">resample_params</span><span class="p">:</span>
+                <span class="n">raw_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="o">**</span><span class="n">resample_params</span><span class="p">)</span>
+
+            <span class="c1"># Extract events</span>
+            <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span> <span class="o">=</span> <span class="n">extract_events</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+
+            <span class="c1"># Create epochs</span>
+            <span class="n">epochs</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Epochs</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">)</span>
+
+            <span class="c1"># Exclude bad epochs</span>
+            <span class="k">if</span> <span class="n">exclude_bad</span><span class="p">:</span>
+                <span class="n">epochs</span><span class="o">.</span><span class="n">drop_bad</span><span class="p">()</span>
+
+            <span class="c1"># Create a group for the current file</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">grp</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addGroup</span><span class="p">(</span><span class="n">grpName</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+            <span class="c1"># Add info dataset for the group</span>
+            <span class="n">info_bytes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+            <span class="n">info_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">info_bytes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="n">info_array</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="c1"># Iterate through each event type and save data</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">event_id</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">event_epochs</span> <span class="o">=</span> <span class="n">epochs</span><span class="p">[</span><span class="n">event</span><span class="p">]</span>
+                    <span class="n">epoch_data</span> <span class="o">=</span> <span class="n">event_epochs</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">epoch_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Epoch data is not three-dimensional.&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># Add dataset for this event</span>
+                    <span class="n">dset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">epoch_data</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">epoch_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+                    <span class="c1"># Add attributes for the dataset</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;rsFreq&#39;</span><span class="p">,</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;sfreq&#39;</span><span class="p">])</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;chOrder&#39;</span><span class="p">,</span> <span class="n">event_epochs</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">])</span>
+
+                    <span class="c1"># Update event counts</span>
+                    <span class="n">event_info</span><span class="p">[</span><span class="n">event</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_epochs</span><span class="p">)</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed and saved epochs for event: </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="c1"># Handle error and skip this event</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing event &#39;</span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed and saved epochs for file: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Use batch_process to process data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span>
+                <span class="n">row</span><span class="p">,</span>
+                <span class="n">exclude_bad</span><span class="o">=</span><span class="n">exclude_bad</span><span class="p">,</span>
+                <span class="n">get_data_row_params</span><span class="o">=</span><span class="n">get_data_row_params</span><span class="p">,</span>
+                <span class="n">resample_params</span><span class="o">=</span><span class="n">resample_params</span><span class="p">,</span>
+                <span class="n">epoch_params</span><span class="o">=</span><span class="n">epoch_params</span>
+            <span class="p">),</span>
+            <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Save the HDF5 dataset</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HDF5 dataset saved to </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Save event_info.json</span>
+        <span class="n">event_info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">file_name_prefix</span> <span class="o">+</span> <span class="s2">&quot;_event_info.json&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">event_info_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">event_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Event information saved to </span><span class="si">{</span><span class="n">event_info_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EEGBatchMixinEpoch.epoch_by_segmentation_hdf5">
+<a class="viewcode-back" href="../../../../eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_segmentation_hdf5">[docs]</a>
+    <span class="k">def</span> <span class="nf">epoch_by_segmentation_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">file_name_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;EpochData&quot;</span><span class="p">,</span>
+                                   <span class="n">miss_bad_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">segment_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Batch process EEG data to create epochs by sliding window segmentation,</span>
+<span class="sd">        save the results in HDF5 format, and generate a JSON file with event counts.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : str</span>
+<span class="sd">            Directory to save the processed epochs.</span>
+<span class="sd">        exclude_bad : bool, optional</span>
+<span class="sd">            Whether to exclude bad epochs. Default is `True`.</span>
+<span class="sd">        file_name_prefix : str, optional</span>
+<span class="sd">            The filename prefix to save hdf5 and event info file. Default is `EpochData`.</span>
+<span class="sd">        miss_bad_data : bool, optional</span>
+<span class="sd">            Whether to skip files with processing errors. Default is `False`.</span>
+<span class="sd">        get_data_row_params : dict, optional</span>
+<span class="sd">            Additional parameters passed to `get_data_row()` for data retrieval.</span>
+<span class="sd">        resample_params : dict, optional</span>
+<span class="sd">            Parameters for resampling the raw data. Must include `sfreq` for the target sampling frequency.</span>
+<span class="sd">        segment_params : dict, optional</span>
+<span class="sd">            Parameters for segmentation. Must include &#39;segment_length&#39; (in seconds) and &#39;overlap&#39; (float between 0-1).</span>
+<span class="sd">            Example: `{&#39;segment_length&#39;: 2.0, &#39;overlap&#39;: 0.5}`.</span>
+<span class="sd">        epoch_params : dict, optional</span>
+<span class="sd">            Additional parameters for `mne.Epochs`, excluding &#39;raw&#39;, &#39;events&#39;, and &#39;event_id&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">get_data_row_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">get_data_row_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">resample_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resample_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">segment_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">segment_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">epoch_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epoch_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="s1">&#39;segment_length&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">segment_params</span> <span class="ow">or</span> <span class="s1">&#39;overlap&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">segment_params</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;segment_params must include &#39;segment_length&#39; and &#39;overlap&#39; keys.&quot;</span><span class="p">)</span>
+
+
+        <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5Dataset</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">file_name_prefix</span><span class="p">)</span>
+        <span class="n">event_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="nd">@handle_errors</span><span class="p">(</span><span class="n">miss_bad_data</span><span class="p">)</span>
+        <span class="nd">@log_processing</span>
+        <span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">segment_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Process an individual file to create and save sliding window epochs.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="o">**</span><span class="n">get_data_row_params</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s1">&#39;sfreq&#39;</span> <span class="ow">in</span> <span class="n">resample_params</span><span class="p">:</span>
+                <span class="n">raw_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="o">**</span><span class="n">resample_params</span><span class="p">)</span>
+
+            <span class="n">sfreq</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;sfreq&#39;</span><span class="p">]</span>
+            <span class="n">n_samples</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">n_times</span>
+
+            <span class="n">segment_length</span> <span class="o">=</span> <span class="n">segment_params</span><span class="p">[</span><span class="s1">&#39;segment_length&#39;</span><span class="p">]</span>
+            <span class="n">overlap</span> <span class="o">=</span> <span class="n">segment_params</span><span class="p">[</span><span class="s1">&#39;overlap&#39;</span><span class="p">]</span>
+
+            <span class="n">window_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">segment_length</span> <span class="o">*</span> <span class="n">sfreq</span><span class="p">)</span>
+            <span class="n">step_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">window_size</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">))</span>
+
+            <span class="n">onset_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">-</span> <span class="n">window_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step_size</span><span class="p">)</span>
+            <span class="n">n_segments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">onset_samples</span><span class="p">)</span>
+
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">segment_event_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">_Segment&quot;</span>
+
+            <span class="c1"># MNE event structure: (onset_sample, 0, event_id)</span>
+            <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_segments</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">events</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">onset_samples</span>
+            <span class="n">events</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># dummy event value (required but not actually used later)</span>
+
+            <span class="n">event_id</span> <span class="o">=</span> <span class="p">{</span><span class="n">segment_event_name</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+
+            <span class="n">epochs</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Epochs</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id</span><span class="p">,</span>
+                                <span class="n">tmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tmax</span><span class="o">=</span><span class="n">segment_length</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">exclude_bad</span><span class="p">:</span>
+                <span class="n">epochs</span><span class="o">.</span><span class="n">drop_bad</span><span class="p">()</span>
+
+            <span class="n">grp</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addGroup</span><span class="p">(</span><span class="n">grpName</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+
+            <span class="n">info_bytes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+            <span class="n">info_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">info_bytes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="n">info_array</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">epoch_data</span> <span class="o">=</span> <span class="n">epochs</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">epoch_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Epoch data is not three-dimensional.&quot;</span><span class="p">)</span>
+
+                <span class="n">dset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">segment_event_name</span><span class="p">,</span> <span class="n">epoch_data</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">epoch_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+                <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;rsFreq&#39;</span><span class="p">,</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;sfreq&#39;</span><span class="p">])</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;chOrder&#39;</span><span class="p">,</span> <span class="n">epochs</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Update event counts</span>
+                <span class="n">event_info</span><span class="p">[</span><span class="n">segment_event_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">segment_event_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed and saved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span><span class="si">}</span><span class="s2"> segments for event: </span><span class="si">{</span><span class="n">segment_event_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing segmented epochs: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span>
+                <span class="n">row</span><span class="p">,</span>
+                <span class="n">exclude_bad</span><span class="o">=</span><span class="n">exclude_bad</span><span class="p">,</span>
+                <span class="n">get_data_row_params</span><span class="o">=</span><span class="n">get_data_row_params</span><span class="p">,</span>
+                <span class="n">resample_params</span><span class="o">=</span><span class="n">resample_params</span><span class="p">,</span>
+                <span class="n">segment_params</span><span class="o">=</span><span class="n">segment_params</span><span class="p">,</span>
+                <span class="n">epoch_params</span><span class="o">=</span><span class="n">epoch_params</span>
+            <span class="p">),</span>
+            <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HDF5 dataset saved to </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">event_info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">file_name_prefix</span> <span class="o">+</span> <span class="s2">&quot;_event_info.json&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">event_info_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">event_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Event information saved to </span><span class="si">{</span><span class="n">event_info_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EEGBatchMixinEpoch.epoch_by_long_event_hdf5">
+<a class="viewcode-back" href="../../../../eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event_hdf5">[docs]</a>
+    <span class="k">def</span> <span class="nf">epoch_by_long_event_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">overlap</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                 <span class="n">file_name_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;EpochData&quot;</span><span class="p">,</span>
+                                 <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                 <span class="n">miss_bad_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                                 <span class="n">get_data_row_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">resample_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">epoch_params</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Batch process EEG data to create epochs for long-duration events with overlapping segments</span>
+<span class="sd">        and save the results in HDF5 format. Also generates event_info.json containing event counts.</span>
+<span class="sd">        This function serves as one of the available interfaces for epoch processing. Given the existence of multiple</span>
+<span class="sd">        interfaces for handling epochs, we recommend using the unified processing interface designed specifically for</span>
+<span class="sd">        this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : str</span>
+<span class="sd">            Directory to save the processed epochs.</span>
+<span class="sd">        overlap : float</span>
+<span class="sd">            Proportion of overlap between consecutive segments (0.0 to 1.0).</span>
+<span class="sd">        file_name_prefix : str, optional</span>
+<span class="sd">            The filename prefix to save hdf5 and event info file. Default is `EpochData`.</span>
+<span class="sd">        exclude_bad : bool, optional</span>
+<span class="sd">            Whether to exclude bad epochs. Default is `True`.</span>
+<span class="sd">        miss_bad_data : bool, optional</span>
+<span class="sd">            Whether to skip files with processing errors. Default is `False`.</span>
+<span class="sd">        get_data_row_params : dict, optional</span>
+<span class="sd">            Additional parameters passed to `get_data_row()` for data retrieval.</span>
+<span class="sd">        resample_params : dict, optional</span>
+<span class="sd">            Parameters for resampling the raw data.</span>
+<span class="sd">        epoch_params : dict, optional</span>
+<span class="sd">            Additional parameters for `mne.Epochs`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The function creates and saves the epochs in HDF5 format and event_info.json.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If any parameters are inconsistent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">get_data_row_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">get_data_row_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">resample_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resample_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">epoch_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epoch_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Overlap must be between 0.0 (no overlap) and less than 1.0.&quot;</span><span class="p">)</span>
+
+        <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Initialize the HDF5 dataset</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">h5Dataset</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">file_name_prefix</span><span class="p">)</span>
+
+        <span class="c1"># Initialize event count dictionary</span>
+        <span class="n">event_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="nd">@handle_errors</span><span class="p">(</span><span class="n">miss_bad_data</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Process an individual file to create epochs from long events.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing File: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="o">**</span><span class="n">get_data_row_params</span><span class="p">)</span>
+
+            <span class="c1"># Resample the raw data if necessary</span>
+            <span class="k">if</span> <span class="s1">&#39;sfreq&#39;</span> <span class="ow">in</span> <span class="n">resample_params</span><span class="p">:</span>
+                <span class="n">raw_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="o">**</span><span class="n">resample_params</span><span class="p">)</span>
+
+            <span class="c1"># Check for annotations</span>
+            <span class="n">annotations</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">annotations</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">annotations</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No annotations found in the raw data for </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Calculate epoch length and create overlapping segments</span>
+            <span class="n">t_min</span> <span class="o">=</span> <span class="n">epoch_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tmin&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">t_max</span> <span class="o">=</span> <span class="n">epoch_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tmax&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">epoch_length</span> <span class="o">=</span> <span class="n">t_max</span> <span class="o">-</span> <span class="n">t_min</span>
+
+            <span class="n">temp_annotations</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">onset</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">description</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">annotations</span><span class="o">.</span><span class="n">onset</span><span class="p">,</span> <span class="n">annotations</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">annotations</span><span class="o">.</span><span class="n">description</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">duration</span> <span class="o">&gt;</span> <span class="n">epoch_length</span><span class="p">:</span>
+                    <span class="n">step</span> <span class="o">=</span> <span class="n">epoch_length</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)</span>
+                    <span class="n">num_segments</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">duration</span> <span class="o">-</span> <span class="n">epoch_length</span><span class="p">)</span> <span class="o">//</span> <span class="n">step</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_segments</span><span class="p">):</span>
+                        <span class="n">segment_start</span> <span class="o">=</span> <span class="n">onset</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">step</span>
+                        <span class="n">temp_annotations</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">segment_start</span><span class="p">,</span> <span class="n">epoch_length</span><span class="p">,</span> <span class="n">description</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">temp_annotations</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No long events long enough for segmentation.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Convert the temporary annotations to mne.Annotations</span>
+            <span class="n">long_event_annotations</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Annotations</span><span class="p">(</span>
+                <span class="n">onset</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">temp_annotations</span><span class="p">],</span>
+                <span class="n">duration</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">temp_annotations</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">temp_annotations</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">raw_data</span><span class="o">.</span><span class="n">set_annotations</span><span class="p">(</span><span class="n">long_event_annotations</span><span class="p">)</span>
+
+            <span class="c1"># Create epochs</span>
+            <span class="n">events</span><span class="p">,</span> <span class="n">event_id_map</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">events_from_annotations</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+            <span class="n">epochs</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">Epochs</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">event_id_map</span><span class="p">,</span> <span class="o">**</span><span class="n">epoch_params</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">exclude_bad</span><span class="p">:</span>
+                <span class="n">epochs</span><span class="o">.</span><span class="n">drop_bad</span><span class="p">()</span>
+
+            <span class="c1"># Create a group for the current file in HDF5</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">grp</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addGroup</span><span class="p">(</span><span class="n">grpName</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+            <span class="c1"># Save info metadata</span>
+            <span class="n">info_bytes</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+            <span class="n">info_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">info_bytes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="n">info_array</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="c1"># Save epochs to HDF5</span>
+            <span class="k">for</span> <span class="n">description</span><span class="p">,</span> <span class="n">event_id</span> <span class="ow">in</span> <span class="n">event_id_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">event_epochs</span> <span class="o">=</span> <span class="n">epochs</span><span class="p">[</span><span class="n">description</span><span class="p">]</span>
+                    <span class="n">epoch_data</span> <span class="o">=</span> <span class="n">event_epochs</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">epoch_data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Epoch data is not three-dimensional.&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># Add dataset for this event</span>
+                    <span class="n">dset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">addDataset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">epoch_data</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="n">epoch_data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+                    <span class="c1"># Add metadata</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;rsFreq&#39;</span><span class="p">,</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;sfreq&#39;</span><span class="p">])</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">addAttributes</span><span class="p">(</span><span class="n">dset</span><span class="p">,</span> <span class="s1">&#39;chOrder&#39;</span><span class="p">,</span> <span class="n">event_epochs</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;ch_names&#39;</span><span class="p">])</span>
+
+                    <span class="c1"># Update event_info</span>
+                    <span class="n">event_info</span><span class="p">[</span><span class="n">description</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_epochs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="c1"># Handle error and skip this event</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing event &#39;</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finished processing </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Use batch_process to process files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Completeness Check&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Unavailable&#39;</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">process_file</span><span class="p">(</span><span class="n">row</span><span class="p">),</span>
+            <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Save the HDF5 dataset</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Long-event epochs saved to </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Save event_info.json</span>
+        <span class="n">event_info_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">file_name_prefix</span> <span class="o">+</span> <span class="s2">&quot;_event_info.json&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">event_info_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">event_info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Event information saved to </span><span class="si">{</span><span class="n">event_info_path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="EEGBatchMixinEpoch.process_epochs">
+<a class="viewcode-back" href="../../../../eegunity.modules.batch.html#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.process_epochs">[docs]</a>
+    <span class="k">def</span> <span class="nf">process_epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                       <span class="n">long_event</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">overlap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="n">use_hdf5</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                       <span class="n">file_name_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;EpochData&quot;</span><span class="p">,</span>
+                       <span class="n">exclude_bad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                       <span class="n">miss_bad_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">get_data_row_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">resample_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">epoch_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unified interface for processing epochs.</span>
+
+<span class="sd">        This method selects and calls one of the underlying epoch processing methods based</span>
+<span class="sd">        on the provided parameters:</span>
+<span class="sd">          - If long_event is False and use_hdf5 is False, it calls epoch_by_event.</span>
+<span class="sd">          - If long_event is False and use_hdf5 is True, it calls epoch_by_event_hdf5.</span>
+<span class="sd">          - If long_event is True and use_hdf5 is False, it calls epoch_by_long_event.</span>
+<span class="sd">          - If long_event is True and use_hdf5 is True, it calls epoch_by_long_event_hdf5.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : str</span>
+<span class="sd">            Directory to save the processed epochs.</span>
+<span class="sd">        long_event : bool, optional</span>
+<span class="sd">            Whether to process long-duration events. If True, overlap must be provided. Default is False.</span>
+<span class="sd">        overlap : float, optional</span>
+<span class="sd">            Overlap ratio for long events (0.0 &lt;= overlap &lt; 1.0). Required if long_event is True.</span>
+<span class="sd">            Default is 0 (non-overlap).</span>
+<span class="sd">        use_hdf5 : bool, optional</span>
+<span class="sd">            Whether to save the results in HDF5 format. If you are working with deep learning, especially large models,</span>
+<span class="sd">            we strongly recommend using this interface (use_hdf5=True) for faster processing. Default is True.</span>
+<span class="sd">        file_name_prefix : str, optional</span>
+<span class="sd">            Filename prefix for HDF5 saving (used only if use_hdf5 is True).  Default is &#39;EpochData&#39;.</span>
+<span class="sd">        exclude_bad : bool, optional</span>
+<span class="sd">            Whether to exclude bad epochs. Default is True.</span>
+<span class="sd">        miss_bad_data : bool, optional</span>
+<span class="sd">            Whether to skip files with processing errors. Default is True.</span>
+<span class="sd">        get_data_row_params : dict, optional</span>
+<span class="sd">            Additional parameters for data retrieval get_data_row().</span>
+<span class="sd">        resample_params : dict, optional</span>
+<span class="sd">            Parameters for resampling the raw data, mne.io.raw.resample()</span>
+<span class="sd">        epoch_params : dict, optional</span>
+<span class="sd">            Additional parameters for creating epochs.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            The method processes and saves the epochs by calling the appropriate underlying method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">long_event</span> <span class="ow">and</span> <span class="n">overlap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Overlap must be provided when long_event is True.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Determine positional arguments: include &#39;overlap&#39; only for long events.</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">output_path</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">long_event</span> <span class="k">else</span> <span class="p">[</span><span class="n">output_path</span><span class="p">,</span> <span class="n">overlap</span><span class="p">]</span>
+
+        <span class="c1"># Build common keyword arguments, adding file_name_prefix if HDF5 is used.</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;exclude_bad&quot;</span><span class="p">:</span> <span class="n">exclude_bad</span><span class="p">,</span>
+            <span class="s2">&quot;miss_bad_data&quot;</span><span class="p">:</span> <span class="n">miss_bad_data</span><span class="p">,</span>
+            <span class="s2">&quot;get_data_row_params&quot;</span><span class="p">:</span> <span class="n">get_data_row_params</span><span class="p">,</span>
+            <span class="s2">&quot;resample_params&quot;</span><span class="p">:</span> <span class="n">resample_params</span><span class="p">,</span>
+            <span class="s2">&quot;epoch_params&quot;</span><span class="p">:</span> <span class="n">epoch_params</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">({</span><span class="s2">&quot;file_name_prefix&quot;</span><span class="p">:</span> <span class="n">file_name_prefix</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_hdf5</span> <span class="k">else</span> <span class="p">{})</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Mapping from (long_event, use_hdf5) to the corresponding method.</span>
+        <span class="n">method_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_by_event</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_by_event_hdf5</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_by_long_event</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_by_long_event_hdf5</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Call the selected method with the prepared arguments.</span>
+        <span class="n">method_mapping</span><span class="p">[(</span><span class="n">long_event</span><span class="p">,</span> <span class="n">use_hdf5</span><span class="p">)](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

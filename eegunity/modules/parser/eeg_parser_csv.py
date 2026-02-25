@@ -1,4 +1,5 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import numpy as np
 import pandas as pd
@@ -90,7 +91,53 @@ def identify_time_columns(df):
     return None
 
 
-def process_csv_files(files_locator):
+def _process_single_csv_file(file_path):
+    """
+    Process a single CSV/TXT file and return metadata dict or None.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the CSV or TXT file.
+
+    Returns
+    -------
+    dict or None
+        A dictionary containing extracted metadata, or None if the file cannot be processed.
+    """
+    print(file_path)
+    try:
+        header_option = None if pd.read_csv(file_path, nrows=0).columns[0].isdigit() else 'infer'
+        df = pd.read_csv(file_path, header=header_option)
+        if header_option is None:
+            df.columns = [str(i) for i in range(1, len(df.columns) + 1)]
+
+        result = {'File Type': 'csvData'}
+
+        time_info = identify_time_columns(df)
+
+        if time_info is not None:
+            print(time_info)
+            time_cols = time_info[0]
+            result['Sampling Rate'] = round(time_info[1])
+            channel_names = [col for col in df.columns if
+                             col not in time_cols and np.issubdtype(df[col].dtype, np.number)]
+            if channel_names:
+                result['Channel Names'] = ','.join(channel_names)
+                result['Number of Channels'] = len(channel_names)
+                result['Data Shape'] = f"({len(channel_names)}, {len(df)})"
+                result['_df_len'] = len(df)
+
+        return result
+    except pd.errors.ParserError:
+        print(f"Failed to parse file as CSV: {file_path}")
+        return None
+    except Exception as e:
+        print(f"Error processing file {file_path}: {e}")
+        return None
+
+
+def process_csv_files(files_locator, num_workers=0):
     """
     Process CSV files and update a DataFrame with file details.
 
@@ -98,64 +145,45 @@ def process_csv_files(files_locator):
     ----------
     files_locator : pandas.DataFrame
         A DataFrame containing the metadata of files, including their file paths and other details. The column 'File Path' is expected to contain paths to the files.
+    num_workers : int, optional
+        Number of worker threads for parallel processing (default is 0, sequential).
 
     Returns
     -------
     pandas.DataFrame
         Updated DataFrame with additional columns 'File Type', 'Sampling Rate', 'Channel Names', 'Number of Channels', and 'Duration' for each file. If a file cannot be processed, appropriate messages are printed.
     """
-    def calculate_sampling_rate(time_series):
-        if not time_series.empty and not all(time_series == ''):
-            time_series = pd.to_numeric(time_series, errors='coerce').dropna()
-            if not time_series.empty:
-                time_diffs = time_series.diff().dropna()
-                average_sampling_interval = time_diffs.mean()
-                if average_sampling_interval != 0:
-                    return round(1 / average_sampling_interval)
-                else:
-                    return None
-        return None
-
+    # Collect indices of eligible files
+    eligible = []
     for index, row in files_locator.iterrows():
         file_path = row['File Path']
-
         if (file_path.endswith('.csv') or file_path.endswith('.txt')) and os.path.getsize(
                 file_path) > 5 * 1024 * 1024:
-            print(file_path)
-            try:
-                # 判断文件的第一行是否为数字列名，决定是否需要header=None
-                header_option = None if pd.read_csv(file_path, nrows=0).columns[0].isdigit() else 'infer'
-                df = pd.read_csv(file_path, header=header_option)
-                if header_option is None:
-                    df.columns = [str(i) for i in range(1, len(df.columns) + 1)]
+            eligible.append((index, file_path))
 
-                files_locator.at[index, 'File Type'] = 'csvData'
+    if not eligible:
+        return files_locator
 
-                # Identifying timestamp columns
-                time_info = identify_time_columns(df)
+    indices, file_paths = zip(*eligible)
 
-                if time_info is not None:
-                    print(time_info)
-                    time_cols = time_info[0]
-                    files_locator.at[index, 'Sampling Rate'] = round(time_info[1])
-                    # Recording channel names, excluding time column and non-numeric columns
-                    channel_names = [col for col in df.columns if
-                                     col not in time_cols and np.issubdtype(df[col].dtype, np.number)]
-                    if channel_names:
-                        files_locator.at[index, 'Channel Names'] = ','.join(channel_names)
-                        files_locator.at[index, 'Number of Channels'] = len(channel_names)
+    if num_workers > 0:
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            results = list(executor.map(_process_single_csv_file, file_paths))
+    else:
+        results = [_process_single_csv_file(fp) for fp in file_paths]
 
-                        data_shape = f"({len(channel_names)}, {len(df)})"
-                        files_locator.at[index, 'Data Shape'] = data_shape
+    for idx, result, file_path in zip(indices, results, file_paths):
+        if result is not None:
+            row = files_locator.loc[idx]
+            df_len = result.pop('_df_len', None)
+            for key, value in result.items():
+                files_locator.at[idx, key] = value
+            # Calculate duration using the sampling rate from this result
+            if df_len is not None and 'Sampling Rate' in result:
+                sr = row['Sampling Rate']
+                if sr != 'N.A.':
+                    numeric_sampling_rate = pd.to_numeric(sr, errors='coerce')
+                    if pd.notna(numeric_sampling_rate):
+                        files_locator.at[idx, 'Duration'] = df_len / numeric_sampling_rate
 
-                        if 'Sampling Rate' in row and row['Sampling Rate'] != 'N.A.':
-                            numeric_sampling_rate = pd.to_numeric(row['Sampling Rate'], errors='coerce')
-                            if pd.notna(numeric_sampling_rate):
-                                duration = len(df) / numeric_sampling_rate
-                                files_locator.at[index, 'Duration'] = duration
-
-            except pd.errors.ParserError:
-                print(f"Failed to parse file as CSV: {file_path}")
-            except Exception as e:
-                print(f"Error processing file {file_path}: {e}")
     return files_locator

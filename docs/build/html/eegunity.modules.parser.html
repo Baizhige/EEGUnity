@@ -1,0 +1,965 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>eegunity.modules.parser &#8212; EEGUnity 0.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'eegunity.modules.parser';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="eegunity.resources package" href="eegunity.resources.html" />
+    <link rel="prev" title="eegunity.modules.llm_booster" href="eegunity.modules.llm_booster.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="eegunity.html">eegunity package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="eegunity.modules.html">eegunity.modules package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html">eegunity.modules.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.correction.html">eegunity.modules.correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html">eegunity.modules.llm_booster</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">eegunity.modules.parser</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.resources.html">eegunity.resources package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="modules.html" class="nav-link">eegunity</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="eegunity.html" class="nav-link">eegunity package</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="eegunity.modules.html" class="nav-link">eegunity.modules package</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">eegunity.modules.parser</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="eegunity-modules-parser">
+<h1>eegunity.modules.parser<a class="headerlink" href="#eegunity-modules-parser" title="Link to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-eegunity.modules.parser.eeg_parser">
+<span id="eegunity-modules-parser-eeg-parser-module"></span><h2>eegunity.modules.parser.eeg_parser module<a class="headerlink" href="#module-eegunity.modules.parser.eeg_parser" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.EEGParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">EEGParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#EEGParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.EEGParser" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_UDatasetSharedAttributes</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.EEGParser.check_locator">
+<span class="sig-name descname"><span class="pre">check_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#EEGParser.check_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.EEGParser.check_locator" title="Link to this definition">#</a></dt>
+<dd><p>Validate the contents of the locator DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>locator</strong> (<em>pd.DataFrame</em>) – A DataFrame containing file metadata, including data shape, channel names, file type, file path, number of channels, sampling rate, and duration.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated DataFrame with a ‘Completeness Check’ column indicating whether the validation was completed or if errors were found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.EEGParser.get_data">
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_idx</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#EEGParser.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.EEGParser.get_data" title="Link to this definition">#</a></dt>
+<dd><p>Retrieve data based on the specified index from the locator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_idx</strong> (<em>int</em>) – Index of the row in the locator DataFrame to retrieve data from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The data retrieved and processed according to the specified parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.channel_name_parser">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">channel_name_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#channel_name_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.channel_name_parser" title="Link to this definition">#</a></dt>
+<dd><p>Format and standardize a list of channel names based on predefined rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_string</strong> (<em>str</em>) – A comma-separated string containing channel names to be formatted.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A comma-separated string of formatted channel names. If duplicates are found, the original input string is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Warns if an invalid channel name is detected or if a duplicate formatted channel name is found.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.convert_unit">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">convert_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Raw</span></span></span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#convert_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.convert_unit" title="Link to this definition">#</a></dt>
+<dd><p>Convert the units of EEG data in a MNE Raw object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>mne.io.Raw</em>) – The raw EEG data to be converted.</p></li>
+<li><p><strong>unit</strong> (<em>str</em>) – The target unit to convert the data to. Must be one of ‘V’, ‘mV’, or ‘uV’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided unit is not valid.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The raw EEG data with converted units.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>mne.io.Raw</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.create_montage_from_json">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">create_montage_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#create_montage_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.create_montage_from_json" title="Link to this definition">#</a></dt>
+<dd><p>Create a montage from a JSON file containing channel positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>json_file</strong> (<em>str</em>) – The path to the JSON file containing channel names as keys and their positions as values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A montage object created from the channel positions defined in the JSON file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.channels.DigMontage</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.extract_events">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">extract_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#extract_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.extract_events" title="Link to this definition">#</a></dt>
+<dd><p>Extract events from an mne.io.Raw object.</p>
+<p>Attempt to extract events using mne.events_from_annotations.
+If it fails, use mne.find_events to extract events without description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>raw</strong> (<em>mne.io.Raw</em>) – The raw data object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>events</strong> (<em>numpy.ndarray</em>) – The events array, shaped (n_events, 3).</p></li>
+<li><p><strong>event_id</strong> (<em>dict</em>) – Dictionary of event IDs.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.get_data_row">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">get_data_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_set_channel_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_set_montage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pick_types_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_convert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_raw_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_nonstandard_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">BaseRaw</span></span></span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#get_data_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.get_data_row" title="Link to this definition">#</a></dt>
+<dd><p>Process and return raw EEG data based on the input row information.</p>
+<p>This function handles both standard and non-standard data, with options for setting channel types,
+montage, normalization, and unit conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>dict</em>) – Dictionary containing data attributes, such as file paths, file types, and channel names.</p></li>
+<li><p><strong>norm_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of normalization to apply, if any. Defaults to None.</p></li>
+<li><p><strong>is_set_channel_type</strong> (<em>bool</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Determines whether to set channel types based on the provided information.
+- If <cite>True</cite>, channel types will be set explicitly.
+- If <cite>None</cite>, the setting of channel types depends on whether the <strong>File Path</strong> in the locator follows the format
+<cite>“type:name”</cite> (see <cite>UnifiedDataset.EEGBatch.format_channel_names()</cite> for details).
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>is_set_montage</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to set montage (electrode coordinates). Defaults to False.</p></li>
+<li><p><strong>pick_types_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary specifying which channel types to include. The keys should match the parameters of
+<cite>raw.pick_types()</cite>. Defaults to None.</p></li>
+<li><p><strong>unit_convert</strong> (<em>str</em><em>, </em><em>optional</em>) – Conversion type for resetting channel units. Defaults to None.</p></li>
+<li><p><strong>read_raw_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters to pass to <cite>mne.io.read_raw()</cite> for standard data loading.</p></li>
+<li><p><strong>handle_nonstandard_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters to pass to <cite>handle_nonstandard_data()</cite> for non-standard data loading.</p></li>
+<li><p><strong>preload</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to preload the data into memory. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The processed raw EEG data object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.BaseRaw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the number of channels in the locator file does not match the metadata.</p></li>
+<li><p><strong>Warning</strong> – If <cite>pick_types</cite> is not None but <cite>is_set_channel_type</cite> is False, a warning will be issued
+    to inform the user to set <cite>is_set_channel_type=True</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.handle_nonstandard_data">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">handle_nonstandard_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#handle_nonstandard_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.handle_nonstandard_data" title="Link to this definition">#</a></dt>
+<dd><p>Handles the loading of non-standard EEG data files into MNE Raw format.</p>
+<p>This function processes EEG data from either .mat files or .csv/.txt files marked as ‘csvData’.
+It extracts channel names and sampling rates from the provided row, and creates an MNE RawArray object containing the EEG data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>pd.Series</em>) – A row from a DataFrame containing information about the file, including ‘File Path’, ‘Channel Names’, ‘Sampling Rate’, and ‘File Type’.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – The verbosity level for MNE functions. Default is ‘CRITICAL’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An MNE Raw object containing the EEG data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the number of channels in the DataFrame does not match the channel names specified in the row.</p></li>
+<li><p><strong>Exception</strong> – If the file type is unsupported or there is an error in loading the data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.infer_channel_unit">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">infer_channel_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ch_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#infer_channel_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.infer_channel_unit" title="Link to this definition">#</a></dt>
+<dd><p>Infer the unit type for a given channel based on its data and type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ch_name</strong> (<em>str</em>) – The name of the channel.</p></li>
+<li><p><strong>ch_data</strong> (<em>array-like</em>) – The data of the channel, typically an array of amplitude values.</p></li>
+<li><p><strong>ch_type</strong> (<em>str</em>) – The type of the channel, such as ‘eeg’, ‘emg’, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The inferred unit type, such as “uV”, “mV”, or “V”, based on the channel data and type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.normalize_data">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">normalize_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_std_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#normalize_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.normalize_data" title="Link to this definition">#</a></dt>
+<dd><p>Normalize EEG data based on provided mean and standard deviation values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>mne.io.Raw</em>) – The raw EEG data to be normalized. The data should be in MNE Raw format.</p></li>
+<li><p><strong>mean_std_str</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Dict</em><em>]</em>) – A dictionary or string that contains mean and standard deviation values.
+If it’s a string, it will be evaluated into a dictionary.
+The dictionary keys should be channel names (for channel-wise normalization)
+or ‘all_eeg’ (for sample-wise normalization).</p></li>
+<li><p><strong>norm_type</strong> (<em>str</em>) – The type of normalization to perform. It can be:
+- ‘channel-wise’: Normalize each channel individually based on its mean and standard deviation.
+- ‘sample-wise’: Normalize all channels based on a common mean and standard deviation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normalized raw EEG data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>norm_type</cite> is not ‘channel-wise’ or ‘sample-wise’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.process_mne_files">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">process_mne_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_locator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#process_mne_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.process_mne_files" title="Link to this definition">#</a></dt>
+<dd><p>Process MNE files based on a locator DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files_locator</strong> (<em>pandas.DataFrame</em>) – DataFrame containing file paths and related metadata for processing.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em>) – Verbosity level for MNE functions.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of worker threads for parallel processing (default is 0, sequential).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated DataFrame with metadata extracted from processed files.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.set_channel_type">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">set_channel_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#set_channel_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.set_channel_type" title="Link to this definition">#</a></dt>
+<dd><p>Set the channel types for the given raw data based on the specified channel string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>mne.io.Raw</em>) – The raw data object containing the EEG, EMG, ECG, EOG, or other types of signals.</p></li>
+<li><p><strong>channel_str</strong> (<em>str</em>) – A string specifying the channel types and names in the format ‘type:name’, separated by commas. Each type must correspond to the desired signal type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated raw data object with renamed channels and set channel types.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the format of any channel in the channel string is invalid (not in ‘type:name’ format).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.set_infer_unit">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">set_infer_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#set_infer_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.set_infer_unit" title="Link to this definition">#</a></dt>
+<dd><p>Set the inferred unit for EEG channels in the raw data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>mne.io.Raw</em>) – The raw data object containing the EEG channels.</p></li>
+<li><p><strong>row</strong> (<em>pandas.Series</em>) – A row from a DataFrame containing the ‘Infer Unit’ field, which should be a dictionary with channel names as keys and units as values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated raw data object with the inferred units set for the specified channels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If ‘Infer Unit’ is not a valid dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser.set_montage_any">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser.</span></span><span class="sig-name descname"><span class="pre">set_montage_any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser.html#set_montage_any"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser.set_montage_any" title="Link to this definition">#</a></dt>
+<dd><p>Set the montage for the given raw data using a montage defined in a JSON file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_data</strong> (<em>mne.io.Raw</em>) – The raw data object to which the montage will be applied.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em><em>, </em><em>optional</em>) – The verbosity level for warnings or messages, by default ‘CRITICAL’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated raw data object with the applied montage.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.io.Raw</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.parser.eeg_parser_config">
+<span id="eegunity-modules-parser-eeg-parser-config-module"></span><h2>eegunity.modules.parser.eeg_parser_config module<a class="headerlink" href="#module-eegunity.modules.parser.eeg_parser_config" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-eegunity.modules.parser.eeg_parser_csv">
+<span id="eegunity-modules-parser-eeg-parser-csv-module"></span><h2>eegunity.modules.parser.eeg_parser_csv module<a class="headerlink" href="#module-eegunity.modules.parser.eeg_parser_csv" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser_csv.calculate_interval">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">calculate_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser_csv.html#calculate_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser_csv.calculate_interval" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the average interval between time points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>times</strong> (<em>pandas.Series</em>) – A pandas Series object containing time points. The time points can either be timezone-aware <cite>DatetimeTZDtype</cite> or naive <cite>pd.Timestamp</cite> objects.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The average interval between consecutive time points in seconds. If the input series is empty or only has one time point, returns None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser_csv.identify_time_columns">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">identify_time_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser_csv.html#identify_time_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser_csv.identify_time_columns" title="Link to this definition">#</a></dt>
+<dd><p>Identify potential time columns in a DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input DataFrame containing potential time columns.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If a single time column is identified, returns the column name and its sampling frequency as a float.
+If multiple time columns are found with the same sampling frequency, returns a list of column names and the common sampling frequency.
+Returns <cite>None</cite> if no valid time column is detected.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str or list of str, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser_csv.is_datetime_format">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">is_datetime_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser_csv.html#is_datetime_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser_csv.is_datetime_format" title="Link to this definition">#</a></dt>
+<dd><p>Check if a string follows a datetime format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>s</strong> (<em>str</em>) – The string to be evaluated for compatibility with the datetime format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns <cite>True</cite> if the string matches the datetime format “%Y-%m-%d %H:%M:%S.%f”<cite>. Otherwise, returns `False</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser_csv.process_csv_files">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser_csv.</span></span><span class="sig-name descname"><span class="pre">process_csv_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_locator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser_csv.html#process_csv_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser_csv.process_csv_files" title="Link to this definition">#</a></dt>
+<dd><p>Process CSV files and update a DataFrame with file details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files_locator</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the metadata of files, including their file paths and other details. The column ‘File Path’ is expected to contain paths to the files.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of worker threads for parallel processing (default is 0, sequential).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated DataFrame with additional columns ‘File Type’, ‘Sampling Rate’, ‘Channel Names’, ‘Number of Channels’, and ‘Duration’ for each file. If a file cannot be processed, appropriate messages are printed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.parser.eeg_parser_mat">
+<span id="eegunity-modules-parser-eeg-parser-mat-module"></span><h2>eegunity.modules.parser.eeg_parser_mat module<a class="headerlink" href="#module-eegunity.modules.parser.eeg_parser_mat" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.parser.eeg_parser_mat.process_mat_files">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.parser.eeg_parser_mat.</span></span><span class="sig-name descname"><span class="pre">process_mat_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_locator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/parser/eeg_parser_mat.html#process_mat_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.parser.eeg_parser_mat.process_mat_files" title="Link to this definition">#</a></dt>
+<dd><p>Process MAT files and update a DataFrame with file details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files_locator</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the metadata of files, including their file paths and other details.
+The column ‘File Path’ is expected to contain paths to the MAT files.</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of worker threads for parallel processing (default is 0, sequential).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated DataFrame with additional columns ‘File Type’, ‘Sampling Rate’, ‘Channel Names’, ‘Number of Channels’, and ‘Duration’ for each file.
+If a file cannot be processed, appropriate messages are printed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the MAT file cannot be located.</p></li>
+<li><p><strong>Exception</strong> – General exception for unexpected errors during file processing.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.parser">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity.modules.parser" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="eegunity.modules.llm_booster.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">eegunity.modules.llm_booster</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="eegunity.resources.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">eegunity.resources package</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.parser.eeg_parser">eegunity.modules.parser.eeg_parser module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.EEGParser"><code class="docutils literal notranslate"><span class="pre">EEGParser</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.EEGParser.check_locator"><code class="docutils literal notranslate"><span class="pre">EEGParser.check_locator()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.EEGParser.get_data"><code class="docutils literal notranslate"><span class="pre">EEGParser.get_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.channel_name_parser"><code class="docutils literal notranslate"><span class="pre">channel_name_parser()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.convert_unit"><code class="docutils literal notranslate"><span class="pre">convert_unit()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.create_montage_from_json"><code class="docutils literal notranslate"><span class="pre">create_montage_from_json()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.extract_events"><code class="docutils literal notranslate"><span class="pre">extract_events()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.get_data_row"><code class="docutils literal notranslate"><span class="pre">get_data_row()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.handle_nonstandard_data"><code class="docutils literal notranslate"><span class="pre">handle_nonstandard_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.infer_channel_unit"><code class="docutils literal notranslate"><span class="pre">infer_channel_unit()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.normalize_data"><code class="docutils literal notranslate"><span class="pre">normalize_data()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.process_mne_files"><code class="docutils literal notranslate"><span class="pre">process_mne_files()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.set_channel_type"><code class="docutils literal notranslate"><span class="pre">set_channel_type()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.set_infer_unit"><code class="docutils literal notranslate"><span class="pre">set_infer_unit()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser.set_montage_any"><code class="docutils literal notranslate"><span class="pre">set_montage_any()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.parser.eeg_parser_config">eegunity.modules.parser.eeg_parser_config module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.parser.eeg_parser_csv">eegunity.modules.parser.eeg_parser_csv module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser_csv.calculate_interval"><code class="docutils literal notranslate"><span class="pre">calculate_interval()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser_csv.identify_time_columns"><code class="docutils literal notranslate"><span class="pre">identify_time_columns()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser_csv.is_datetime_format"><code class="docutils literal notranslate"><span class="pre">is_datetime_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser_csv.process_csv_files"><code class="docutils literal notranslate"><span class="pre">process_csv_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.parser.eeg_parser_mat">eegunity.modules.parser.eeg_parser_mat module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.parser.eeg_parser_mat.process_mat_files"><code class="docutils literal notranslate"><span class="pre">process_mat_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.parser">Module contents</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/eegunity.modules.parser.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

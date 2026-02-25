@@ -1,135 +1,417 @@
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>eegunity package &mdash; EEGUnity 0.3.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>eegunity package &#8212; EEGUnity 0.6.0 documentation</title>
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
   
-        <script src="_static/documentation_options.js?v=71d9d8e6"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/js/theme.js"></script>
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'eegunity';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="eegunity.module_eeg_batch package" href="eegunity.module_eeg_batch.html" />
-    <link rel="prev" title="eegunity" href="modules.html" /> 
-</head>
+    <link rel="next" title="eegunity.modules package" href="eegunity.modules.html" />
+    <link rel="prev" title="eegunity" href="modules.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
-          
-          
-          <a href="index.html" class="icon icon-home">
-            EEGUnity
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">eegunity</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">eegunity package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_batch.html">eegunity.module_eeg_batch package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_correction.html">eegunity.module_eeg_correction package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_llm_booster.html">eegunity.module_eeg_llm_booster package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="eegunity.module_eeg_parser.html">eegunity.module_eeg_parser package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#eegunity-share-attributes-module">eegunity.share_attributes module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-eegunity.unifieddataset">eegunity.unifieddataset module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#eegunity.unifieddataset.UnifiedDataset"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#module-eegunity">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
 
-        </div>
-      </div>
-    </nav>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">EEGUnity</a>
-      </nav>
+  
+    
+  
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">eegunity</a></li>
-      <li class="breadcrumb-item active">eegunity package</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/eegunity.rst.txt" rel="nofollow"> View page source</a>
-      </li>
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
   </ul>
-  <hr/>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">eegunity package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="eegunity.modules.html">eegunity.modules package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html">eegunity.modules.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.correction.html">eegunity.modules.correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html">eegunity.modules.llm_booster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html">eegunity.modules.parser</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.resources.html">eegunity.resources package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="modules.html" class="nav-link">eegunity</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">eegunity package</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
   <section id="eegunity-package">
-<h1>eegunity package<a class="headerlink" href="#eegunity-package" title="Link to this heading">¶</a></h1>
+<h1>eegunity package<a class="headerlink" href="#eegunity-package" title="Link to this heading">#</a></h1>
 <section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="eegunity.module_eeg_batch.html">eegunity.module_eeg_batch package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_batch.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity-module-eeg-batch-eeg-batch-module">eegunity.module_eeg_batch.eeg_batch module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_batch.html#eegunity-module-eeg-batch-eeg-scores-module">eegunity.module_eeg_batch.eeg_scores module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_batch.html#module-contents">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eegunity.modules.html">eegunity.modules package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.batch.html">eegunity.modules.batch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.eeg_batch">eegunity.modules.batch.eeg_batch module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.eeg_scores_modified_mne">eegunity.modules.batch.eeg_scores_modified_mne module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.eeg_scores_shady">eegunity.modules.batch.eeg_scores_shady module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.method_mixin_epoch">eegunity.modules.batch.method_mixin_epoch module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch.utils">eegunity.modules.batch.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.batch.html#module-eegunity.modules.batch">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="eegunity.module_eeg_correction.html">eegunity.module_eeg_correction package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_correction.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_correction.html#eegunity-module-eeg-correction-eeg-correction-module">eegunity.module_eeg_correction.eeg_correction module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_correction.html#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.correction.html">eegunity.modules.correction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.correction.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.correction.html#module-eegunity.modules.correction.eeg_correction">eegunity.modules.correction.eeg_correction module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.correction.html#module-eegunity.modules.correction">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="eegunity.module_eeg_llm_booster.html">eegunity.module_eeg_llm_booster package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_llm_booster.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_llm_booster.html#eegunity-module-eeg-llm-booster-eeg-llm-booster-module">eegunity.module_eeg_llm_booster.eeg_llm_booster module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_llm_booster.html#eegunity-module-eeg-llm-booster-eeg-llm-des-parser-module">eegunity.module_eeg_llm_booster.eeg_llm_des_parser module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_llm_booster.html#eegunity-module-eeg-llm-booster-eeg-llm-file-parser-module">eegunity.module_eeg_llm_booster.eeg_llm_file_parser module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_llm_booster.html#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html">eegunity.modules.llm_booster</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.llm_booster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster.eeg_llm_booster">eegunity.modules.llm_booster.eeg_llm_booster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster.eeg_llm_des_parser">eegunity.modules.llm_booster.eeg_llm_des_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster.eeg_llm_file_parser">eegunity.modules.llm_booster.eeg_llm_file_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.llm_booster.html#module-eegunity.modules.llm_booster">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="eegunity.module_eeg_parser.html">eegunity.module_eeg_parser package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_parser.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity-module-eeg-parser-eeg-parser-module">eegunity.module_eeg_parser.eeg_parser module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity-module-eeg-parser-eeg-parser-config-module">eegunity.module_eeg_parser.eeg_parser_config module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity-module-eeg-parser-eeg-parser-csv-module">eegunity.module_eeg_parser.eeg_parser_csv module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_parser.html#eegunity-module-eeg-parser-eeg-parser-mat-module">eegunity.module_eeg_parser.eeg_parser_mat module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eegunity.module_eeg_parser.html#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html">eegunity.modules.parser</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser">eegunity.modules.parser.eeg_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser_config">eegunity.modules.parser.eeg_parser_config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser_csv">eegunity.modules.parser.eeg_parser_csv module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser.eeg_parser_mat">eegunity.modules.parser.eeg_parser_mat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eegunity.modules.parser.html#module-eegunity.modules.parser">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.modules.html#module-eegunity.modules">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="eegunity.resources.html">eegunity.resources package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.resources.html#module-eegunity.resources">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#module-eegunity.utils.channel_align_raw">eegunity.utils.channel_align_raw module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.utils.html#eegunity.utils.channel_align_raw.channel_align_raw"><code class="docutils literal notranslate"><span class="pre">channel_align_raw()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#module-eegunity.utils.con_udatasets">eegunity.utils.con_udatasets module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.utils.html#eegunity.utils.con_udatasets.con_udatasets"><code class="docutils literal notranslate"><span class="pre">con_udatasets()</span></code></a></li>
 </ul>
@@ -145,6 +427,14 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#module-eegunity.utils.handle_errors">eegunity.utils.handle_errors module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.utils.html#eegunity.utils.handle_errors.handle_errors"><code class="docutils literal notranslate"><span class="pre">handle_errors()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#module-eegunity.utils.log_processing">eegunity.utils.log_processing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.utils.html#eegunity.utils.log_processing.log_processing"><code class="docutils literal notranslate"><span class="pre">log_processing()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#module-eegunity.utils.normalize">eegunity.utils.normalize module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="eegunity.utils.html#eegunity.utils.normalize.normalize_mne"><code class="docutils literal notranslate"><span class="pre">normalize_mne()</span></code></a></li>
 </ul>
@@ -157,6 +447,10 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#module-eegunity.utils.split_hdf5_file">eegunity.utils.split_hdf5_file module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.utils.html#eegunity.utils.split_hdf5_file.split_hdf5_file"><code class="docutils literal notranslate"><span class="pre">split_hdf5_file()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html#module-eegunity.utils">Module contents</a></li>
 </ul>
 </li>
@@ -164,20 +458,17 @@
 </div>
 </section>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
-</section>
-<section id="eegunity-share-attributes-module">
-<h2>eegunity.share_attributes module<a class="headerlink" href="#eegunity-share-attributes-module" title="Link to this heading">¶</a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 </section>
 <section id="module-eegunity.unifieddataset">
-<span id="eegunity-unifieddataset-module"></span><h2>eegunity.unifieddataset module<a class="headerlink" href="#module-eegunity.unifieddataset" title="Link to this heading">¶</a></h2>
+<span id="eegunity-unifieddataset-module"></span><h2>eegunity.unifieddataset module<a class="headerlink" href="#module-eegunity.unifieddataset" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.unifieddataset.</span></span><span class="sig-name descname"><span class="pre">UnifiedDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain_tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unzip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.unifieddataset.</span></span><span class="sig-name descname"><span class="pre">UnifiedDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locator_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_unzip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CRITICAL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_UDatasetSharedAttributes</span></code></p>
 <p>This is the kernel class to manage mutiple EEG datasets and associated processing tools.</p>
 <section id="attributes">
-<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
 <dl class="simple">
 <dt>dataset_path<span class="classifier">str, optional</span></dt><dd><p>Path to the dataset (folder). Should not be provided alongside locator_path.</p>
 </dd>
@@ -199,11 +490,17 @@
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.clear_kernel">
+<span class="sig-name descname"><span class="pre">clear_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.clear_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.clear_kernel" title="Link to this definition">#</a></dt>
+<dd><p>Unbind the current kernel from this dataset.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.copy" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.copy" title="Link to this definition">#</a></dt>
 <dd><p>Create a deep copy of the UnifiedDataset instance.</p>
 <section id="returns">
-<h4>Returns:<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h4>
+<h4>Returns:<a class="headerlink" href="#returns" title="Link to this heading">#</a></h4>
 <dl class="simple">
 <dt>UnifiedDataset</dt><dd><p>A deep copy of the current UnifiedDataset instance.</p>
 </dd>
@@ -212,11 +509,17 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.get_kernel">
+<span class="sig-name descname"><span class="pre">get_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.get_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.get_kernel" title="Link to this definition">#</a></dt>
+<dd><p>Return the currently bound kernel object or None.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.get_locator">
-<span class="sig-name descname"><span class="pre">get_locator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.get_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.get_locator" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_locator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.get_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.get_locator" title="Link to this definition">#</a></dt>
 <dd><p>Return the locator in DataFrame.</p>
 <section id="id1">
-<h4>Returns:<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<h4>Returns:<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
 <dl class="simple">
 <dt>pandas.DataFrame</dt><dd><p>The locator DataFrame associated with the dataset.</p>
 </dd>
@@ -225,13 +528,44 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.group_by_domain">
+<span class="sig-name descname"><span class="pre">group_by_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.group_by_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.group_by_domain" title="Link to this definition">#</a></dt>
+<dd><p>Groups the locator data by the ‘domain_tag’ and returns multiple UnifiedDataset instances.</p>
+<section id="id2">
+<h4>Returns:<a class="headerlink" href="#id2" title="Link to this heading">#</a></h4>
+<p>List[UnifiedDataset] : A list of UnifiedDataset instances, each grouped by domain.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.load_kernel">
+<span class="sig-name descname"><span class="pre">load_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.load_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.load_kernel" title="Link to this definition">#</a></dt>
+<dd><p>Load an external kernel and bind it to this dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kernel_spec</strong> – Spec string in the form <code class="docutils literal notranslate"><span class="pre">&quot;&lt;path_or_module&gt;:&lt;object_name&gt;&quot;</span></code>.
+This can be called at construction time or any time later.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The loaded kernel object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the loaded object does not implement <code class="docutils literal notranslate"><span class="pre">apply(udataset,</span> <span class="pre">raw,</span> <span class="pre">row)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.save_locator">
-<span class="sig-name descname"><span class="pre">save_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.save_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.save_locator" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.save_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.save_locator" title="Link to this definition">#</a></dt>
 <dd><p>Save the locator of this UnifiedDataset to a CSV file at the specified path. This file is helpful for checking the current status and metadata after data processing.
 You can also reload the UnifiedDataset later by using this locator file, for example:
 unified_dataset = UnifiedDataset(locator_path=”your_locator_path”)</p>
 <section id="parameters">
-<h4>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h4>
+<h4>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h4>
 <dl class="simple">
 <dt>path<span class="classifier">str</span></dt><dd><p>The file path where the locator should be saved.</p>
 </dd>
@@ -241,11 +575,11 @@ unified_dataset = UnifiedDataset(locator_path=”your_locator_path”)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="eegunity.unifieddataset.UnifiedDataset.set_locator">
-<span class="sig-name descname"><span class="pre">set_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_locator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.set_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.set_locator" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_locator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_locator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/unifieddataset.html#UnifiedDataset.set_locator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.unifieddataset.UnifiedDataset.set_locator" title="Link to this definition">#</a></dt>
 <dd><p>Set a new locator for this UnifiedDataset instance.
 This allows you to update the metadata for the entire dataset without altering the original raw file.</p>
-<section id="id2">
-<h4>Parameters:<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<section id="id3">
+<h4>Parameters:<a class="headerlink" href="#id3" title="Link to this heading">#</a></h4>
 <dl class="simple">
 <dt>new_locator<span class="classifier">pandas.DataFrame</span></dt><dd><p>The new locator DataFrame to associate with the dataset.</p>
 </dd>
@@ -258,39 +592,141 @@ This allows you to update the metadata for the entire dataset without altering t
 
 </section>
 <section id="module-eegunity">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity" title="Link to this heading">¶</a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-left" title="eegunity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="eegunity.module_eeg_batch.html" class="btn btn-neutral float-right" title="eegunity.module_eeg_batch package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2024, Wenlong You.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="modules.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">eegunity</p>
       </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+    </a>
+    <a class="right-next"
+       href="eegunity.modules.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">eegunity.modules package</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-</body>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.unifieddataset">eegunity.unifieddataset module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.clear_kernel"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.clear_kernel()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.copy"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.copy()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.get_kernel"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.get_kernel()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.get_locator"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.get_locator()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.group_by_domain"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.group_by_domain()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.load_kernel"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.load_kernel()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.save_locator"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.save_locator()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.unifieddataset.UnifiedDataset.set_locator"><code class="docutils literal notranslate"><span class="pre">UnifiedDataset.set_locator()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity">Module contents</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/eegunity.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
 </html>

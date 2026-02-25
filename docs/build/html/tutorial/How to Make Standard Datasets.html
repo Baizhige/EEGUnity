@@ -1,0 +1,758 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Creating a Standardized FIF Dataset using EEGUnity &#8212; EEGUnity 0.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/How to Make Standard Datasets';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cooperation with Multiple Computers or Servers using EEGUnity" href="How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html" />
+    <link rel="prev" title="Formatting Channel Names and Inspecting Metadata" href="How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="../_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="How%20does%20EEGUnity%20support%20multi-modal%20data.html">EEGUnity: Supporting Multi-Modal Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html">Formatting Channel Names and Inspecting Metadata</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Creating a Standardized FIF Dataset using EEGUnity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html">Cooperation with Multiple Computers or Servers using EEGUnity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="How%20to%20Process%20Data%20and%20Export%20as%20h5Dataset.html">EEG Dataset Processing Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="How%20to%20Read%20h5Dataset.html">Reading EEGUnity HDF5 Files: A Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="How%20to%20Reading%20Rich%20Meta%20Data%20via%20Kernel.html">EEGUnity Kernels: Dataset-Specific In-Memory Preprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="How%20to%20Speep%20Up%20with%20Multithread.html">How to Speed Up EEGUnity with Built-in Multithreading</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../tutorials.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Creating a Standardized FIF Dataset using EEGUnity</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="creating-a-standardized-fif-dataset-using-eegunity">
+<h1>Creating a Standardized FIF Dataset using EEGUnity<a class="headerlink" href="#creating-a-standardized-fif-dataset-using-eegunity" title="Link to this heading">#</a></h1>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">#</a></h2>
+<p>Before using this script, you should have:</p>
+<ol class="arabic simple">
+<li><p><strong>Toolbox Installation</strong></p>
+<ul class="simple">
+<li><p>Install EEGUnity toolbox.</p></li>
+</ul>
+</li>
+<li><p><strong>Familiarity with Python syntax</strong></p>
+<ul class="simple">
+<li><p>Basic understanding of Python programming concepts and structures.</p></li>
+</ul>
+</li>
+<li><p><strong>Knowledge of the MNE-Python library (suggested)</strong></p>
+<ul class="simple">
+<li><p>Experience in using MNE-Python for EEG data processing and analysis.</p></li>
+</ul>
+</li>
+<li><p><strong>Understanding of EEG paradigms (suggested)</strong></p>
+<ul class="simple">
+<li><p>Familiarity with common EEG experimental paradigms and related concepts.</p></li>
+</ul>
+</li>
+<li><p><strong>Time Consuming</strong></p>
+<ul class="simple">
+<li><p>30 mins</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="purpose">
+<h2>Purpose<a class="headerlink" href="#purpose" title="Link to this heading">#</a></h2>
+<p>This tutorial is made for developers to create a <code class="docutils literal notranslate"><span class="pre">make_fif_xxxx</span></code> script (below marked as <code class="docutils literal notranslate"><span class="pre">standard</span> <span class="pre">script</span></code>)using the <code class="docutils literal notranslate"><span class="pre">EEGUnity</span></code> library. The script standardizes raw EEG datasets into the FIF format for following any unified processing. It ensures that:</p>
+<ul class="simple">
+<li><p><strong>Events</strong> are stored as MNE annotations, with descriptions consistent with the original dataset.</p></li>
+<li><p><strong>Subject Information</strong> is embedded in the <code class="docutils literal notranslate"><span class="pre">mne.io.raw.info['description']</span></code> field.</p></li>
+<li><p><strong>Channel Information</strong> is updated if the original data does not sufficiently reflect electrode positions.
+This document is detailed and beginner-friendly, making it accessible even to those without prior knowledge of EEG or programming. Below are the steps to create <code class="docutils literal notranslate"><span class="pre">standard</span> <span class="pre">script</span></code>.</p></li>
+</ul>
+</section>
+<section id="step-0-prepare-a-python-environment">
+<h2>🚀 Step 0: Prepare a Python Environment<a class="headerlink" href="#step-0-prepare-a-python-environment" title="Link to this heading">#</a></h2>
+<ol class="arabic">
+<li><p><strong>Create a Python environment</strong> with Python version <strong>≥ 3.6</strong>.</p>
+<ul class="simple">
+<li><p>You can use <code class="docutils literal notranslate"><span class="pre">venv</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code> to manage the environment.</p></li>
+</ul>
+</li>
+<li><p><strong>Install the <code class="docutils literal notranslate"><span class="pre">EEGUnity</span></code> library</strong> by running the following command in your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>eeginity
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="step-1-prepare-a-python-project">
+<h2>Step 1 Prepare a Python Project<a class="headerlink" href="#step-1-prepare-a-python-project" title="Link to this heading">#</a></h2>
+<ol class="arabic">
+<li><p>Create a Python project and name it: <code class="docutils literal notranslate"><span class="pre">standard_script_projects</span></code></p></li>
+<li><p>Create a Python package named <code class="docutils literal notranslate"><span class="pre">setting</span></code> in the root directory of project and create a python file name <code class="docutils literal notranslate"><span class="pre">path_variable.py</span></code> inside the <code class="docutils literal notranslate"><span class="pre">setting</span></code> package</p></li>
+<li><p>Create a folder in the root directory of the project, name <code class="docutils literal notranslate"><span class="pre">stage1_locator</span></code>, for storing locator files.</p></li>
+<li><p>Create a folder in the root directory of the project</p></li>
+<li><p>Create a folder named <code class="docutils literal notranslate"><span class="pre">original_raweeg</span></code> in any accessible path, to save original EEG datasets (for dataset downloasd).</p></li>
+<li><p>Create a folder named <code class="docutils literal notranslate"><span class="pre">standard_raweeg</span></code> in any accessible path, to save processed standard EEG datasets (folder for storing processed dataset).</p></li>
+<li><p>Download any datasets and unzip EEG datasets in <code class="docutils literal notranslate"><span class="pre">orignal_raweeg</span></code>, such as <a class="reference external" href="https://www.bbci.de/competition/iv/#dataset2a">BCI Competition IV 2a</a></p></li>
+<li><p>Define path variable on <code class="docutils literal notranslate"><span class="pre">path_variable.py</span></code>, like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Input path for each dataset</span>
+<span class="n">bcic_iv_2a_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;path/to/original_raweeg/bcic_iv_2a&quot;</span>
+<span class="n">bcic_iv_2b_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;path/to/original_raweeg/bcic_iv_2b&quot;</span> <span class="c1"># add more path if needed</span>
+
+<span class="c1"># output directory for stage 1</span>
+<span class="n">stage1_locator</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;path/to/stage1_locator/&quot;</span> <span class="c1"># folder to save stage 1 locator</span>
+<span class="n">stage1_output_dir</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;path/to/standard_raweeg&quot;</span>  <span class="c1"># folder to save processed datasets</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="step-2-make-standard-script-for-datasets">
+<h2>Step 2 Make Standard Script for Datasets<a class="headerlink" href="#step-2-make-standard-script-for-datasets" title="Link to this heading">#</a></h2>
+<p>Create a Python file, name <code class="docutils literal notranslate"><span class="pre">make_fif_xxxx.py</span></code> in the root directory of the project. Then, make it by following instrutions.
+The script performs the following tasks:</p>
+<ol class="arabic">
+<li><p><strong>Parameter Settings</strong>:<br />
+Define input and output paths, domain tag, and cache usage. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parameter settings </span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">setting.path_variable</span> <span class="k">as</span> <span class="nn">pv</span> <span class="c1"># this is additional python file which stores all path variable</span>
+<span class="n">input_path</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">bcic_iv_2a_path</span>  <span class="c1"># Dataset directory </span>
+<span class="n">domain_tag</span> <span class="o">=</span> <span class="s1">&#39;bcic-iv-2a&#39;</span>        <span class="c1"># Domain tag for marking the dataset </span>
+<span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pv</span><span class="o">.</span><span class="n">stage1_output_dir</span><span class="p">,</span> <span class="s1">&#39;bcic_iv_2a&#39;</span><span class="p">)</span>  <span class="c1"># Output path </span>
+<span class="n">use_cache</span> <span class="o">=</span> <span class="kc">False</span> 
+</pre></div>
+</div>
+<p><em>Note: Avoid absolute paths. Only specify basic parameters.</em></p>
+</li>
+<li><p><strong>Loading the Dataset</strong>:<br />
+The script uses the <code class="docutils literal notranslate"><span class="pre">UnifiedDataset</span></code> class to load the dataset. If a locator file exists and caching is enabled, it reuses that file; otherwise, it creates a new locator file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">locator_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pv</span><span class="o">.</span><span class="n">stage1_locator</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">locator_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">use_cache</span><span class="p">:</span>
+    <span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="n">locator_path</span><span class="o">=</span><span class="n">locator_path</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="n">dataset_path</span><span class="o">=</span><span class="n">input_path</span><span class="p">,</span> <span class="n">domain_tag</span><span class="o">=</span><span class="n">domain_tag</span><span class="p">)</span>
+    <span class="n">unified_dataset</span><span class="o">.</span><span class="n">save_locator</span><span class="p">(</span><span class="n">locator_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Processing Each Data Row</strong>:<br />
+A function <code class="docutils literal notranslate"><span class="pre">app_func</span></code> is defined to:</p>
+<ul class="simple">
+<li><p>Load the raw EEG data using <code class="docutils literal notranslate"><span class="pre">get_data_row</span></code>, a key function in <code class="docutils literal notranslate"><span class="pre">EEGUnity</span></code>.</p></li>
+<li><p>Extract the subject ID (e.g., from the file path) and update the subject information (such as age, gender, etc.) in <code class="docutils literal notranslate"><span class="pre">mne_raw.info['description']</span></code>. For convenience, you can check the dataset folder beforehand and store the information in a Python dictionary to simplify loading it within the code.</p></li>
+<li><p>Rename channels to match the standard system (e.g., 10-20 system).</p></li>
+<li><p><strong>Events Handling</strong>:</p>
+<ul>
+<li><p><strong>⚡ Extract events from the dataset folder</strong> and convert them back to annotations using <code class="docutils literal notranslate"><span class="pre">mne.annotations_from_events</span></code>.<br />
+<strong><em>Note:</em></strong> This step is <strong>the most important</strong> and <strong>time-consuming</strong> when creating <code class="docutils literal notranslate"><span class="pre">standard</span> <span class="pre">script</span></code>. 🚨
+For more details on MNE annotations, please read the <a class="reference external" href="https://mne.tools/stable/auto_tutorials/plot_annotations.html">MNE-Python Annotations Documentation</a> :contentReference[oaicite:0]{index=0} carefully.</p></li>
+</ul>
+</li>
+<li><p>Handle irregularities, such as nonstandard data (e.g., file names and event annotations), directly within the script.<br />
+This ensures that users can run the <code class="docutils literal notranslate"><span class="pre">standard</span> <span class="pre">script</span></code> immediately after downloading the datasets without additional modifications.</p></li>
+</ul>
+</li>
+<li><p><strong>Saving the Processed Data</strong>:<br />
+After processing, the EEG data is saved as a FIF file. The output filename is modified (by appending <code class="docutils literal notranslate"><span class="pre">_raw.fif</span></code>) to conform to MNE naming conventions.</p></li>
+<li><p><strong>Batch Processing</strong>:<br />
+Finally, the script applies <code class="docutils literal notranslate"><span class="pre">app_func</span></code> to all data rows (filtered to only those marked as <code class="docutils literal notranslate"><span class="pre">Completed</span></code>), processing the entire dataset in batch.</p></li>
+</ol>
+</section>
+<section id="detailed-explanation-of-the-code">
+<h2>Detailed Explanation of the Code<a class="headerlink" href="#detailed-explanation-of-the-code" title="Link to this heading">#</a></h2>
+<p>Below is the full sample script for standardizing the <code class="docutils literal notranslate"><span class="pre">bcic_iv_2a</span></code> dataset, you can copy it in your project and modify it based on your dataset:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">scio</span>
+<span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">get_data_row</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">mne</span>
+<span class="kn">import</span> <span class="nn">setting.path_variable</span> <span class="k">as</span> <span class="nn">pv</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">subject_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;A01&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;female&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">},</span>
+    <span class="s1">&#39;A02&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;female&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">},</span>
+    <span class="s1">&#39;A03&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;male&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">},</span>
+    <span class="s1">&#39;A04&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;female&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">},</span>
+    <span class="s1">&#39;A05&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;male&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">},</span>
+    <span class="s1">&#39;A06&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;female&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">},</span>
+    <span class="s1">&#39;A07&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;male&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">},</span>
+    <span class="s1">&#39;A08&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;male&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">},</span>
+    <span class="s1">&#39;A09&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;gender&#39;</span><span class="p">:</span> <span class="s1">&#39;male&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="mi">17</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># Parameter settings</span>
+<span class="n">input_path</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">bcic_iv_2a_path</span>  <span class="c1"># Dataset directory</span>
+<span class="n">domain_tag</span> <span class="o">=</span> <span class="s2">&quot;bcic-iv-2a&quot;</span>      <span class="c1"># Domain tag for marking the dataset</span>
+<span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pv</span><span class="o">.</span><span class="n">stage1_output_dir</span><span class="p">,</span> <span class="s2">&quot;bcic_iv_2a&quot;</span><span class="p">)</span>  <span class="c1"># Output path</span>
+<span class="n">use_cache</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+    <span class="c1"># Load the MNE raw data</span>
+    <span class="n">mne_raw</span> <span class="o">=</span> <span class="n">get_data_row</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+    <span class="n">subject_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">])[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">description_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;original_description&quot;</span><span class="p">:</span> <span class="n">mne_raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">],</span>
+        <span class="s2">&quot;eegunity_description&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;amplifier&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cap&quot;</span><span class="p">:</span> <span class="s2">&quot;Ag/AgCl&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="n">subject_dict</span><span class="p">[</span><span class="n">subject_id</span><span class="p">][</span><span class="s1">&#39;age&#39;</span><span class="p">],</span>
+            <span class="s2">&quot;sex&quot;</span><span class="p">:</span> <span class="n">subject_dict</span><span class="p">[</span><span class="n">subject_id</span><span class="p">][</span><span class="s1">&#39;gender&#39;</span><span class="p">],</span>
+            <span class="s2">&quot;handedness&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">mne_raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">description_dict</span><span class="p">)</span>
+
+    <span class="c1"># Rename the channels to the 10-20 system, commonly used for 64 electrode positions</span>
+    <span class="n">mne_raw</span><span class="o">.</span><span class="n">rename_channels</span><span class="p">({</span>
+        <span class="s1">&#39;EEG-Fz&#39;</span><span class="p">:</span> <span class="s1">&#39;Fz&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-0&#39;</span><span class="p">:</span> <span class="s1">&#39;FC3&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-1&#39;</span><span class="p">:</span> <span class="s1">&#39;FC1&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-2&#39;</span><span class="p">:</span> <span class="s1">&#39;FCz&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;EEG-3&#39;</span><span class="p">:</span> <span class="s1">&#39;FC2&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-4&#39;</span><span class="p">:</span> <span class="s1">&#39;FC4&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-5&#39;</span><span class="p">:</span> <span class="s1">&#39;C5&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-C3&#39;</span><span class="p">:</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;EEG-6&#39;</span><span class="p">:</span> <span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-Cz&#39;</span><span class="p">:</span> <span class="s1">&#39;Cz&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-7&#39;</span><span class="p">:</span> <span class="s1">&#39;C2&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-C4&#39;</span><span class="p">:</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;EEG-8&#39;</span><span class="p">:</span> <span class="s1">&#39;C6&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-9&#39;</span><span class="p">:</span> <span class="s1">&#39;CP3&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-10&#39;</span><span class="p">:</span> <span class="s1">&#39;CP1&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-11&#39;</span><span class="p">:</span> <span class="s1">&#39;CPz&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;EEG-12&#39;</span><span class="p">:</span> <span class="s1">&#39;CP2&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-13&#39;</span><span class="p">:</span> <span class="s1">&#39;CP4&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-14&#39;</span><span class="p">:</span> <span class="s1">&#39;P1&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-15&#39;</span><span class="p">:</span> <span class="s1">&#39;Pz&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;EEG-16&#39;</span><span class="p">:</span> <span class="s1">&#39;P2&#39;</span><span class="p">,</span> <span class="s1">&#39;EEG-Pz&#39;</span><span class="p">:</span> <span class="s1">&#39;POz&#39;</span>
+    <span class="p">})</span>
+
+    <span class="n">montage</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">make_standard_montage</span><span class="p">(</span><span class="s1">&#39;standard_1020&#39;</span><span class="p">)</span>
+    <span class="n">mne_raw</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">set_montage</span><span class="p">(</span><span class="n">montage</span><span class="p">,</span> <span class="n">on_missing</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="n">mne_raw</span><span class="o">.</span><span class="n">set_channel_types</span><span class="p">({</span><span class="s1">&#39;EOG-left&#39;</span><span class="p">:</span> <span class="s1">&#39;eog&#39;</span><span class="p">,</span> <span class="s1">&#39;EOG-central&#39;</span><span class="p">:</span> <span class="s1">&#39;eog&#39;</span><span class="p">,</span> <span class="s1">&#39;EOG-right&#39;</span><span class="p">:</span> <span class="s1">&#39;eog&#39;</span><span class="p">})</span>
+
+    <span class="c1"># Event ID mapping</span>
+    <span class="n">event_id</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;Rejected trial&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;Eye movements&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;Idling EEG (eyes open)&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">&#39;Idling EEG (eyes closed)&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">&#39;Start of a new run&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;Start of a trial&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s1">&#39;Cue onset left (class 1)&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+        <span class="s1">&#39;Cue onset right (class 2)&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="s1">&#39;Cue onset foot (class 3)&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+        <span class="s1">&#39;Cue onset tongue (class 4)&#39;</span><span class="p">:</span> <span class="mi">10</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Extract events and original event IDs</span>
+    <span class="n">events</span><span class="p">,</span> <span class="n">original_event_id</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">events_from_annotations</span><span class="p">(</span><span class="n">mne_raw</span><span class="p">)</span>
+
+    <span class="c1"># Update events based on new event_id mapping</span>
+    <span class="k">for</span> <span class="n">event_desc</span><span class="p">,</span> <span class="n">new_id</span> <span class="ow">in</span> <span class="n">event_id</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">event_desc</span> <span class="ow">in</span> <span class="n">original_event_id</span><span class="p">:</span>
+            <span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">original_event_id</span><span class="p">[</span><span class="n">event_desc</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_id</span>
+
+    <span class="c1"># Check if the file name ends with &#39;E&#39; and construct the .mat file path</span>
+    <span class="n">file_base</span><span class="p">,</span> <span class="n">file_ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">file_base</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">file_ext</span> <span class="o">==</span> <span class="s1">&#39;.gdf&#39;</span><span class="p">:</span>
+        <span class="n">mat_filepath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_base</span><span class="si">}</span><span class="s2">.mat&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">mat_filepath</span><span class="p">):</span>
+            <span class="n">mat_data</span> <span class="o">=</span> <span class="n">scio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">mat_filepath</span><span class="p">)</span>
+            <span class="n">values_from_mat</span> <span class="o">=</span> <span class="n">mat_data</span><span class="p">[</span>
+                                  <span class="s1">&#39;classlabel&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">+</span> <span class="mi">6</span>  <span class="c1"># Replace &#39;data&#39; with the correct key in your .mat file</span>
+
+            <span class="c1"># Replace events where the last column is 7</span>
+            <span class="n">replacement_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">events</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">7</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">replacement_indices</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values_from_mat</span><span class="p">):</span>
+                <span class="n">events</span><span class="p">[</span><span class="n">replacement_indices</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">values_from_mat</span><span class="p">)],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">values_from_mat</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="n">mat_filepath</span><span class="si">}</span><span class="s2"> contains fewer values than needed for replacement.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert modified events back to annotations</span>
+    <span class="n">event_desc</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">event_id</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>  <span class="c1"># Convert event IDs back to descriptions</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="n">mne</span><span class="o">.</span><span class="n">annotations_from_events</span><span class="p">(</span>
+        <span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span>
+        <span class="n">sfreq</span><span class="o">=</span><span class="n">mne_raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;sfreq&#39;</span><span class="p">],</span>
+        <span class="n">event_desc</span><span class="o">=</span><span class="n">event_desc</span>  <span class="c1"># Mapping event codes to descriptions</span>
+    <span class="p">)</span>
+    <span class="n">mne_raw</span><span class="o">.</span><span class="n">set_annotations</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span>  <span class="c1"># Set new annotations to raw data</span>
+
+    <span class="c1"># Save the processed EEG data to the output directory</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;File Path&#39;</span><span class="p">])</span>  <span class="c1"># Extract the file name</span>
+    <span class="c1"># Modify the output filename to conform to MNE naming conventions</span>
+    <span class="n">output_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">_raw.fif&quot;</span>  <span class="c1"># Assuming the original filename ends with &#39;.gdf&#39;, remove the extension and add &#39;_raw.fif&#39;</span>
+    <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">)</span>  <span class="c1"># Define the output path</span>
+    <span class="n">mne_raw</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Save the file, overwriting if necessary</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="c1"># 1. Load the dataset directory</span>
+<span class="n">locator_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pv</span><span class="o">.</span><span class="n">stage1_locator</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">locator_path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">use_cache</span><span class="p">:</span>
+    <span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="n">locator_path</span><span class="o">=</span><span class="n">locator_path</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="n">dataset_path</span><span class="o">=</span><span class="n">input_path</span><span class="p">,</span> <span class="n">domain_tag</span><span class="o">=</span><span class="n">domain_tag</span><span class="p">)</span>
+    <span class="n">unified_dataset</span><span class="o">.</span><span class="n">save_locator</span><span class="p">(</span><span class="n">locator_path</span><span class="p">)</span>
+
+<span class="c1"># 2. Batch process EEG data</span>
+<span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span>
+    <span class="n">con_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Completeness Check&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Completed&#39;</span><span class="p">,</span>  <span class="c1"># Filter out &#39;Completed&#39; data</span>
+    <span class="n">app_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">app_func</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">output_path</span><span class="p">),</span>  <span class="c1"># Call the processing function and set output directory</span>
+    <span class="n">is_patch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># No patching needed</span>
+    <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span>  <span class="c1"># No return type needed</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="key-points-to-remember">
+<h2>Key Points to Remember<a class="headerlink" href="#key-points-to-remember" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Annotations</strong>: All events are stored as MNE annotations, ensuring consistency in event descriptions. For more details, refer to <a class="reference external" href="https://mne.tools/stable/auto_tutorials/plot_annotations.html">MNE-Python Annotations</a> :contentReference[oaicite:1]{index=1}.</p></li>
+<li><p><strong>Subject Information</strong>: Subject details (e.g., age, gender) are embedded in the <code class="docutils literal notranslate"><span class="pre">info['description']</span></code> field.</p></li>
+<li><p><strong>Channel Information</strong>: Renaming channels and setting a standard montage guarantees accurate electrode positioning.</p></li>
+<li><p><strong>Robustness</strong>: Exception handling is built into the script (e.g., handling irregular file names and time annotations) so that users can process the dataset without manual directory modifications.</p></li>
+<li><p><strong>Parameter Settings</strong>: Only basic parameters (input_path, domain_tag, output_path, use_cache) need to be specified, with no absolute paths used.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="How%20to%20Format%20Channel%20Name%20and%20Inspect%20Metadata.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Formatting Channel Names and Inspecting Metadata</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="How%20to%20Process%20Data%20Using%20Multiple%20Computers%20with%20EEGUnity.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Cooperation with Multiple Computers or Servers using EEGUnity</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#purpose">Purpose</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-prepare-a-python-environment">🚀 Step 0: Prepare a Python Environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-prepare-a-python-project">Step 1 Prepare a Python Project</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-make-standard-script-for-datasets">Step 2 Make Standard Script for Datasets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#detailed-explanation-of-the-code">Detailed Explanation of the Code</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-points-to-remember">Key Points to Remember</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tutorial/How to Make Standard Datasets.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

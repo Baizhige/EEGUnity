@@ -1,0 +1,1827 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>eegunity.modules.batch &#8212; EEGUnity 0.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'eegunity.modules.batch';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = '_static/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'latest';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="eegunity.modules.correction" href="eegunity.modules.correction.html" />
+    <link rel="prev" title="eegunity.modules package" href="eegunity.modules.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="latest" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="EEGUnity 0.6.0 documentation - Home"/>
+    <img src="_static/logo.png" class="logo__image only-dark pst-js-only" alt="EEGUnity 0.6.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="modules.html">
+    eegunity
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="eegunity.html">eegunity package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="eegunity.modules.html">eegunity.modules package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">eegunity.modules.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.correction.html">eegunity.modules.correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.llm_booster.html">eegunity.modules.llm_booster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eegunity.modules.parser.html">eegunity.modules.parser</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.resources.html">eegunity.resources package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eegunity.utils.html">eegunity.utils package</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="modules.html" class="nav-link">eegunity</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="eegunity.html" class="nav-link">eegunity package</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="eegunity.modules.html" class="nav-link">eegunity.modules package</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">eegunity.modules.batch</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="eegunity-modules-batch">
+<h1>eegunity.modules.batch<a class="headerlink" href="#eegunity-modules-batch" title="Link to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-eegunity.modules.batch.eeg_batch">
+<span id="eegunity-modules-batch-eeg-batch-module"></span><h2>eegunity.modules.batch.eeg_batch module<a class="headerlink" href="#module-eegunity.modules.batch.eeg_batch" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_batch.</span></span><span class="sig-name descname"><span class="pre">EEGBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">main_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_UDatasetSharedAttributes</span></code>, <a class="reference internal" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch" title="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch"><code class="xref py py-class docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch</span></code></a></p>
+<p>This is a key module of <cite>UnifiedDataset</cite> class, with focus on batch processing.
+This <cite>EEGBatch</cite> class has the same attributes as the UnifiedDataset class. In this
+class, we define the functions relative to EEG batch processing.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.align_channel">
+<span class="sig-name descname"><span class="pre">align_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_num_channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.align_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.align_channel" title="Link to this definition">#</a></dt>
+<dd><p>Adjust the channel order and perform interpolation on the data.</p>
+<p>This method realigns the EEG data channels based on the provided <cite>channel_order</cite>. It utilizes
+<cite>get_data_row()</cite> for retrieving the data. Additional parameters can be passed to <cite>get_data_row()</cite>
+via <cite>get_data_row_params</cite>. For more information on available options, refer to the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">get_data_row()</span></code> function in this documentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The path where the adjusted file will be saved.</p></li>
+<li><p><strong>channel_order</strong> (<em>list</em>) – The desired order of channels, provided as a list.</p></li>
+<li><p><strong>min_num_channels</strong> (<em>int</em><em>, </em><em>optional</em>) – The minimum number of channels required for alignment. Defaults to 1.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments to be passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">get_data_row()</span></code> for data fetching.
+This allows fine-tuning the data retrieval process.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by saving the adjusted data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any invalid channels are found in the provided <cite>channel_order</cite> or if the number of
+    matching channels is below <cite>min_num_channels</cite>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the output path is accessible and that the provided channel order is valid before calling this method.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">align_channel</span><span class="p">(</span><span class="s1">&#39;/path/to/save/&#39;</span><span class="p">,</span> <span class="n">channel_order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span> <span class="s1">&#39;O1&#39;</span><span class="p">],</span> <span class="n">min_num_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.auto_domain">
+<span class="sig-name descname"><span class="pre">auto_domain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.auto_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.auto_domain" title="Link to this definition">#</a></dt>
+<dd><p>Automatically modify the ‘Domain Tag’ of each row based on ‘Sampling Rate’ and channel names.</p>
+<p>This function processes each row in the dataset and updates the ‘Domain Tag’
+by appending the ‘Sampling Rate’ and a unique encoded representation of the channel names.
+The channel names are retrieved using <cite>get_data_row()</cite> to ensure accuracy,
+and parameters can be passed to <cite>get_data_row()</cite> via <cite>get_data_row_params</cite>.</p>
+<p>The ‘Domain Tag’ is updated in the format:
+<cite>f”row[‘Domain Tag’]-row[‘Sampling Rate’]Hz-ch_enc(channel_names)”</cite>.</p>
+<p>The function utilizes the <cite>batch_process</cite> method to apply these modifications
+across the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The function modifies the dataset in place by updating the ‘Domain Tag’ column.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>KeyError</strong> – If the required columns (‘Domain Tag’, ‘Sampling Rate’) are missing.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">auto_domain</span><span class="p">(</span><span class="n">get_data_row_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;preload&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.batch_process">
+<span class="sig-name descname"><span class="pre">batch_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">con_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.batch_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.batch_process" title="Link to this definition">#</a></dt>
+<dd><p>Process each row of locator based on conditions specified
+in <cite>con_func</cite> and apply <cite>app_func</cite> accordingly. This function handles both list
+and dataframe return types, ensuring the result aligns with the original locator’s
+rows based on the <cite>is_patch</cite> flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>con_func</strong> (<em>Callable</em>) – A function that takes a row of locator and returns <cite>True</cite> or <cite>False</cite> to determine
+if <cite>app_func</cite> should be applied to that row. The input is a single row from the
+locator, which you can access like a dictionary. For example, to read the file
+path attribute, use: file_path = row[‘File Path’]</p></li>
+<li><p><strong>app_func</strong> (<em>Callable</em>) – A function that processes a row of locator and returns the result. The input is same
+as con_func.</p></li>
+<li><p><strong>is_patch</strong> (<em>bool</em>) – If <cite>True</cite>, the returned list length or dataframe rows will match the locator’s
+row count, using placeholder elements as needed.</p></li>
+<li><p><strong>result_type</strong> (<em>{'series'</em><em>, </em><em>'value'</em><em>, </em><em>None}</em><em>, </em><em>optional</em>) – Specifies the expected return type of <cite>app_func</cite> results. Can be “series”, “value”,
+or <cite>None</cite> (case insensitive). Defaults to <cite>None</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The processed results, either as a list or dataframe, depending on <cite>result_type</cite>
+and <cite>app_func</cite> return type and consistency. Returns <cite>None</cite> if <cite>result_type</cite> is <cite>None</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[None, list, pd.DataFrame]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>result_type</cite> is not one of the expected values.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is essential when designing a custom processing pipeline for the dataset.
+Ensure that <cite>con_func</cite> and <cite>app_func</cite> are compatible with the structure of the locator.
+If using <cite>is_patch</cite>, consider the implications on the data integrity.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u_ds</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># example1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_locator</span> <span class="o">=</span> <span class="n">u_ds</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">app_func</span><span class="p">,</span> <span class="n">con_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">new_locator</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># example2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a_list</span> <span class="o">=</span> <span class="n">u_ds</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">app_func</span><span class="p">,</span> <span class="n">con_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">a_list</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># example3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u_ds</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">batch_process</span><span class="p">(</span><span class="n">app_func</span><span class="p">,</span> <span class="n">con_func</span><span class="p">,</span> <span class="n">is_patch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.epoch_for_pretraining">
+<span class="sig-name descname"><span class="pre">epoch_for_pretraining</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seg_sec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.epoch_for_pretraining"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.epoch_for_pretraining" title="Link to this definition">#</a></dt>
+<dd><p>Processes raw EEG data by creating epochs for pretraining, with optional resampling and event segmentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Path to save the preprocessed epoch data in .npy format.</p></li>
+<li><p><strong>seg_sec</strong> (<em>float</em>) – Segment length in seconds for each epoch.</p></li>
+<li><p><strong>resample</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – New sampling rate. If specified, raw data will be resampled.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em><em>, </em><em>optional</em>) – Fraction of overlap between consecutive segments (0.0 means no overlap).</p></li>
+<li><p><strong>exclude_bad</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, drops epochs marked as bad.</p></li>
+<li><p><strong>baseline</strong> (<em>Tuple</em><em>[</em><em>Optional</em><em>[</em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Baseline correction period, represented as a tuple (start, end). Default is (None, 0).</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, skips files with errors instead of raising an exception.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>raw_data.resample()</cite>.</p></li>
+<li><p><strong>epoch_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>mne.Epochs()</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by saving the processed epoch data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the segment length is invalid or if any specified parameters are inconsistent.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the output path is accessible and that the input data is properly formatted before calling this method.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">epoch_for_pretraining</span><span class="p">(</span><span class="s1">&#39;/path/to/save/&#39;</span><span class="p">,</span> <span class="n">seg_sec</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.export_h5Dataset">
+<span class="sig-name descname"><span class="pre">export_h5Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EEGUnity_export'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.export_h5Dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.export_h5Dataset" title="Link to this definition">#</a></dt>
+<dd><p>Export the dataset in HDF5 format to the specified output path, use in this large brain model project:
+<a class="github reference external" href="https://github.com/935963004/LaBraM">935963004/LaBraM</a>;
+Reference: W.-B. Jiang, L.-M. Zhao, and B.-L. Lu, “Large brain model for learning generic representations with
+tremendous EEG data in BCI,” Proc. The 12th Int. Conf. Learning Representations, 2024. [Online]. Available:
+<a class="reference external" href="https://openreview.net/forum?id=QzTpTRVtrP">https://openreview.net/forum?id=QzTpTRVtrP</a>.</p>
+<p>This function processes all files in the dataset, ensuring that each file
+is stored in a separate group with its own dataset and attributes.</p>
+<p>The exported HDF5 file will have the following structure:</p>
+<ul>
+<li><p>A root group named after the provided <cite>name</cite> (default: ‘EEGUnity_export’).</p></li>
+<li><p>Each file in the dataset is stored as a separate group within the root group.
+- The group name is derived from the basename of the file path (e.g., ‘file1.fif’).
+- Within each group:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>A dataset named ‘eeg’ contains the EEG data (stored as a NumPy array).</p></li>
+<li><p>A dataset named ‘info’ contains additional metadata about the EEG data, serialized as a uint8 array (using pickle).</p></li>
+<li><p>Attributes for each dataset:
+- ‘rsFreq’: The sampling rate of the EEG data for the specific file.
+- ‘chOrder’: The list of channel names in the order they appear in the EEG data.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The directory path where the exported HDF5 files will be saved.
+A <cite>FileNotFoundError</cite> is raised if the path does not exist.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the HDF5 file. Must be a string. The default value is ‘EEGUnity_export’.
+Raises a <cite>TypeError</cite> if the value provided is not a string.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>True</cite>, skips rows that contain bad data without raising an error.
+If <cite>False</cite>, raises an exception when encountering bad data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function does not return any value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the output path does not exist.</p></li>
+<li><p><strong>FileExistsError</strong> – If the HDF5 file already exists in the specified output path.</p></li>
+<li><p><strong>ValueError</strong> – If channel configurations or counts are inconsistent within a domain tag.</p></li>
+<li><p><strong>TypeError</strong> – If the <cite>name</cite> parameter is not a string.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bandpass'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notch_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_adjust_h_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notch_filter_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.filter" title="Link to this definition">#</a></dt>
+<dd><p>Apply filtering to the data, supporting low-pass, high-pass, band-pass, and notch filters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Path to save the filtered file.</p></li>
+<li><p><strong>filter_type</strong> (<em>{'lowpass'</em><em>, </em><em>'highpass'</em><em>, </em><em>'bandpass'</em><em>, </em><em>'notch'}</em><em>, </em><em>optional</em>) – Type of filter to apply. Defaults to ‘bandpass’.</p></li>
+<li><p><strong>l_freq</strong> (<em>float</em><em>, </em><em>optional</em>) – Low cutoff frequency for the filter (used in high-pass or low-frequency band-pass filters). Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>h_freq</strong> (<em>float</em><em>, </em><em>optional</em>) – High cutoff frequency for the filter (used in low-pass or high-frequency band-pass filters). Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>notch_freq</strong> (<em>float</em><em>, </em><em>optional</em>) – Frequency for the notch filter. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>auto_adjust_h_freq</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to automatically adjust the high cutoff frequency to fit the Nyquist frequency. Defaults to <cite>True</cite>.</p></li>
+<li><p><strong>picks</strong> (<em>str</em><em>, </em><em>optional</em>) – Channels to be used for filtering. Defaults to ‘all’.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>filter_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for <cite>mne_raw.filter()</cite>.</p></li>
+<li><p><strong>notch_filter_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for <cite>mne_raw.notch_filter()</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.format_channel_names">
+<span class="sig-name descname"><span class="pre">format_channel_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EEGUnity'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.format_channel_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.format_channel_names" title="Link to this definition">#</a></dt>
+<dd><p>Format channel names in the dataset and update the ‘Channel Names’ column.</p>
+<p>This function processes each row in the dataset, checks the ‘Channel Names’
+column, and applies a formatting function to standardize the channel names.
+The function utilizes the <cite>batch_process</cite> method to apply the formatting to
+each row of locator, and the updated channel names are then saved back to
+the ‘Channel Names’ column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>format_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The format for channel names, possible values are ‘EEGUnity’, ‘normal’, by default ‘EEGUnity’. If set to
+‘EEGUnity’, the channel names are formated in “type:name”, like ‘EEG:C3’, ‘EEG:Cz’, ‘Stim:stim1’, which store
+channel type in the locator, rather than change the source data. If set to ‘normal’, the channel, only formatted
+channels name are stored, like ‘C3’, ‘Cz’, ‘stim1’.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs. Defaults to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by updating the
+‘Channel Names’ column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If the ‘Channel Names’ column is missing from the dataset.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the dataset is properly loaded and contains the ‘Channel Names’ column
+before calling this method.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">format_channel_names</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.get_events">
+<span class="sig-name descname"><span class="pre">get_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.get_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.get_events" title="Link to this definition">#</a></dt>
+<dd><p>Extract events and log them in the data rows.</p>
+<p>This method processes each data row by applying the <cite>get_data_row()</cite> and <cite>extract_events()</cite>
+functions. Additional parameters can be passed to these functions via <cite>get_data_row_params</cite> and <cite>extract_events_params</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If <cite>miss_bad_data</cite> is <cite>False</cite>, an exception is raised on processing errors.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please refer to the documentation of <cite>get_data_row()</cite> and <cite>extract_events()</cite>
+for detailed descriptions of the available parameters.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.get_file_hashes">
+<span class="sig-name descname"><span class="pre">get_file_hashes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.get_file_hashes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.get_file_hashes" title="Link to this definition">#</a></dt>
+<dd><p>Generate and store unique file identifiers for EEG data files.</p>
+<p>This method processes each row in the dataset by reading the file at the
+specified path and computing its SHA-256 hash. The hash serves as a unique
+identifier for the file, which is then stored in the metadata under the
+key “Source Hash”.</p>
+<p>The method uses <cite>batch_process</cite> to apply the hash function to all rows,
+and updates the metadata using <cite>set_metadata</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If a file at the specified path cannot be found.</p></li>
+<li><p><strong>IOError</strong> – If a file cannot be read due to permission or corruption issues.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.get_quality">
+<span class="sig-name descname"><span class="pre">get_quality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'shady'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ica_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'scores'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.get_quality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.get_quality" title="Link to this definition">#</a></dt>
+<dd><p>Process the data quality of EEG files by calculating quality scores for each row in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>True</cite>, skips rows that contain bad data without raising an error.
+If <cite>False</cite>, raises an exception when encountering bad data.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to the <cite>get_data_row()</cite> function.
+This allows fine-tuning of parameters such as unit conversion, data normalization, etc.
+For details, refer to the <cite>get_data_row()</cite> function documentation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by updating quality scores for each row.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.ica">
+<span class="sig-name descname"><span class="pre">ica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ica_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.ica"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.ica" title="Link to this definition">#</a></dt>
+<dd><p>Apply ICA (Independent Component Analysis) to the specified file in the dataset.</p>
+<p>This method applies ICA to clean the EEG data using parameters passed through <cite>ica_params</cite>, <cite>fit_params</cite>,
+and <cite>apply_params</cite>. Please refer to the official documentation for <cite>mne.preprocessing.ICA</cite>, <cite>ica.fit()</cite>,
+and <cite>ica.apply()</cite> for the complete list of available parameters.</p>
+<p>Documentation links:
+- <cite>mne.preprocessing.ICA</cite>: <a class="reference external" href="https://mne.tools/stable/generated/mne.preprocessing.ICA.html">https://mne.tools/stable/generated/mne.preprocessing.ICA.html</a>
+- <cite>ICA.fit</cite>: <a class="reference external" href="https://mne.tools/stable/generated/mne.preprocessing.ICA.html#fitting-ica">https://mne.tools/stable/generated/mne.preprocessing.ICA.html#fitting-ica</a>
+- <cite>ICA.apply</cite>: <a class="reference external" href="https://mne.tools/stable/generated/mne.preprocessing.ICA.html#applying-ica">https://mne.tools/stable/generated/mne.preprocessing.ICA.html#applying-ica</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Path to save the processed file after applying ICA.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip bad data files and continue processing the next one. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>get_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>eegunity.module_eeg_parser.eeg_parser.get_data_row</cite>,</p></li>
+<li><p><strong>ica_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>mne.preprocessing.ICA</cite>, such as <cite>n_components</cite>, <cite>method</cite>, etc.</p></li>
+<li><p><strong>fit_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>ica.fit()</cite>, such as <cite>picks</cite>, <cite>decim</cite>, etc.</p></li>
+<li><p><strong>apply_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>ica.apply()</cite>, such as <cite>exclude</cite>, <cite>include</cite>, etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updates the file path in the dataset locator after ICA is applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the output path is invalid or if the specified parameters are inconsistent.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the input data is properly formatted and that all necessary parameters are specified
+before calling this method.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">ica</span><span class="p">(</span><span class="s1">&#39;/path/to/save/&#39;</span><span class="p">,</span> <span class="n">ica_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_components&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span> <span class="n">fit_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;picks&#39;</span><span class="p">:</span> <span class="s1">&#39;eeg&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.infer_units">
+<span class="sig-name descname"><span class="pre">infer_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.infer_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.infer_units" title="Link to this definition">#</a></dt>
+<dd><p>Infer the units of each channel and record them in the data line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next file when an error occurs.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite>. These allow for more flexible data processing
+during the inference process.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If an error occurs during file processing and <cite>miss_bad_data</cite> is set to <cite>False</cite>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method applies a custom function to each row in the dataframe to infer the units for each channel
+based on the raw MNE data. The function handles errors gracefully if <cite>miss_bad_data</cite> is <cite>True</cite>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sample-wise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.normalize" title="Link to this definition">#</a></dt>
+<dd><p>Normalize the data.</p>
+<p>This method normalizes the EEG data based on the specified normalization type. It can either
+perform sample-wise normalization or aggregate by domain mean, depending on the provided parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The path where the normalized file will be saved.</p></li>
+<li><p><strong>norm_type</strong> (<em>str</em>) – The type of normalization to perform. It can be:
+- ‘channel-wise’: Normalize each channel individually based on its mean and standard deviation.
+- ‘sample-wise’: Normalize all channels based on a common mean and standard deviation.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>domain_mean</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True (default), the function aggregates the results by domain tags. Each domain contains the
+mean and standard deviation across all related EEG channels. If False, the function calculates
+and stores individual mean and standard deviation for each EEG recording.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">get_data_row()</span></code>. This allows users to pass extra parameters
+required by the <cite>get_data_row</cite> function seamlessly. For details on the parameters, refer to the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">get_data_row()</span></code> function in this documentation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by saving the normalized data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the specified normalization type is invalid or if there are issues with the input data.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the output path is accessible and that the input data is properly formatted before calling this method.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s1">&#39;/path/to/save/&#39;</span><span class="p">,</span> <span class="n">norm_type</span><span class="o">=</span><span class="s1">&#39;channel-wise&#39;</span><span class="p">,</span> <span class="n">domain_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.process_mean_std">
+<span class="sig-name descname"><span class="pre">process_mean_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pick_type_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'eeg':</span> <span class="pre">True,</span> <span class="pre">'eog':</span> <span class="pre">False,</span> <span class="pre">'meg':</span> <span class="pre">False,</span> <span class="pre">'stim':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.process_mean_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.process_mean_std" title="Link to this definition">#</a></dt>
+<dd><p>Process the mean and standard deviation for EEG data across different channels and optionally
+compute domain-level statistics.</p>
+<p>This function calculates the mean and standard deviation for all EEG channels, both combined and individually.
+It can also aggregate the results by domain if <cite>domain_mean</cite> is set to <cite>True</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain_mean</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>True</cite> (default), the function aggregates the results by domain tags. Each domain contains the
+mean and standard deviation across all related EEG channels. If <cite>False</cite>, the function calculates
+and stores individual mean and standard deviation for each EEG recording.</p></li>
+<li><p><strong>pick_type_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">mne.pick_types()</span></code>. This allows users to pass extra parameters
+required by the <cite>mne.pick_types</cite> function seamlessly. For details on the parameters, refer to the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">mne.pick_types()</span></code> function in MNE-Python documentation.
+Detault is <cite>{‘eeg’:True, ‘meg’:False, ‘stim’:False, ‘eog’:False}</cite></p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs. Defaults to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function updates the instance by setting the “MEAN STD” column with the calculated mean and
+standard deviation values. If <cite>domain_mean</cite> is <cite>True</cite>, it computes domain-aggregated statistics;
+otherwise, it stores per-channel results.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If inconsistent channel names or numbers are found within a domain when <cite>domain_mean</cite> is <cite>True</cite>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the EEG data is properly formatted and that all necessary channels are present before calling
+this method.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">process_mean_std</span><span class="p">(</span><span class="n">domain_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.replace_paths">
+<span class="sig-name descname"><span class="pre">replace_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_prefix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.replace_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.replace_paths" title="Link to this definition">#</a></dt>
+<dd><p>Replace the prefix of file paths in the dataset according to the provided mapping (in-place).
+“This function is generally used in the context of multi-server or multi-user coordination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_prefix</strong> (<em>str</em>) – The old path prefix to be replaced.</p></li>
+<li><p><strong>new_prefix</strong> (<em>str</em>) – The new path prefix to replace the old one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This method modifies internal state in-place and does not return any value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.resample">
+<span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.resample" title="Link to this definition">#</a></dt>
+<dd><p>Resample the data using MNE’s resampling functionality and save the processed data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The path where the resampled file will be saved.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip the current file and continue processing the next one if an error occurs. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters to be passed to the <cite>mne_raw.resample()</cite> function.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters to be passed to the <cite>get_data_row()</cite> function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by saving the resampled data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If an error occurs during resampling and <cite>miss_bad_data</cite> is set to <cite>False</cite>, the error will be raised.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the output path is accessible and that the input data is properly formatted before calling this method.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;/path/to/save/&#39;</span><span class="p">,</span> <span class="n">resample_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sfreq&#39;</span><span class="p">:</span> <span class="mi">256</span><span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.sample_filter">
+<span class="sig-name descname"><span class="pre">sample_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completeness_check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.sample_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.sample_filter" title="Link to this definition">#</a></dt>
+<dd><p>Filters the ‘locator’ dataframe based on the given criteria. This function is typically
+used to select the data file according to specified requirements. For advanced filtering,
+refer to the <cite>batch_process()</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel_number</strong> (<em>Union</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – A tuple or list with (min, max) values to filter the “Number of Channels” column.
+If <cite>None</cite>, this criterion is ignored. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>sampling_rate</strong> (<em>Union</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – A tuple or list with (min, max) values to filter the “Sampling Rate” column.
+If <cite>None</cite>, this criterion is ignored. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>duration</strong> (<em>Union</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – A tuple or list with (min, max) values to filter the “Duration” column.
+If <cite>None</cite>, this criterion is ignored. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>completeness_check</strong> (<em>str</em><em>, </em><em>optional</em>) – A string that can be ‘Completed’, ‘Unavailable’, or ‘Acceptable’ to filter the
+“Completeness Check” column. The check is case-insensitive. If <cite>None</cite>, this criterion
+is ignored. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>domain_tag</strong> (<em>str</em><em>, </em><em>optional</em>) – A string to filter the “Domain Tag” column. If <cite>None</cite>, this criterion is ignored.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>file_type</strong> (<em>str</em><em>, </em><em>optional</em>) – A string to filter the “File Type” column. If <cite>None</cite>, this criterion is ignored.
+Defaults to <cite>None</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If any of the input parameters are not in the expected format (e.g., invalid tuples or
+    strings).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method modifies the ‘locator’ dataframe in place based on the provided filters.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">sample_filter</span><span class="p">(</span><span class="n">completeness_check</span><span class="o">=</span><span class="s1">&#39;Completed&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.save_as_other">
+<span class="sig-name descname"><span class="pre">save_as_other</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fif'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_events</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="eegunity.html#eegunity.unifieddataset.UnifiedDataset" title="eegunity.unifieddataset.UnifiedDataset"><span class="pre">UnifiedDataset</span></a></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.save_as_other"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.save_as_other" title="Link to this definition">#</a></dt>
+<dd><p>Save data in the specified format (‘fif’ or ‘csv’) to the given output path. If you want
+to save as hdf5 file, please use ‘export_h5Dataset’, because hdf5 file is generally used to
+save the whole dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – The directory path where the converted files will be saved. If the path does not exist,
+a <cite>FileNotFoundError</cite> is raised.</p></li>
+<li><p><strong>domain_tag</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional filter to save only the files with a matching ‘Domain Tag’. If <cite>None</cite>, all files
+are processed.</p></li>
+<li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – The format to save the data in. Supported formats are ‘fif’ and ‘csv’. If an unsupported
+format is provided, a <cite>ValueError</cite> is raised. Defaults to ‘fif’.</p></li>
+<li><p><strong>preserve_events</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>True</cite>, event markers will be included in the CSV file, and metadata will be adjusted.
+Defaults to <cite>True</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>True</cite>, existing files with the same name will be overwritten. If <cite>False</cite>, a new
+file name with an incremented suffix (e.g., “_raw(1).fif”) will be created to avoid
+overwriting. Defaults to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This method modifies internal state in-place and does not return any value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If the output path does not exist.</p></li>
+<li><p><strong>ValueError</strong> – If the <cite>format</cite> is not ‘fif’ or ‘csv’.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the <cite>output_path</cite> is accessible and has the necessary write permissions.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_locator</span> <span class="o">=</span> <span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">save_as_other</span><span class="p">(</span><span class="s1">&#39;/path/to/output&#39;</span><span class="p">,</span> <span class="n">domain_tag</span><span class="o">=</span><span class="s1">&#39;example&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;fif&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_batch.EEGBatch.set_metadata">
+<span class="sig-name descname"><span class="pre">set_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_batch.html#EEGBatch.set_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_batch.EEGBatch.set_metadata" title="Link to this definition">#</a></dt>
+<dd><p>Set the specified metadata in the locator with the given list of values.
+This function is generally used to modify metadata of datasets, directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>col_name</strong> (<em>str</em>) – <dl class="simple">
+<dt>The name of the column to be set, such as <cite>File Path</cite>, <cite>File Path</cite>, <cite>Domain Tag</cite>, <cite>File Type</cite>, <cite>Data Shape</cite>,</dt><dd><p><cite>Channel Names</cite>, <cite>Number of Channels</cite>, <cite>Sampling Rate</cite>, <cite>Duration</cite>, <cite>Completeness Check</cite>.</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>value</strong> (<em>list</em>) – The list of values to set in the column. Its length must match the number of rows
+in the dataframe.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the length of the <cite>value</cite> list does not match the number of rows in the dataframe.</p></li>
+<li><p><strong>TypeError</strong> – If the input types are not as expected (e.g., <cite>col_name</cite> is not a string or <cite>value</cite> is not a list).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ensure that the provided <cite>value</cite> list contains valid entries for the specified column type.</p>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eegunity</span> <span class="kn">import</span> <span class="n">UnifiedDataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span> <span class="o">=</span> <span class="n">UnifiedDataset</span><span class="p">(</span><span class="o">***</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unified_dataset</span><span class="o">.</span><span class="n">eeg_batch</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">(</span><span class="s1">&#39;Sampling Rate&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.batch.eeg_scores_modified_mne">
+<span id="eegunity-modules-batch-eeg-scores-modified-mne-module"></span><h2>eegunity.modules.batch.eeg_scores_modified_mne module<a class="headerlink" href="#module-eegunity.modules.batch.eeg_scores_modified_mne" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_modified_mne.compute_quality_score_mne">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_modified_mne.</span></span><span class="sig-name descname"><span class="pre">compute_quality_score_mne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ica_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_modified_mne.html#compute_quality_score_mne"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_modified_mne.compute_quality_score_mne" title="Link to this definition">#</a></dt>
+<dd><p>Compute a data quality score using MNE’s built-in artifact detection methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw</strong> (<em>mne.io.Raw</em>) – The EEG raw data.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The method to use for artifact detection. Options are “ica” and “maxwell”.</p></li>
+<li><p><strong>plot</strong> (<em>bool</em>) – Whether to plot artifact scores and diagnostics.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the quality score, artifact ratio, and individual artifact counts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.batch.eeg_scores_shady">
+<span id="eegunity-modules-batch-eeg-scores-shady-module"></span><h2>eegunity.modules.batch.eeg_scores_shady module<a class="headerlink" href="#module-eegunity.modules.batch.eeg_scores_shady" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.butter_bandpass">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">butter_bandpass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lowcut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highcut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#butter_bandpass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.butter_bandpass" title="Link to this definition">#</a></dt>
+<dd><p>Design a Butterworth bandpass filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>low_cut</strong> (<em>float</em>) – The lower cutoff frequency of the filter.</p></li>
+<li><p><strong>high_cut</strong> (<em>float</em>) – The upper cutoff frequency of the filter.</p></li>
+<li><p><strong>sampling_freq</strong> (<em>float</em>) – The sampling frequency of the input signal.</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – The order of the Butterworth filter (default is 4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>b</strong> (<em>ndarray</em>) – The numerator (b) coefficients of the IIR filter.</p></li>
+<li><p><strong>a</strong> (<em>ndarray</em>) – The denominator (a) coefficients of the IIR filter.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function designs a bandpass filter using a Butterworth design.
+The cutoff frequencies are normalized by the Nyquist frequency,
+which is half the sampling frequency. The filter coefficients are
+returned as arrays suitable for use with <cite>scipy.signal.lfilter</cite> or
+similar filtering functions.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.butter_bandpass_filter">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">butter_bandpass_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowcut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highcut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#butter_bandpass_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.butter_bandpass_filter" title="Link to this definition">#</a></dt>
+<dd><p>Apply a bandpass filter to the data array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – Data to filter, with channels as rows.</p></li>
+<li><p><strong>lowcut</strong> (<em>float</em>) – The low frequency cut-off for the filter.</p></li>
+<li><p><strong>highcut</strong> (<em>float</em>) – The high frequency cut-off for the filter.</p></li>
+<li><p><strong>fs</strong> (<em>int</em>) – The sampling frequency of the data.</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – The order of the filter (default is 4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>y</strong> – The filtered data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function uses a Butterworth bandpass filter designed with the
+specified cut-off frequencies and order. The filter is applied using
+zero-phase filtering with <cite>scipy.signal.filtfilt</cite>, which ensures
+that the filtered signal is not phase-shifted.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.calculate_beta_amplitude_score">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">calculate_beta_amplitude_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#calculate_beta_amplitude_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.calculate_beta_amplitude_score" title="Link to this definition">#</a></dt>
+<dd><p>Calculate Score 4 based on the percentage of beta wave samples in each channel
+that do not exceed the maximum amplitude threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta_data</strong> (<em>ndarray</em>) – The EEG data filtered in the beta band, expected to be a 2D array
+where rows represent channels and columns represent amplitudes at each time point.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum amplitude threshold for the beta waves (in microvolts, μV). Default is 20.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The average percentage of samples across all channels that do not exceed the threshold.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function counts the number of samples in each channel that are less than or equal
+to the specified threshold and calculates the percentage of such samples relative to the
+total number of samples in that channel. The final score is the average percentage across
+all channels.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.calculate_beta_sinusoidal_score">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">calculate_beta_sinusoidal_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fft_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#calculate_beta_sinusoidal_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.calculate_beta_sinusoidal_score" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the beta sinusoidal score by analyzing the proportion of significant energy
+in the FFT data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fft_data</strong> (<em>ndarray</em>) – The FFT results of the EEG data, expected to be a 2D array where each row represents the FFT results of a
+channel.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sinusoidal score as a percentage.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function computes the total and significant energy for each channel based on the FFT results.
+It applies a threshold to determine significant frequencies and calculates the score as the
+percentage of significant energy relative to the total energy. If the total energy is zero,
+the score for that channel is set to zero to avoid division errors.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.calculate_dominant_frequency">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">calculate_dominant_frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#calculate_dominant_frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.calculate_dominant_frequency" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the dominant frequency of a signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<em>ndarray</em>) – The signal array. This should be a 1D array representing the time-series data of the EEG signal.</p></li>
+<li><p><strong>fs</strong> (<em>int</em>) – The sampling frequency of the signal, representing the number of data points collected per second.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The dominant frequency of the signal, which is the frequency component that has the highest amplitude in the
+Fourier Transform of the signal.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function computes the Fast Fourier Transform (FFT) of the input signal and identifies
+the frequency with the highest amplitude. The dominant frequency is determined from the
+positive frequency components of the FFT.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.calculate_general_amplitude_score">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">calculate_general_amplitude_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#calculate_general_amplitude_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.calculate_general_amplitude_score" title="Link to this definition">#</a></dt>
+<dd><p>Calculate a general amplitude score based on the proportion of signal amplitudes
+that fall within a specific range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>ndarray</em>) – 2D array of EEG data where rows represent channels and columns represent amplitudes at each time point.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The average score across all channels, normalized to 100.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function calculates the general amplitude score for each channel by counting the number of amplitudes
+within a specific range (-100 to 100) and dividing it by the total number of amplitudes. The scores are then
+averaged across all channels to obtain the final general amplitude score.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.calculate_highest_amplitude_score">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">calculate_highest_amplitude_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#calculate_highest_amplitude_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.calculate_highest_amplitude_score" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the highest amplitude score for specific channels within the Alpha band.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – The EEG data in the Alpha band, expected to be a 2D array where rows represent channels and columns represent amplitudes at each time point.</p></li>
+<li><p><strong>channel_indices</strong> (<em>list</em><em> of </em><em>int</em>) – List of indices for the channels of interest.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated highest amplitude score, normalized to 100.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function first filters the data for the specified channels of interest.
+It then calculates the maximum amplitude for each channel. The amplitudes are sorted
+in descending order, and scoring is applied based on the percentile of each channel’s amplitude.
+The final score is the average of these scores, normalized to 100.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.calculate_symmetry_score">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">calculate_symmetry_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels_left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels_right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#calculate_symmetry_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.calculate_symmetry_score" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the symmetry score between two sets of channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each
+time point.</p></li>
+<li><p><strong>channels_left</strong> (<em>list</em><em> of </em><em>int</em>) – List of indices for the left channels.</p></li>
+<li><p><strong>channels_right</strong> (<em>list</em><em> of </em><em>int</em>) – List of indices for the right channels.</p></li>
+<li><p><strong>fs</strong> (<em>int</em>) – The sampling frequency of the data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The symmetry score between the two sets of channels, expressed as a percentage.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function filters the data for the specified left and right channels, calculates the dominant frequencies
+for each set of channels, and computes the correlation score between the dominant frequencies. The symmetry
+score is normalized to a range of 0 to 100.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.calculate_theta_amplitude_score">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">calculate_theta_amplitude_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#calculate_theta_amplitude_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.calculate_theta_amplitude_score" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the percentage of data points not exceeding a specified amplitude threshold in the theta frequency band.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – The EEG data, expected to be a 2D array where rows represent channels and columns represent amplitudes at each
+time point.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – The amplitude threshold for considering a data point as not exceeding. Default is 30.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The average percentage of data points across all channels that do not exceed the threshold.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function checks for data points in the theta frequency band that are below the specified threshold
+and calculates the percentage of such points for each channel. It returns the average percentage across
+all channels. If the input data is not already filtered for the theta band, appropriate filtering should
+be applied before using this function.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.classify_channels">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">classify_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#classify_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.classify_channels" title="Link to this definition">#</a></dt>
+<dd><p>Classify the given channels into different groups based on their location and type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>channels</strong> (<em>list</em>) – List of channel names.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>list</em> – List of channel indices that belong to Score 2.</p></li>
+<li><p><em>list</em> – List of left-side channel indices.</p></li>
+<li><p><em>list</em> – List of right-side channel indices.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function classifies channels based on common EEG electrode naming conventions.
+Channels are grouped into frontal, temporal, parietal, occipital, and auricular categories.
+It distinguishes between left-side and right-side channels based on the suffix of their names,
+where odd-numbered suffixes typically denote left-side channels and even-numbered suffixes
+denote right-side channels. Midline and auricular channels are included in the Score 2 classification.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.compute_quality_scores_shady">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">compute_quality_scores_shady</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mne_io_raw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#compute_quality_scores_shady"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.compute_quality_scores_shady" title="Link to this definition">#</a></dt>
+<dd><p>Calculate EEG scores for the given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mne_io_raw</strong> (<em>mne.io.Raw</em>) – MNE Raw object containing EEG data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of EEG scores corresponding to different metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function calculates various EEG quality scores based on different metrics.
+The scores are calculated using filtered data from the original EEG signals.
+If fewer channels are available, only selected scores are computed.
+Otherwise, additional metrics are included for a more comprehensive assessment.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eegunity.modules.batch.eeg_scores_shady.plot_radar_chart">
+<span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.eeg_scores_shady.</span></span><span class="sig-name descname"><span class="pre">plot_radar_chart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EEG</span> <span class="pre">Scores'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/eegunity/modules/batch/eeg_scores_shady.html#plot_radar_chart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.eeg_scores_shady.plot_radar_chart" title="Link to this definition">#</a></dt>
+<dd><p>Plot a radar chart for the given scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scores</strong> (<em>list</em><em> of </em><em>float</em>) – List of scores to plot. Each score represents a metric for evaluating EEG quality.</p></li>
+<li><p><strong>score_names</strong> (<em>list</em><em> of </em><em>str</em>) – Names corresponding to the scores. These names describe the metrics for evaluating EEG quality.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title for the radar chart (default is ‘EEG Scores’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function creates a radar chart using the provided scores and score names.
+The radar chart is displayed using matplotlib.</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.batch.method_mixin_epoch">
+<span id="eegunity-modules-batch-method-mixin-epoch-module"></span><h2>eegunity.modules.batch.method_mixin_epoch module<a class="headerlink" href="#module-eegunity.modules.batch.method_mixin_epoch" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">eegunity.modules.batch.method_mixin_epoch.</span></span><span class="sig-name descname"><span class="pre">EEGBatchMixinEpoch</span></span><a class="reference internal" href="_modules/eegunity/modules/batch/method_mixin_epoch.html#EEGBatchMixinEpoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event">
+<span class="sig-name descname"><span class="pre">epoch_by_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/method_mixin_epoch.html#EEGBatchMixinEpoch.epoch_by_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event" title="Link to this definition">#</a></dt>
+<dd><p>Batch process EEG data to create epochs based on events specified in the event_id column. The output is saved in
+multiple .npy files for clarity and ease of use. This function serves as one of the available interfaces for
+epoch processing. Given the existence of multiple interfaces for handling epochs, we recommend using the
+unified processing interface designed specifically for this purpose. For more details, please refer to the
+documentation for UnifiedDataset.EEGBatch.process_epochs().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Directory to save the processed epochs.</p></li>
+<li><p><strong>exclude_bad</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is <cite>True</cite>.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip files with processing errors. Default is <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters for resampling the raw data. Must include <cite>sfreq</cite> for the target sampling frequency.
+Example: <cite>{‘sfreq’: 256, ‘npad’: ‘auto’}</cite>.</p></li>
+<li><p><strong>epoch_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for <cite>mne.Epochs</cite>, excluding <cite>raw_data</cite>, <cite>events</cite>, and <cite>event_id</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by creating and saving the epochs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any parameters are inconsistent or if the specified output path is invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event_hdf5">
+<span class="sig-name descname"><span class="pre">epoch_by_event_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EpochData'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/method_mixin_epoch.html#EEGBatchMixinEpoch.epoch_by_event_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event_hdf5" title="Link to this definition">#</a></dt>
+<dd><p>Batch process EEG data to create epochs based on events specified in the event_id column,
+save the results in HDF5 format, and generate a JSON file with event counts.
+This function serves as one of the available interfaces for epoch processing. Given the existence of multiple
+interfaces for handling epochs, we recommend using the unified processing interface designed specifically for
+this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Directory to save the processed epochs.</p></li>
+<li><p><strong>exclude_bad</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is <cite>True</cite>.</p></li>
+<li><p><strong>file_name_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – The filename prefix to save hdf5 and event info file. Default is <cite>EpochData</cite>.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip files with processing errors. Default is <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters for resampling the raw data. Must include <cite>sfreq</cite> for the target sampling frequency.
+Example: <cite>{‘sfreq’: 256, ‘npad’: ‘auto’}</cite>.</p></li>
+<li><p><strong>epoch_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for <cite>mne.Epochs</cite>, excluding <cite>raw_data</cite>, <cite>events</cite>, and <cite>event_id</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by creating and saving the epochs in HDF5 format,
+and generates an event_info.json file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event">
+<span class="sig-name descname"><span class="pre">epoch_by_long_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/method_mixin_epoch.html#EEGBatchMixinEpoch.epoch_by_long_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event" title="Link to this definition">#</a></dt>
+<dd><p>Batch process EEG data to create epochs for long-duration events with overlapping segments.
+This function serves as one of the available interfaces for epoch processing. Given the existence of multiple
+interfaces for handling epochs, we recommend using the unified processing interface designed specifically for
+this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Directory to save the processed epochs.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em>) – Proportion of overlap between consecutive segments (0.0 to 1.0).</p></li>
+<li><p><strong>exclude_bad</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to exclude bad epochs. Uses simple heuristics to determine bad epochs. Default is <cite>True</cite>.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip files with processing errors. Default is <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters for resampling the raw data. Must include <cite>sfreq</cite> for the target sampling frequency.
+Example: <cite>{‘sfreq’: 256, ‘npad’: ‘auto’}</cite>.</p></li>
+<li><p><strong>epoch_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for <cite>mne.Epochs</cite>, excluding <cite>raw_data</cite>, <cite>events</cite>, and <cite>event_id</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the dataset in place by creating and saving the epochs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any parameters are inconsistent or if the specified output path is invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event_hdf5">
+<span class="sig-name descname"><span class="pre">epoch_by_long_event_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EpochData'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/method_mixin_epoch.html#EEGBatchMixinEpoch.epoch_by_long_event_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event_hdf5" title="Link to this definition">#</a></dt>
+<dd><p>Batch process EEG data to create epochs for long-duration events with overlapping segments
+and save the results in HDF5 format. Also generates event_info.json containing event counts.
+This function serves as one of the available interfaces for epoch processing. Given the existence of multiple
+interfaces for handling epochs, we recommend using the unified processing interface designed specifically for
+this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Directory to save the processed epochs.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em>) – Proportion of overlap between consecutive segments (0.0 to 1.0).</p></li>
+<li><p><strong>file_name_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – The filename prefix to save hdf5 and event info file. Default is <cite>EpochData</cite>.</p></li>
+<li><p><strong>exclude_bad</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to exclude bad epochs. Default is <cite>True</cite>.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip files with processing errors. Default is <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters for resampling the raw data.</p></li>
+<li><p><strong>epoch_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for <cite>mne.Epochs</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function creates and saves the epochs in HDF5 format and event_info.json.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any parameters are inconsistent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_segmentation_hdf5">
+<span class="sig-name descname"><span class="pre">epoch_by_segmentation_hdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EpochData'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/method_mixin_epoch.html#EEGBatchMixinEpoch.epoch_by_segmentation_hdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_segmentation_hdf5" title="Link to this definition">#</a></dt>
+<dd><p>Batch process EEG data to create epochs by sliding window segmentation,
+save the results in HDF5 format, and generate a JSON file with event counts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Directory to save the processed epochs.</p></li>
+<li><p><strong>exclude_bad</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to exclude bad epochs. Default is <cite>True</cite>.</p></li>
+<li><p><strong>file_name_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – The filename prefix to save hdf5 and event info file. Default is <cite>EpochData</cite>.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip files with processing errors. Default is <cite>False</cite>.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters passed to <cite>get_data_row()</cite> for data retrieval.</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters for resampling the raw data. Must include <cite>sfreq</cite> for the target sampling frequency.</p></li>
+<li><p><strong>segment_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters for segmentation. Must include ‘segment_length’ (in seconds) and ‘overlap’ (float between 0-1).
+Example: <cite>{‘segment_length’: 2.0, ‘overlap’: 0.5}</cite>.</p></li>
+<li><p><strong>epoch_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for <cite>mne.Epochs</cite>, excluding ‘raw’, ‘events’, and ‘event_id’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.process_epochs">
+<span class="sig-name descname"><span class="pre">process_epochs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_hdf5</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'EpochData'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_bad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miss_bad_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_data_row_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/eegunity/modules/batch/method_mixin_epoch.html#EEGBatchMixinEpoch.process_epochs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.process_epochs" title="Link to this definition">#</a></dt>
+<dd><p>Unified interface for processing epochs.</p>
+<p>This method selects and calls one of the underlying epoch processing methods based
+on the provided parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If long_event is False and use_hdf5 is False, it calls epoch_by_event.</p></li>
+<li><p>If long_event is False and use_hdf5 is True, it calls epoch_by_event_hdf5.</p></li>
+<li><p>If long_event is True and use_hdf5 is False, it calls epoch_by_long_event.</p></li>
+<li><p>If long_event is True and use_hdf5 is True, it calls epoch_by_long_event_hdf5.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>str</em>) – Directory to save the processed epochs.</p></li>
+<li><p><strong>long_event</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to process long-duration events. If True, overlap must be provided. Default is False.</p></li>
+<li><p><strong>overlap</strong> (<em>float</em><em>, </em><em>optional</em>) – Overlap ratio for long events (0.0 &lt;= overlap &lt; 1.0). Required if long_event is True.
+Default is 0 (non-overlap).</p></li>
+<li><p><strong>use_hdf5</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to save the results in HDF5 format. If you are working with deep learning, especially large models,
+we strongly recommend using this interface (use_hdf5=True) for faster processing. Default is True.</p></li>
+<li><p><strong>file_name_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Filename prefix for HDF5 saving (used only if use_hdf5 is True).  Default is ‘EpochData’.</p></li>
+<li><p><strong>exclude_bad</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to exclude bad epochs. Default is True.</p></li>
+<li><p><strong>miss_bad_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to skip files with processing errors. Default is True.</p></li>
+<li><p><strong>get_data_row_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for data retrieval get_data_row().</p></li>
+<li><p><strong>resample_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters for resampling the raw data, mne.io.raw.resample()</p></li>
+<li><p><strong>epoch_params</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional parameters for creating epochs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The method processes and saves the epochs by calling the appropriate underlying method.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eegunity.modules.batch.utils">
+<span id="eegunity-modules-batch-utils-module"></span><h2>eegunity.modules.batch.utils module<a class="headerlink" href="#module-eegunity.modules.batch.utils" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-eegunity.modules.batch">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eegunity.modules.batch" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="eegunity.modules.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">eegunity.modules package</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="eegunity.modules.correction.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">eegunity.modules.correction</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.batch.eeg_batch">eegunity.modules.batch.eeg_batch module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch"><code class="docutils literal notranslate"><span class="pre">EEGBatch</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.align_channel"><code class="docutils literal notranslate"><span class="pre">EEGBatch.align_channel()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.auto_domain"><code class="docutils literal notranslate"><span class="pre">EEGBatch.auto_domain()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.batch_process"><code class="docutils literal notranslate"><span class="pre">EEGBatch.batch_process()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.epoch_for_pretraining"><code class="docutils literal notranslate"><span class="pre">EEGBatch.epoch_for_pretraining()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.export_h5Dataset"><code class="docutils literal notranslate"><span class="pre">EEGBatch.export_h5Dataset()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.filter"><code class="docutils literal notranslate"><span class="pre">EEGBatch.filter()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.format_channel_names"><code class="docutils literal notranslate"><span class="pre">EEGBatch.format_channel_names()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.get_events"><code class="docutils literal notranslate"><span class="pre">EEGBatch.get_events()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.get_file_hashes"><code class="docutils literal notranslate"><span class="pre">EEGBatch.get_file_hashes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.get_quality"><code class="docutils literal notranslate"><span class="pre">EEGBatch.get_quality()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.ica"><code class="docutils literal notranslate"><span class="pre">EEGBatch.ica()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.infer_units"><code class="docutils literal notranslate"><span class="pre">EEGBatch.infer_units()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.normalize"><code class="docutils literal notranslate"><span class="pre">EEGBatch.normalize()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.process_mean_std"><code class="docutils literal notranslate"><span class="pre">EEGBatch.process_mean_std()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.replace_paths"><code class="docutils literal notranslate"><span class="pre">EEGBatch.replace_paths()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.resample"><code class="docutils literal notranslate"><span class="pre">EEGBatch.resample()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.sample_filter"><code class="docutils literal notranslate"><span class="pre">EEGBatch.sample_filter()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.save_as_other"><code class="docutils literal notranslate"><span class="pre">EEGBatch.save_as_other()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_batch.EEGBatch.set_metadata"><code class="docutils literal notranslate"><span class="pre">EEGBatch.set_metadata()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.batch.eeg_scores_modified_mne">eegunity.modules.batch.eeg_scores_modified_mne module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_modified_mne.compute_quality_score_mne"><code class="docutils literal notranslate"><span class="pre">compute_quality_score_mne()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.batch.eeg_scores_shady">eegunity.modules.batch.eeg_scores_shady module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.butter_bandpass"><code class="docutils literal notranslate"><span class="pre">butter_bandpass()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.butter_bandpass_filter"><code class="docutils literal notranslate"><span class="pre">butter_bandpass_filter()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.calculate_beta_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_beta_amplitude_score()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.calculate_beta_sinusoidal_score"><code class="docutils literal notranslate"><span class="pre">calculate_beta_sinusoidal_score()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.calculate_dominant_frequency"><code class="docutils literal notranslate"><span class="pre">calculate_dominant_frequency()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.calculate_general_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_general_amplitude_score()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.calculate_highest_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_highest_amplitude_score()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.calculate_symmetry_score"><code class="docutils literal notranslate"><span class="pre">calculate_symmetry_score()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.calculate_theta_amplitude_score"><code class="docutils literal notranslate"><span class="pre">calculate_theta_amplitude_score()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.classify_channels"><code class="docutils literal notranslate"><span class="pre">classify_channels()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.compute_quality_scores_shady"><code class="docutils literal notranslate"><span class="pre">compute_quality_scores_shady()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.eeg_scores_shady.plot_radar_chart"><code class="docutils literal notranslate"><span class="pre">plot_radar_chart()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.batch.method_mixin_epoch">eegunity.modules.batch.method_mixin_epoch module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_event()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_event_hdf5"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_event_hdf5()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_long_event()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_long_event_hdf5"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_long_event_hdf5()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.epoch_by_segmentation_hdf5"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.epoch_by_segmentation_hdf5()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch.process_epochs"><code class="docutils literal notranslate"><span class="pre">EEGBatchMixinEpoch.process_epochs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.batch.utils">eegunity.modules.batch.utils module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-eegunity.modules.batch">Module contents</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/eegunity.modules.batch.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, EEGUnity Team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

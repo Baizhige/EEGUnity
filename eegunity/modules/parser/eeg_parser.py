@@ -10,6 +10,7 @@ import mne
 import numpy as np
 import pandas as pd
 import scipy
+from concurrent.futures import ThreadPoolExecutor
 from typing import Union, Dict
 from collections import OrderedDict
 from eegunity.modules.parser.eeg_parser_csv import process_csv_files
@@ -75,9 +76,10 @@ class EEGParser(_UDatasetSharedAttributes):
                                      columns=['File Path', 'Domain Tag', 'File Type', 'Data Shape', 'Channel Names',
                                               'Number of Channels',
                                               'Sampling Rate', 'Duration', 'Completeness Check'])
-        files_locator = process_mne_files(files_locator, self.get_shared_attr()['verbose'])
-        files_locator = process_mat_files(files_locator)
-        files_locator = process_csv_files(files_locator)
+        num_workers = self.get_shared_attr().get('num_workers', 0)
+        files_locator = process_mne_files(files_locator, self.get_shared_attr()['verbose'], num_workers=num_workers)
+        files_locator = process_mat_files(files_locator, num_workers=num_workers)
+        files_locator = process_csv_files(files_locator, num_workers=num_workers)
         files_locator = _clean_sampling_rate_(files_locator)
         files_locator = files_locator.sort_values(by='File Path').reset_index(drop=True)
         return files_locator
@@ -135,8 +137,29 @@ class EEGParser(_UDatasetSharedAttributes):
         Any
             The data retrieved and processed according to the specified parameters.
         """
+        # --- anchor: EEGParser.get_data kernel hook ---
         row = self.get_shared_attr()['locator'].iloc[data_idx]
-        return get_data_row(row, **kwargs)
+        raw = get_data_row(row, **kwargs)
+
+        kernel = self.get_shared_attr().get('kernel', None)
+        if kernel is None:
+            return raw
+
+        try:
+            return kernel.apply(self, raw, row)
+        except Exception as e:
+            kid = getattr(kernel, "KERNEL_ID", kernel.__class__.__name__)
+            domain_tag = row.get("Domain Tag", "unknown")
+            file_path = row.get("File Path", "unknown")
+            warnings.warn(
+                (
+                    f"Kernel '{kid}' is not compatible with this dataset (or this record). "
+                    f"Domain Tag: {domain_tag}. File Path: {file_path}. "
+                    f"Error: {e}. Please adjust the kernel or download a dataset version "
+                    f"that matches the kernel."
+                )
+            )
+            return raw
 
     def check_locator(self, locator):
         """
@@ -908,7 +931,46 @@ def convert_unit(data: mne.io.Raw, unit: str) -> mne.io.Raw:
 
     return data
 
-def process_mne_files(files_locator, verbose):
+def _process_single_mne_file(filepath, verbose):
+    """
+    Process a single file with MNE and return metadata dict.
+
+    Parameters
+    ----------
+    filepath : str
+        Path to the file to process.
+    verbose : str
+        Verbosity level for MNE functions.
+
+    Returns
+    -------
+    dict
+        A dictionary containing extracted metadata or error information.
+    """
+    try:
+        data = mne.io.read_raw(filepath, verbose=verbose)
+        nchan = int(data.info['nchan'])
+        n_times = int(data.n_times)
+        result = {
+            'File Type': 'standard_data',
+            'Data Shape': str((nchan, n_times)),
+            'Channel Names': ', '.join(data.info.get('ch_names', [])),
+            'Number of Channels': nchan,
+            'Sampling Rate': float(data.info.get('sfreq', 0.0)),
+            'Duration': float(data.times[-1]) if len(data.times) > 0 else 0.0,
+        }
+        print(f"Retrieved channel sequence: {data.info.get('ch_names', [])}")
+        return result
+    except Exception as e:
+        print(f"Failed to process file {filepath}: {e}")
+        return {
+            'File Type': 'unknown',
+            'Data Shape': 'error',
+            'Error': str(e),
+        }
+
+
+def process_mne_files(files_locator, verbose, num_workers=0):
     """
     Process MNE files based on a locator DataFrame.
 
@@ -918,30 +980,25 @@ def process_mne_files(files_locator, verbose):
         DataFrame containing file paths and related metadata for processing.
     verbose : str
         Verbosity level for MNE functions.
+    num_workers : int, optional
+        Number of worker threads for parallel processing (default is 0, sequential).
 
     Returns
     -------
     pandas.DataFrame
         Updated DataFrame with metadata extracted from processed files.
     """
-    for index, row in files_locator.iterrows():
-        filepath = row['File Path']
-        try:
-            data = mne.io.read_raw(filepath, verbose=verbose)
-            nchan = int(data.info['nchan'])
-            n_times = int(data.n_times)
+    indices = list(files_locator.index)
+    filepaths = [files_locator.at[idx, 'File Path'] for idx in indices]
 
-            files_locator.at[index, 'File Type'] = 'standard_data'
-            files_locator.at[index, 'Data Shape'] = str((nchan, n_times))
-            files_locator.at[index, 'Channel Names'] = ', '.join(data.info.get('ch_names', []))
-            files_locator.at[index, 'Number of Channels'] = nchan
-            files_locator.at[index, 'Sampling Rate'] = float(data.info.get('sfreq', 0.0))
-            files_locator.at[index, 'Duration'] = float(data.times[-1]) if len(data.times) > 0 else 0.0
+    if num_workers > 0:
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            results = list(executor.map(lambda fp: _process_single_mne_file(fp, verbose), filepaths))
+    else:
+        results = [_process_single_mne_file(fp, verbose) for fp in filepaths]
 
-            print(f"Retrieved channel sequence: {data.info.get('ch_names', [])}")
-        except Exception as e:
-            files_locator.at[index, 'File Type'] = 'unknown'
-            files_locator.at[index, 'Data Shape'] = 'error'
-            files_locator.at[index, 'Error'] = str(e)
-            print(f"Failed to process file {filepath}: {e}")
+    for idx, result in zip(indices, results):
+        for key, value in result.items():
+            files_locator.at[idx, key] = value
+
     return files_locator

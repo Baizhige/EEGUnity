@@ -1,11 +1,76 @@
 import os
 import re
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor
 from numpy import ndarray
 from scipy.io import loadmat
 
 
-def process_mat_files(files_locator):
+def _is_numeric(s):
+    """Match integer or floating-point numbers."""
+    pattern = r'^-?\d+(\.\d+)?$'
+    return bool(re.match(pattern, s))
+
+
+def _process_single_mat_file(file_path):
+    """
+    Process a single MAT file and return metadata dict or None.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the MAT file.
+
+    Returns
+    -------
+    dict or None
+        A dictionary containing extracted metadata, or None if the file cannot be processed.
+    """
+    file_size = os.path.getsize(file_path)
+    if file_size <= 5 * 1024 * 1024:
+        return None
+
+    data = loadmat(file_path, simplify_cells=True)
+    channel_name = _find_variables_by_condition(data, _condition_sampling_channel_name,
+                                                max_depth=5, max_width=20)
+    sampling_rate = _find_variables_by_condition(data, _condition_sampling_rate,
+                                                 max_depth=5, max_width=20)
+    source_data = _find_variables_by_condition(data, _condition_source_data,
+                                               max_depth=5, max_width=20)
+    source_data_3d = _find_variables_by_condition(data, _condition_source_data_3d,
+                                                  max_depth=5, max_width=20)
+
+    result = {}
+    if isinstance(source_data[1], ndarray):
+        result['Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
+        if isinstance(channel_name[1], ndarray):
+            result['Channel Names'] = ','.join(str(x) for x in channel_name[1])
+        result['Number of Channels'] = str(min(source_data[1].shape))
+        result['Data Shape'] = str(source_data[1].shape)
+        if _is_numeric(result['Sampling Rate']):
+            result['Duration'] = str(max(source_data[1].shape) / float(result['Sampling Rate']))
+        else:
+            result['Duration'] = ''
+        result['File Type'] = "matRawData:" + str(source_data[0])
+        return result
+    elif isinstance(source_data_3d[1], ndarray):
+        result['Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
+        if isinstance(channel_name[1], ndarray):
+            print(','.join(str(x) for x in channel_name[1]))
+            result['Channel Names'] = ','.join(str(x) for x in channel_name[1])
+        result['Number of Channels'] = str(len(channel_name[1]))
+        result['Data Shape'] = str(source_data_3d[1].shape)
+        if _is_numeric(result['Sampling Rate']):
+            result['Duration'] = str(max(source_data_3d[1].shape) / float(result['Sampling Rate']))
+        else:
+            result['Duration'] = ''
+        result['File Type'] = "matEpochData:" + str(source_data_3d[0])
+        return result
+    else:
+        return None
+
+
+def process_mat_files(files_locator, num_workers=0):
     """
     Process MAT files and update a DataFrame with file details.
 
@@ -14,6 +79,8 @@ def process_mat_files(files_locator):
     files_locator : pandas.DataFrame
         A DataFrame containing the metadata of files, including their file paths and other details.
         The column 'File Path' is expected to contain paths to the MAT files.
+    num_workers : int, optional
+        Number of worker threads for parallel processing (default is 0, sequential).
 
     Returns
     -------
@@ -28,65 +95,30 @@ def process_mat_files(files_locator):
     Exception
         General exception for unexpected errors during file processing.
     """
-    def is_numeric(s):
-        # Match integer or floating-point numbers
-        pattern = r'^-?\d+(\.\d+)?$'
-        return bool(re.match(pattern, s))
-
+    # Collect indices of eligible files
+    eligible = []
     for index, row in files_locator.iterrows():
         file_path = row['File Path']
         file_type = row['File Type']
-
         if file_path.endswith('.mat') and file_type == 'unknown':
-            file_size = os.path.getsize(file_path)
-            if file_size > 5 * 1024 * 1024:  # Greater than 5MB
-                data = loadmat(file_path, simplify_cells=True)  # Simplify dictionary structure
-                channel_name = _find_variables_by_condition(data, _condition_sampling_channel_name,
-                                                            max_depth=5, max_width=20)
-                sampling_rate = _find_variables_by_condition(data, _condition_sampling_rate,
-                                                             max_depth=5, max_width=20)
-                source_data = _find_variables_by_condition(data, _condition_source_data,
-                                                           max_depth=5, max_width=20)
-                source_data_3d = _find_variables_by_condition(data, _condition_source_data_3d,
-                                                              max_depth=5, max_width=20)
-                if isinstance(source_data[1], ndarray):
-                    files_locator.at[index, 'Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
-                    if isinstance(channel_name[1], ndarray):
-                        # If channel_name is ndarray, ensure correct processing and conversion to string
-                        # print(','.join(str(x) for x in channel_name[1]))
-                        files_locator.at[index, 'Channel Names'] = ','.join(str(x) for x in channel_name[1])
+            eligible.append((index, file_path))
 
-                    files_locator.at[index, 'Number of Channels'] = str(min(source_data[1].shape))
-                    files_locator.at[index, 'Data Shape'] = str(source_data[1].shape)
-                    if is_numeric(files_locator.at[index, 'Sampling Rate']):
-                        files_locator.at[index, 'Duration'] = str(
-                            max(source_data[1].shape) / float(files_locator.at[index, 'Sampling Rate']))
-                    else:
-                        files_locator.at[index, 'Duration'] = ''
-                    files_locator.at[index, 'File Type'] = "matRawData:" + str(source_data[0])
+    if not eligible:
+        return files_locator
 
-                elif isinstance(source_data_3d[1], ndarray):
-                    files_locator.at[index, 'Sampling Rate'] = str(sampling_rate[1]).strip("HhZz")
+    indices, file_paths = zip(*eligible)
 
-                    if isinstance(channel_name[1], ndarray):
-                        # If channel_name is ndarray, ensure correct processing and conversion to string
-                        print(','.join(str(x) for x in channel_name[1]))
-                        files_locator.at[index, 'Channel Names'] = ','.join(str(x) for x in channel_name[1])
+    if num_workers > 0:
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            results = list(executor.map(_process_single_mat_file, file_paths))
+    else:
+        results = [_process_single_mat_file(fp) for fp in file_paths]
 
-                    files_locator.at[index, 'Number of Channels'] = str(len(channel_name[1]))
-                    files_locator.at[index, 'Data Shape'] = str(source_data_3d[1].shape)
-                    if is_numeric(files_locator.at[index, 'Sampling Rate']):
-                        files_locator.at[index, 'Duration'] = str(
-                            max(source_data_3d[1].shape) / float(files_locator.at[index, 'Sampling Rate']))
-                    else:
-                        files_locator.at[index, 'Duration'] = ''
-                    files_locator.at[index, 'File Type'] = "matEpochData:" + str(source_data_3d[0])
-                else:
-                    # "No data detected in file {file_path}. Skipping."
-                    pass
-            else:
-                # File {file_path} is below the size threshold. Skipping.
-                pass
+    for idx, result in zip(indices, results):
+        if result is not None:
+            for key, value in result.items():
+                files_locator.at[idx, key] = value
+
     return files_locator
 
 

@@ -1,0 +1,18 @@
+[
+  {
+    "version": "latest",
+    "url": "https://eegunity.readthedocs.io/en/latest/"
+  },
+  {
+    "version": "stable",
+    "url": "https://eegunity.readthedocs.io/en/stable/"
+  },
+  {
+    "version": "maintenance-0.5.1",
+    "url": "https://eegunity.readthedocs.io/en/maintenance-0.5.1/"
+  },
+  {
+    "version": "maintenance-0.4.1",
+    "url": "https://eegunity.readthedocs.io/en/maintenance-0.4.1/"
+  }
+]
