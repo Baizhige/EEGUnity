@@ -1,43 +1,38 @@
-import json
-import os
-import sys
-# Get the parent directory of the script
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+﻿"""CI test for align_channel."""
 
-# Add parent directory to sys.path
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-from eegunity import UnifiedDataset
+from __future__ import annotations
 
-# Obtain base config from file
-with open('CI_config.json', 'r') as config_file:
-    config = json.load(config_file)
+from ci_runtime import dataset_from_locator, domains, load_ci_config, output_dir
 
-remain_list = config['test_data_list']
-locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']
 
-# Define sample channel orders for testing AFp6
-channel_order = ['C3', 'C4', 'Cz']
-channel_order_miss = ['C3', 'C4', 'Cz', 'AFp6']
+def main() -> None:
+    """Align channels with normal and missing-channel target orders."""
+    config = load_ci_config()
+    out_dir = output_dir(config, "align_channel")
 
-# Test function with different parameter combinations
-for folder_name in remain_list:
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
-    unified_dataset.eeg_batch.format_channel_names()
-    # Test with default parameters and channel order
-    unified_dataset.eeg_batch.align_channel(output_path=CI_output_path+"/align_channel", channel_order=channel_order, get_data_row_params={"is_set_channel_type": True})
-    print(f"Test with channel order for {folder_name} completed.")
+    channel_order = ["C3", "C4", "Cz"]
+    channel_order_miss = ["C3", "C4", "Cz", "AFp6"]
 
-for folder_name in remain_list:
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
-    unified_dataset.eeg_batch.format_channel_names()
-    # Test with default parameters and channel order
-    unified_dataset.eeg_batch.align_channel(output_path=CI_output_path+"/align_channel", channel_order=channel_order_miss, get_data_row_params={"is_set_channel_type": True})
-    print(f"Test with channel order for {folder_name} completed.")
+    for domain in domains(config):
+        u_ds = dataset_from_locator(config, domain)
+        u_ds.eeg_batch.format_channel_names()
+        u_ds.eeg_batch.align_channel(
+            output_path=str(out_dir),
+            channel_order=channel_order,
+            get_data_row_params={"is_set_channel_type": True},
+        )
+        print(f"[eeg_batch_align_channel] {domain}: aligned with channel_order")
 
-print("Successfully completed all align_channel tests.")
+        u_ds = dataset_from_locator(config, domain)
+        u_ds.eeg_batch.format_channel_names()
+        u_ds.eeg_batch.align_channel(
+            output_path=str(out_dir),
+            channel_order=channel_order_miss,
+            get_data_row_params={"is_set_channel_type": True},
+            miss_bad_data=True,
+        )
+        print(f"[eeg_batch_align_channel] {domain}: aligned with channel_order_miss")
+
+
+if __name__ == "__main__":
+    main()

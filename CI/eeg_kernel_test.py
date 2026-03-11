@@ -38,6 +38,7 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 from eegunity.unifieddataset import UnifiedDataset  # noqa: E402
+from ci_runtime import load_ci_config, locator_path  # noqa: E402
 
 
 def _get_kernel_spec(domain_tag: str, config: Dict) -> Optional[str]:
@@ -81,12 +82,10 @@ def _validate_description_json(raw) -> None:
 
 def main() -> None:
     """Run kernel CI tests."""
-    # Obtain base config from file (same as resample CI script).
-    with open("CI_config.json", "r", encoding="utf-8") as config_file:
-        config = json.load(config_file)
+    # Obtain base config.
+    config = load_ci_config()
 
     remain_list = config["test_data_list"]
-    locator_base_path = config["locator_base_path"]
     ci_output_base = config["CI_output_path"]
     ci_output_path = os.path.join(ci_output_base, "kernel")
 
@@ -95,12 +94,16 @@ def main() -> None:
 
     # Test each dataset.
     for domain_tag in remain_list:
-        locator_path = f"{locator_base_path}/{domain_tag}.csv"
+        domain_locator_path = locator_path(config, domain_tag)
         unified_dataset = UnifiedDataset(
             domain_tag=domain_tag,
-            locator_path=locator_path,
+            locator_path=str(domain_locator_path),
             is_unzip=False,
         )
+        max_rows = int(config.get("max_rows_per_test", 0) or 0)
+        if max_rows > 0:
+            loc = unified_dataset.get_locator().head(max_rows).copy().reset_index(drop=True)
+            unified_dataset.set_locator(loc)
 
         kernel_spec = _get_kernel_spec(domain_tag, config)
         if not kernel_spec:

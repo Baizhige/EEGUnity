@@ -17,5 +17,4 @@ Module contents
 
 .. automodule:: eegunity.modules
    :members:
-   :undoc-members:
    :show-inheritance:

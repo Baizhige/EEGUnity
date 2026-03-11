@@ -6,10 +6,11 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict
 import pickle
-from eegunity.modules.parser.eeg_parser import get_data_row, extract_events
+from eegunity.modules.parser.eeg_parser import extract_events
 from eegunity.utils.h5 import h5Dataset
 from eegunity.utils.handle_errors import handle_errors
 from eegunity.utils.log_processing import log_processing
+from eegunity.utils.label_channel import resample_raw_with_labels
 class EEGBatchMixinEpoch:
     def epoch_by_event(self, output_path: str,
                        exclude_bad: bool = True, miss_bad_data: bool = False,
@@ -73,11 +74,11 @@ class EEGBatchMixinEpoch:
             """Apply function to process individual rows."""
             print(f"Processing File: {row['File Path']}")
             # Load raw data with additional parameters
-            raw_data = get_data_row(row, **get_data_row_params)
+            raw_data = self._get_data_row(row, **get_data_row_params)
 
             # Resample if resample_params includes `sfreq`
             if 'sfreq' in resample_params:
-                raw_data.resample(**resample_params)
+                resample_raw_with_labels(raw_data, **resample_params)
 
             # Extract events
             events, event_id = extract_events(raw_data)
@@ -141,7 +142,8 @@ class EEGBatchMixinEpoch:
                 epoch_params=epoch_params
             ),
             is_patch=False,
-            result_type='value'
+            result_type='value',
+            execution_mode='process',
         )
 
         # Merge index_data from all results in main thread
@@ -224,11 +226,11 @@ class EEGBatchMixinEpoch:
             print(f"Processing File: {row['File Path']}")
 
             # Load raw data with additional parameters
-            raw_data = get_data_row(row, **get_data_row_params)
+            raw_data = self._get_data_row(row, **get_data_row_params)
 
             # Resample if resample_params includes `sfreq`
             if 'sfreq' in resample_params:
-                raw_data.resample(**resample_params)
+                resample_raw_with_labels(raw_data, **resample_params)
 
             # Check for annotations in the raw data
             annotations = raw_data.annotations
@@ -332,7 +334,8 @@ class EEGBatchMixinEpoch:
                 epoch_params=epoch_params
             ),
             is_patch=False,
-            result_type='value'
+            result_type='value',
+            execution_mode='process',
         )
 
         # Merge index_data from all results in main thread
@@ -360,6 +363,22 @@ class EEGBatchMixinEpoch:
         interfaces for handling epochs, we recommend using the unified processing interface designed specifically for
         this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().
 
+        **Continuous regression labels via misc channels** - if the raw object
+        contains ``misc:`` label channels (added by a dataset-specific kernel,
+        see :mod:`eegunity.utils.label_channel`), they are included in the
+        epoch array alongside the EEG channels.  The ``chOrder`` attribute of
+        every HDF5 event dataset reflects all channels, including ``misc:``
+        ones::
+
+            {group_name}/{event_name}   # float array [n_epochs, n_ch_total, n_times]
+                attrs:
+                    chOrder : [...'eeg:Fz', ..., 'misc:reaction_time']
+                    rsFreq  : float
+
+        Downstream code can retrieve misc channel values by name from
+        ``chOrder`` (see :class:`~dataset_example.RegressionEpochDataset`).
+        Existing code that does not reference ``misc:`` channels is unaffected.
+
         Parameters
         ----------
         output_path : str
@@ -374,6 +393,7 @@ class EEGBatchMixinEpoch:
             Additional parameters passed to `get_data_row()` for data retrieval.
         resample_params : dict, optional
             Parameters for resampling the raw data. Must include `sfreq` for the target sampling frequency.
+            ``misc:`` channels are resampled with nearest-neighbour interpolation automatically.
             Example: `{'sfreq': 256, 'npad': 'auto'}`.
         epoch_params : dict, optional
             Additional parameters for `mne.Epochs`, excluding `raw_data`, `events`, and `event_id`.
@@ -411,11 +431,11 @@ class EEGBatchMixinEpoch:
             """
             Process an individual file to create and save epochs.
             """
-            raw_data = get_data_row(row, **get_data_row_params)
+            raw_data = self._get_data_row(row, **get_data_row_params)
 
             # Resample raw data if necessary
             if 'sfreq' in resample_params:
-                raw_data.resample(**resample_params)
+                resample_raw_with_labels(raw_data, **resample_params)
 
             # Extract events
             events, event_id = extract_events(raw_data)
@@ -446,7 +466,8 @@ class EEGBatchMixinEpoch:
                     # Add dataset for this event
                     dset = dataset.addDataset(grp, event, epoch_data, chunks=epoch_data.shape)
 
-                    # Add attributes for the dataset
+                    # Add attributes for the dataset.
+                    # chOrder includes all channels: EEG and any misc: label channels.
                     dataset.addAttributes(dset, 'rsFreq', raw_data.info['sfreq'])
                     dataset.addAttributes(dset, 'chOrder', event_epochs.info['ch_names'])
 
@@ -462,7 +483,7 @@ class EEGBatchMixinEpoch:
 
             print(f"Processed and saved epochs for file: {file_name}")
 
-        # Use batch_process to process data
+        # Use batch_process to process data - must be sequential (shared HDF5 handle)
         self.batch_process(
             lambda row: True,
             lambda row: app_func(
@@ -473,7 +494,8 @@ class EEGBatchMixinEpoch:
                 epoch_params=epoch_params
             ),
             is_patch=False,
-            result_type=None
+            result_type=None,
+            execution_mode=None,
         )
 
         # Save the HDF5 dataset
@@ -497,6 +519,15 @@ class EEGBatchMixinEpoch:
         """
         Batch process EEG data to create epochs by sliding window segmentation,
         save the results in HDF5 format, and generate a JSON file with event counts.
+
+        .. note::
+            ``misc:`` label channels added by kernels are preserved in the
+            epoch array (they are channel data, not annotations, and survive
+            sliding-window segmentation).  The value at the epoch midpoint
+            can be retrieved via ``chOrder`` using
+            :class:`~dataset_example.RegressionEpochDataset`.  However, each
+            segment shares the same misc channel signal as the source recording,
+            so the label semantics depend on how the kernel filled the channel.
 
         Parameters
         ----------
@@ -551,10 +582,10 @@ class EEGBatchMixinEpoch:
             """
             Process an individual file to create and save sliding window epochs.
             """
-            raw_data = get_data_row(row, **get_data_row_params)
+            raw_data = self._get_data_row(row, **get_data_row_params)
 
             if 'sfreq' in resample_params:
-                raw_data.resample(**resample_params)
+                resample_raw_with_labels(raw_data, **resample_params)
 
             sfreq = raw_data.info['sfreq']
             n_samples = raw_data.n_times
@@ -609,6 +640,7 @@ class EEGBatchMixinEpoch:
             except Exception as e:
                 print(f"Error processing segmented epochs: {e}")
 
+        # Must be sequential - app_func writes directly to a shared HDF5 handle
         self.batch_process(
             lambda row: True,
             lambda row: app_func(
@@ -620,7 +652,8 @@ class EEGBatchMixinEpoch:
                 epoch_params=epoch_params
             ),
             is_patch=False,
-            result_type=None
+            result_type=None,
+            execution_mode=None,
         )
 
         dataset.save()
@@ -645,6 +678,13 @@ class EEGBatchMixinEpoch:
         This function serves as one of the available interfaces for epoch processing. Given the existence of multiple
         interfaces for handling epochs, we recommend using the unified processing interface designed specifically for
         this purpose. For more details, please refer to the documentation for UnifiedDataset.EEGBatch.process_epochs().
+
+        .. note::
+            ``misc:`` label channels added by kernels are preserved in the
+            epoch array even though ``raw.annotations`` is replaced internally
+            with the segmented long-event annotations.  Channel data survives
+            annotation replacement.  The label value at each segment's midpoint
+            can be retrieved via :class:`~dataset_example.RegressionEpochDataset`.
 
         Parameters
         ----------
@@ -700,11 +740,11 @@ class EEGBatchMixinEpoch:
             Process an individual file to create epochs from long events.
             """
             print(f"Processing File: {row['File Path']}")
-            raw_data = get_data_row(row, **get_data_row_params)
+            raw_data = self._get_data_row(row, **get_data_row_params)
 
             # Resample the raw data if necessary
             if 'sfreq' in resample_params:
-                raw_data.resample(**resample_params)
+                resample_raw_with_labels(raw_data, **resample_params)
 
             # Check for annotations
             annotations = raw_data.annotations
@@ -775,12 +815,13 @@ class EEGBatchMixinEpoch:
 
             print(f"Finished processing {file_name}.")
 
-        # Use batch_process to process files
+        # Must be sequential - process_file writes directly to a shared HDF5 handle
         self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: process_file(row),
             is_patch=False,
-            result_type=None
+            result_type=None,
+            execution_mode=None,
         )
 
         # Save the HDF5 dataset
@@ -808,12 +849,11 @@ class EEGBatchMixinEpoch:
         """
         Unified interface for processing epochs.
 
-        This method selects and calls one of the underlying epoch processing methods based
-        on the provided parameters:
-          - If long_event is False and use_hdf5 is False, it calls epoch_by_event.
-          - If long_event is False and use_hdf5 is True, it calls epoch_by_event_hdf5.
-          - If long_event is True and use_hdf5 is False, it calls epoch_by_long_event.
-          - If long_event is True and use_hdf5 is True, it calls epoch_by_long_event_hdf5.
+        Method selection rule:
+        ``(long_event=False, use_hdf5=False) -> epoch_by_event``;
+        ``(long_event=False, use_hdf5=True) -> epoch_by_event_hdf5``;
+        ``(long_event=True, use_hdf5=False) -> epoch_by_long_event``;
+        ``(long_event=True, use_hdf5=True) -> epoch_by_long_event_hdf5``.
 
         Parameters
         ----------
@@ -834,7 +874,7 @@ class EEGBatchMixinEpoch:
         miss_bad_data : bool, optional
             Whether to skip files with processing errors. Default is True.
         get_data_row_params : dict, optional
-            Additional parameters for data retrieval get_data_row().
+            Additional parameters for data retrieval via ``get_data_row()``.
         resample_params : dict, optional
             Parameters for resampling the raw data, mne.io.raw.resample()
         epoch_params : dict, optional

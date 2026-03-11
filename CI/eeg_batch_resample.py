@@ -1,39 +1,24 @@
-import json
-import os
-import sys
-# Get the parent directory of the script
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+﻿"""CI test for resample."""
 
-# Add parent directory to sys.path
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-from eegunity.unifieddataset import UnifiedDataset
+from __future__ import annotations
 
-# Obtain base config from file
-with open('CI_config.json', 'r') as config_file:
-    config = json.load(config_file)
-
-remain_list = config['test_data_list']
-locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']+"/resample"
-
-# Create filter output directory if it doesn't exist
-resample_output_path = os.path.join(CI_output_path, 'resample')
-os.makedirs(resample_output_path, exist_ok=True)
-
-# Test function with different parameter combinations
-for folder_name in remain_list:
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
-
-    # Resample with specified sampling rate (downsample to 100 Hz)
-    unified_dataset.eeg_batch.resample(output_path=resample_output_path, resample_params={"sfreq":100.0})
-    print(f"Test with resample to 100 Hz for {folder_name} completed.")
-
-    # Resample with specified sampling rate (upsample to 512 Hz)
-    unified_dataset.eeg_batch.resample(output_path=resample_output_path, resample_params={"sfreq":512.0})
-    print(f"Test with resample to 512 Hz for {folder_name} completed.")
+from ci_runtime import dataset_from_locator, domains, load_ci_config, output_dir
 
 
-print("Successfully completed all resample tests.")
+def main() -> None:
+    """Run resample for downsample and upsample paths."""
+    config = load_ci_config()
+    out_dir = output_dir(config, "resample")
+
+    for domain in domains(config):
+        for sfreq in (100.0, 512.0):
+            u_ds = dataset_from_locator(config, domain)
+            u_ds.eeg_batch.resample(
+                output_path=str(out_dir),
+                resample_params={"sfreq": sfreq},
+            )
+            print(f"[eeg_batch_resample] {domain}: sfreq={sfreq}")
+
+
+if __name__ == "__main__":
+    main()

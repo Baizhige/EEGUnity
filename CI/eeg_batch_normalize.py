@@ -1,43 +1,28 @@
-import json
-import os
-import sys
-# Get the parent directory of the script
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+﻿"""CI test for normalize."""
 
-# Add parent directory to sys.path
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-from eegunity.unifieddataset import UnifiedDataset
+from __future__ import annotations
 
-# Obtain base config from file
-with open('CI_config.json', 'r') as config_file:
-    config = json.load(config_file)
-
-remain_list = config['test_data_list']
-locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']+"/normalize"
-
-# Test the normalize function with different parameter combinations
-for folder_name in remain_list:
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
+from ci_runtime import dataset_from_locator, domains, load_ci_config, output_dir
 
 
-    # Default parameters (sample-wise normalization)
-    unified_dataset.eeg_batch.normalize(output_path=CI_output_path)
-    print(f"Test with default parameters (sample-wise normalization) for {folder_name} completed.")
+def main() -> None:
+    """Run normalize in sample-wise and channel-wise modes."""
+    config = load_ci_config()
+    out_dir = output_dir(config, "normalize")
 
-    # Normalize with min-max normalization
-    unified_dataset.eeg_batch.normalize(output_path=CI_output_path, norm_type='sample-wise')
-    print(f"Test with min-max normalization for {folder_name} completed.")
+    for domain in domains(config):
+        cases = [
+            {},
+            {"norm_type": "sample-wise"},
+            {"norm_type": "channel-wise"},
+            {"miss_bad_data": True},
+        ]
 
-    # Normalize with z-score normalization
-    unified_dataset.eeg_batch.normalize(output_path=CI_output_path, norm_type='channel-wise')
-    print(f"Test with z-score normalization for {folder_name} completed.")
+        for params in cases:
+            u_ds = dataset_from_locator(config, domain)
+            u_ds.eeg_batch.normalize(output_path=str(out_dir), **params)
+            print(f"[eeg_batch_normalize] {domain}: params={params}")
 
-    # Testing normalization while skipping bad data (miss_bad_data=True)
-    unified_dataset.eeg_batch.normalize(output_path=CI_output_path, miss_bad_data=True)
-    print(f"Test with miss_bad_data=True for {folder_name} completed.")
 
-print("Successfully completed all normalize tests.")
+if __name__ == "__main__":
+    main()

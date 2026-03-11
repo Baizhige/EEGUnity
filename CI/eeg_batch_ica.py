@@ -1,31 +1,20 @@
-import json
-import os
-import sys
-# Get the parent directory of the script
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+﻿"""CI test for ICA."""
 
-# Add parent directory to sys.path
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-from eegunity.unifieddataset import UnifiedDataset
+from __future__ import annotations
 
-# obtain base config from file
-with open('CI_config.json', 'r') as config_file:
-    config = json.load(config_file)
+from ci_runtime import dataset_from_locator, domains, load_ci_config, output_dir
 
-remain_list = config['test_data_list']
-locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']+"/ica"
 
-# Create filter output directory if it doesn't exist
-ica_output_path = os.path.join(CI_output_path, 'ica')
-os.makedirs(ica_output_path, exist_ok=True)
+def main() -> None:
+    """Run ICA-based artifact correction."""
+    config = load_ci_config()
+    out_dir = output_dir(config, "ica")
 
-# Test ICA function
-for folder_name in remain_list:
-    unified_dataset = UnifiedDataset(domain_tag=folder_name, 
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
-    unified_dataset.eeg_batch.ica(output_path=ica_output_path)
+    for domain in domains(config):
+        u_ds = dataset_from_locator(config, domain)
+        u_ds.eeg_batch.ica(output_path=str(out_dir), miss_bad_data=True)
+        print(f"[eeg_batch_ica] {domain}: completed")
 
-print("Successfully completed ICA Test")
+
+if __name__ == "__main__":
+    main()

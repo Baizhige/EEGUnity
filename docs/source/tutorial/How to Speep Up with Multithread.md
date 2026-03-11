@@ -1,170 +1,99 @@
-# How to Speed Up EEGUnity with Built-in Multithreading
+# How to Speed Up EEGUnity with Built-in Parallelism
 
 ## 1. Introduction
 
-EEGUnity (>0.6.0) now provides built-in multithreading through the `num_workers`
-parameter in `UnifiedDataset`.
+EEGUnity supports parallel execution through:
 
-The new version integrates multithreading
-directly into the core pipeline. This ensures:
+- Global worker count: `UnifiedDataset(..., num_workers=...)`
+- Batch backend selection: `batch_process(..., execution_mode=...)`
 
--   Cleaner user code
--   Safer concurrency management
--   Better performance scaling
--   No nested or duplicated thread pools
+This tutorial explains when to use thread mode, process mode, or sequential mode.
 
-The design philosophy is similar to PyTorch's
-`DataLoader(num_workers=...)`.
+## 2. Basic Configuration
 
-------------------------------------------------------------------------
-
-## 2. Basic Usage
-
-To enable multithreading, simply set `num_workers` when creating a
-`UnifiedDataset`.
-
-``` python
+```python
 from eegunity import UnifiedDataset
 
-u_dataset = UnifiedDataset(
+ud = UnifiedDataset(
     dataset_path="your_dataset_root",
     domain_tag="your_domain_tag",
-    num_workers=8   # number of threads
+    num_workers=8,
 )
 ```
 
-If `num_workers=0` (default), EEGUnity runs sequentially.
+- `num_workers=0` means sequential execution.
+- `num_workers>0` enables parallel paths where supported.
 
-If `num_workers>0`, EEGUnity internally uses a thread pool to
-parallelize supported operations.
+## 3. Execution Modes in `batch_process`
 
-No additional concurrency code is required.
+`EEGBatch.batch_process` supports:
 
-------------------------------------------------------------------------
-
-## 3. Where Multithreading Is Applied
-
-Multithreading is automatically applied in the following stages:
-
-### 3.1 Dataset Scanning (Parser Stage)
-
-When `dataset_path` is provided, EEGUnity scans directories and builds
-the locator.
-
-File parsing (e.g., `.fif`, `.mat`, `.csv`) is parallelized using
-`num_workers`.
-
-This significantly accelerates large dataset initialization.
-
-### 3.2 Batch Processing (EEGBatch Stage)
-
-Functions that rely on `batch_process()` automatically inherit
-multithreading, including:
-
--   `export_h5Dataset()`
--   `save_as_other()`
--   `process_mean_std()`
--   `format_channel_names()`
-
-Each row in the locator can be processed in parallel.
-
-------------------------------------------------------------------------
-
-## 4. Internal Execution Model
-
-EEGUnity uses a `ThreadPoolExecutor` internally when `num_workers > 0`.
-
-However, not all steps can be parallelized safely.
-
-Some operations must remain sequential, such as:
-
--   Writing to the same output file
--   Maintaining deterministic order
--   Updating shared state
-
-EEGUnity solves this by:
-
--   Parallelizing independent row-level tasks
--   Keeping order-sensitive operations outside thread pools
--   Collecting results before final writing steps
-
-This hybrid design ensures correctness while maximizing throughput.
-
-------------------------------------------------------------------------
-
-## 5. Choosing num_workers
-
-There is no single optimal value. It depends on:
-
--   CPU core count
--   Dataset size
--   I/O speed (SSD vs HDD)
--   Task complexity
-
-### General Recommendations
-
--   Start with `num_workers = number_of_CPU_cores`
--   For I/O-heavy workloads, slightly higher values may help
--   For CPU-heavy signal processing, stay near core count
--   For small datasets, parallelism may not provide noticeable benefit
+- `execution_mode='thread'`: recommended for I/O-bound tasks
+- `execution_mode='process'`: recommended for CPU-bound tasks
+- `execution_mode=None`: force sequential execution
 
 Example:
 
-``` python
-import os
-
-u_dataset = UnifiedDataset(
-    dataset_path="your_dataset_root",
-    domain_tag="your_domain_tag",
-    num_workers=os.cpu_count()
+```python
+results = ud.eeg_batch.batch_process(
+    con_func=lambda row: row["Completeness Check"] == "Completed",
+    app_func=lambda row: row["File Path"],
+    is_patch=False,
+    result_type="value",
+    execution_mode="thread",
 )
 ```
 
-Always benchmark on your own system.
+## 4. Where Parallelism Is Commonly Applied
 
-------------------------------------------------------------------------
+### 4.1 Parser Stage
 
-## 6. Practical Example
+When loading from `dataset_path`, parser steps can use `num_workers`, including:
 
-``` python
+- standard file scanning
+- MAT/CSV parsing
+- HDF5 EEGLAB `.set` fallback parsing
+- BrainVision `.vhdr` sidecar fallback parsing
+- WFDB header parsing
+
+### 4.2 Batch Stage
+
+Many heavy `eeg_batch` methods now choose backend explicitly, for example:
+
+- filtering/resampling/normalization pipelines
+- quality scoring
+- hash calculation
+- epoch workflows
+
+Some write-heavy paths stay sequential intentionally to keep output consistency.
+
+## 5. Choosing Worker Count
+
+General guidance:
+
+- Start at `os.cpu_count()`
+- Reduce if memory pressure is high
+- Increase slightly for storage/network bound workloads
+- Benchmark on your own dataset
+
+```python
+import os
 from eegunity import UnifiedDataset
 
-u_dataset = UnifiedDataset(
+ud = UnifiedDataset(
     dataset_path="your_dataset_root",
     domain_tag="your_domain_tag",
-    num_workers=8
+    num_workers=os.cpu_count(),
 )
-
-# Export to HDF5 in parallel
-u_dataset.eeg_batch.export_h5Dataset("output_path")
 ```
 
-This will:
+## 6. Practical Tips
 
-1.  Parse dataset files in parallel
-2.  Process each locator row concurrently
-3.  Safely write results in correct order
+- Use `execution_mode='process'` for CPU-heavy transforms.
+- Use `execution_mode='thread'` for file I/O aggregation.
+- Set `num_workers=0` during debugging for deterministic reproduction.
+- Avoid nesting your own thread/process pools around EEGUnity batch calls.
 
-------------------------------------------------------------------------
+## 7. Summary
 
-## 7. Important Notes
-
--   Do not manually create external thread pools.
--   Avoid nesting additional concurrency layers.
--   Ensure sufficient memory is available when increasing `num_workers`.
--   If debugging, temporarily set `num_workers=0` for deterministic
-    behavior.
-
-------------------------------------------------------------------------
-
-## 8. Summary
-
-The new built-in multithreading system:
-
--   Simplifies user code
--   Improves performance for large datasets
--   Ensures safe parallel execution
--   Requires only one parameter: `num_workers`
-
-By delegating concurrency management to EEGUnity, users can focus on
-dataset processing logic instead of thread orchestration.
+Use `num_workers` to define available parallel workers and `execution_mode` to choose the right backend for each workload.
