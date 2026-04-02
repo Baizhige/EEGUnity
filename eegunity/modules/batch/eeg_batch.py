@@ -1434,7 +1434,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         return None
 
     def export_h5Dataset(self, output_path: str, name: str = 'EEGUnity_export',
-                         get_data_row_params: Dict = None, miss_bad_data: bool = False) -> None:
+                         get_data_row_params: Dict = None, miss_bad_data: bool = False,
+                         pipeline: Optional[Callable] = None) -> None:
         """
         Export the dataset in HDF5 format to the specified output path.
 
@@ -1463,6 +1464,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         miss_bad_data : bool, optional
             If `True`, skips rows that contain bad data without raising an error.
             If `False`, raises an exception when encountering bad data.
+        pipeline : callable, optional
+            A user-supplied preprocessing function applied to each raw recording
+            after loading: ``raw = pipeline(raw)``.
         Returns
         -------
         None
@@ -1489,15 +1493,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
 
-        # Create the HDF5 file path
-        h5_path = Path(output_path) / f"{name}.hdf5"
-
-        # Check if the HDF5 file already exists
-        if h5_path.exists():
-            raise FileExistsError(
-                f"The HDF5 file '{h5_path}' already exists. Please choose a different name or delete the existing file.")
-
-        # Create the HDF5 file handler
+        # Create the HDF5 file handler (raises FileExistsError if <name>.hdf5 exists)
         dataset = h5Dataset(Path(output_path), name)
 
         # Parallel read; sequential HDF5 write in the main thread.
@@ -1507,6 +1503,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         @log_processing
         def app_func(row):
             raw = self._get_data_row(row, **get_data_row_params)
+            if pipeline is not None:
+                raw = pipeline(raw)
             current_channels = list(raw.info.get('ch_names', []))
             current_sf = int(float(raw.info.get('sfreq', row['Sampling Rate'])))
             eeg_data = raw.get_data()
@@ -1533,8 +1531,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         # Save the dataset to disk
         dataset.save()
-        # Print completion message if verbose is True
-        print(f"All data exported successfully to {h5_path}.")
+        print(f"All data exported successfully to {Path(output_path) / f'{name}.hdf5'}.")
 
     def auto_domain(self) -> None:
         """Automatically modify the 'Domain Tag' of each row based on 'Sampling Rate' and channel names.
