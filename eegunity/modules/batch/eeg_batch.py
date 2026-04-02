@@ -5,17 +5,24 @@ import numpy as np
 import pandas as pd
 import hashlib
 import pickle
-from concurrent.futures import ThreadPoolExecutor
+from eegunity.utils.parallel import parallel_execute
 from pathlib import Path
 from typing import Callable, Union, Tuple, List, Dict, Optional
 from eegunity.modules.batch.eeg_scores_shady import compute_quality_scores_shady
 from eegunity.modules.batch.eeg_scores_modified_mne import compute_quality_score_mne
-from eegunity.modules.parser.eeg_parser import get_data_row, channel_name_parser, extract_events, infer_channel_unit
+from eegunity.modules.parser.eeg_parser import (
+    get_data_row,
+    channel_name_parser,
+    extract_events,
+    infer_channel_unit,
+    apply_dataset_kernel,
+)
 from eegunity._share_attributes import _UDatasetSharedAttributes
 from eegunity.utils.h5 import h5Dataset
 from eegunity.utils.handle_errors import handle_errors
 from eegunity.utils.log_processing import log_processing
 from eegunity.modules.batch.method_mixin_epoch import EEGBatchMixinEpoch
+from eegunity.utils.label_channel import resample_raw_with_labels
 
 
 class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
@@ -30,11 +37,34 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         self._shared_attr = main_instance._shared_attr
         self.main_instance = main_instance
 
+    def _get_data_row(self, row, **kwargs):
+        """Load one row and apply locator-driven kernel augmentation.
+
+        Parameters
+        ----------
+        row : pandas.Series
+            Locator row.
+        **kwargs
+            Forwarded to :func:`eegunity.modules.parser.eeg_parser.get_data_row`.
+
+        Returns
+        -------
+        mne.io.BaseRaw
+            Raw object after metadata patching and optional kernel application.
+
+        Examples
+        --------
+        >>> # raw = self._get_data_row(row, is_set_channel_type=True)  # doctest: +SKIP
+        """
+        raw = get_data_row(row, **kwargs)
+        return apply_dataset_kernel(self.main_instance, raw, row)
+
     def batch_process(self,
                       con_func: Callable,
                       app_func: Callable,
                       is_patch: bool,
-                      result_type: Union[str, None] = None):
+                      result_type: Union[str, None] = None,
+                      execution_mode: Union[str, None] = None):
         r"""Process each row of locator based on conditions specified
         in `con_func` and apply `app_func` accordingly. This function handles both list
         and dataframe return types, ensuring the result aligns with the original locator's
@@ -56,6 +86,16 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         result_type : {'series', 'value', None}, optional
             Specifies the expected return type of `app_func` results. Can be "series", "value",
             or `None` (case insensitive). Defaults to `None`.
+        execution_mode : {'thread', 'process', None}, optional
+            Selects the concurrency backend used when ``num_workers > 0``.
+            When ``None`` (default), the method always runs sequentially regardless
+            of the ``num_workers`` setting - use this for lightweight or shared-state
+            operations.  ``'thread'`` uses a
+            :class:`~concurrent.futures.ThreadPoolExecutor` and is suited to I/O-bound
+            workloads (file reads, network calls).  ``'process'`` uses a
+            :class:`~concurrent.futures.ProcessPoolExecutor` for CPU-bound workloads;
+            closures are handled transparently via *cloudpickle*.
+            Defaults to ``None``.
 
         Returns
         -------
@@ -67,26 +107,32 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         ------
         ValueError
             If `result_type` is not one of the expected values.
+        ValueError
+            If `execution_mode` is not one of ``'thread'``, ``'process'``, or ``None``.
 
         Note
         ----
         This method is essential when designing a custom processing pipeline for the dataset.
         Ensure that `con_func` and `app_func` are compatible with the structure of the locator.
         If using `is_patch`, consider the implications on the data integrity.
-
+        When ``execution_mode`` is ``None``, ``num_workers`` is ignored and execution is
+        always sequential; this is the safe default for methods that have not yet been
+        classified as I/O- or CPU-bound.
 
         Examples
         ---------
         >>> from eegunity import UnifiedDataset
         >>> u_ds = UnifiedDataset(***)
-        >>> # example1
+        >>> # example1: sequential (default)
         >>> new_locator = u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='series')
         >>> print(new_locator)
-        >>> # example2
-        >>> a_list = u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='value')
+        >>> # example2: threaded I/O-bound
+        >>> a_list = u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type='value',
+        ...                                        execution_mode='thread')
         >>> print(a_list)
-        >>> # example3
-        >>> u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type=None)
+        >>> # example3: CPU-bound multiprocessing
+        >>> u_ds.eeg_batch.batch_process(app_func, con_func, is_patch=True, result_type=None,
+        ...                              execution_mode='process')
 
         """
 
@@ -104,32 +150,14 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             should_apply = con_func(row)
             tasks.append((index, row, should_apply))
 
-        if num_workers > 0:
-            # Parallel execution using ThreadPoolExecutor
-            def _process_row(task):
-                idx, row, should_apply = task
-                if should_apply:
-                    return app_func(row)
-                else:
-                    if is_patch and result_type == "series":
-                        return row
-                    else:
-                        return None
-
-            with ThreadPoolExecutor(max_workers=num_workers) as executor:
-                results = list(executor.map(_process_row, tasks))
-        else:
-            # Sequential execution (original behavior)
-            results = []
-            for idx, row, should_apply in tasks:
-                if should_apply:
-                    result = app_func(row)
-                else:
-                    if is_patch and result_type == "series":
-                        result = row
-                    else:
-                        result = None
-                results.append(result)
+        results = parallel_execute(
+            tasks=tasks,
+            app_func=app_func,
+            is_patch=is_patch,
+            result_type=result_type,
+            execution_mode=execution_mode,
+            num_workers=num_workers,
+        )
 
         if result_type == "series":
             # Check if all elements in results are None
@@ -287,7 +315,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             return True
 
         # Process the dataframe
-        filtered_locator = self.batch_process(con_func, lambda row: row, is_patch=False, result_type='series')
+        filtered_locator = self.batch_process(con_func, lambda row: row, is_patch=False, result_type='series',
+                                              execution_mode='thread')
 
         # Update the locator in shared attributes
         self.set_shared_attr({'locator': filtered_locator})
@@ -361,7 +390,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         @handle_errors(miss_bad_data)
         def app_func(row):
-            raw = get_data_row(row, **get_data_row_params)
+            raw = self._get_data_row(row, **get_data_row_params)
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
             new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
 
@@ -421,7 +450,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         new_locator = self.batch_process(lambda row: domain_tag is None or row['Domain Tag'] == domain_tag,
                                          app_func,
                                          is_patch=False,
-                                         result_type='series')
+                                         result_type='series',
+                                         execution_mode='thread')
         self.set_shared_attr({'locator': new_locator})
         return None
 
@@ -510,12 +540,12 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         @handle_errors(miss_bad_data)
         def app_func(row):
-            data = get_data_row(row)
+            data = self._get_data_row(row)
             mean_std = get_mean_std(data)
             return mean_std
 
         results = self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable', app_func, is_patch=False,
-                                     result_type="value")
+                                     result_type="value", execution_mode='process')
 
         if domain_mean:
             domain_results = {}
@@ -571,7 +601,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         ----------
         format_type : str, optional
             The format for channel names, possible values are 'EEGUnity', 'normal', by default 'EEGUnity'. If set to
-            'EEGUnity', the channel names are formated in "type:name", like 'EEG:C3', 'EEG:Cz', 'Stim:stim1', which store
+            'EEGUnity', the channel names are formated in "type:name", like 'eeg:C3', 'eeg:Cz', 'stim:stim1', which store
             channel type in the locator, rather than change the source data. If set to 'normal', the channel, only formatted
             channels name are stored, like 'C3', 'Cz', 'stim1'.
 
@@ -612,7 +642,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                 cache[channel_name] = formatted_channel_name
                 return formatted_channel_name
 
-        results = self.batch_process(lambda row: True, app_func, is_patch=False, result_type="value")
+        results = self.batch_process(lambda row: True, app_func, is_patch=False, result_type="value",
+                                     execution_mode=None)
         self.set_metadata("Channel Names", results)
 
     def filter(self,
@@ -671,7 +702,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             # Get the data
             if get_data_row_params is None:
                 get_data_row_params = {}
-            mne_raw = get_data_row(row, **get_data_row_params)
+            mne_raw = self._get_data_row(row, **get_data_row_params)
 
             # Get sampling frequency and Nyquist frequency
             sfreq = mne_raw.info['sfreq']
@@ -732,7 +763,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                                                 output_path, auto_adjust_h_freq, picks,
                                                 get_data_row_params, filter_params, notch_filter_params),
                            is_patch=False,
-                           result_type=None)
+                           result_type=None,
+                           execution_mode='process')
 
         # Update file paths in the dataset
         self.get_shared_attr()["dataset_path"] = output_path
@@ -793,7 +825,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         def app_func(row, output_path: str):
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
             new_file_path = os.path.join(output_path, f"{file_name}_ica_cleaned_raw.fif")
-            mne_raw = get_data_row(row, **(get_params or {}))
+            mne_raw = self._get_data_row(row, **(get_params or {}))
 
             # Initialize ICA with specific parameters
             ica = mne.preprocessing.ICA(**(ica_params or {}))
@@ -814,7 +846,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, output_path),
             is_patch=False,
-            result_type='value'
+            result_type='value',
+            execution_mode='process',
         )
 
         # Update locator
@@ -870,10 +903,11 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
             new_file_path = os.path.join(output_path, f"{file_name}_resampled_raw.fif")
 
-            mne_raw = get_data_row(row, **get_data_row_params)
+            mne_raw = self._get_data_row(row, **get_data_row_params)
 
-            # Resample using the provided resample_params
-            mne_raw.resample(**resample_params)
+            # Resample using the provided resample_params.
+            # misc: label channels receive nearest-neighbour interpolation.
+            resample_raw_with_labels(mne_raw, **resample_params)
 
             # Save resampled data and update locator
             mne_raw.save(new_file_path, overwrite=True)
@@ -893,7 +927,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, output_path),
             is_patch=False,
-            result_type=None
+            result_type=None,
+            execution_mode='process',
         )
         # Update file paths in the dataset
         self.get_shared_attr()["dataset_path"] = output_path
@@ -954,7 +989,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             new_file_path = os.path.join(output_path, f"{file_name}_aligned.fif")
 
             # Fetch the data using get_data_row and get_data_row_params
-            mne_raw = get_data_row(row, **get_data_row_params)
+            mne_raw = self._get_data_row(row, **get_data_row_params)
 
             aligned_raw = channel_align_raw(mne_raw, channel_order, min_matched_channel=min_num_channels)
 
@@ -972,7 +1007,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, channel_order, output_path, min_num_channels),
             is_patch=False,
-            result_type='series'
+            result_type='series',
+            execution_mode='process',
         )
         self.get_shared_attr()['locator'] = new_locator
 
@@ -1042,7 +1078,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             get_data_row_params_with_norm = get_data_row_params.copy()
             get_data_row_params_with_norm['norm_type'] = norm_type
 
-            mne_raw = get_data_row(row, **get_data_row_params_with_norm)
+            mne_raw = self._get_data_row(row, **get_data_row_params_with_norm)
             mne_raw.save(new_file_path, overwrite=True)
             row['File Path'] = new_file_path
             row['File Type'] = "standard_data"
@@ -1052,7 +1088,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, norm_type, output_path),
             is_patch=False,
-            result_type='series'
+            result_type='series',
+            execution_mode='process',
         )
         self.get_shared_attr()['locator'] = new_locator
 
@@ -1159,11 +1196,12 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                 Additional parameters for `mne.Epochs()`.
             """
             # Retrieve the raw data for processing
-            raw_data = get_data_row(row, **get_data_row_params)
+            raw_data = self._get_data_row(row, **get_data_row_params)
 
             # Apply resampling if specified
             if resample:
-                raw_data.resample(resample, **resample_params)
+                # misc: label channels receive nearest-neighbour interpolation.
+                resample_raw_with_labels(raw_data, resample, **resample_params)
 
             # Calculate step size and event intervals
             step_sec = seg_sec * (1 - overlap)
@@ -1202,7 +1240,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                 epoch_params=epoch_params
             ),
             is_patch=False,
-            result_type=None
+            result_type=None,
+            execution_mode='process',
         )
 
     def get_events(self, miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
@@ -1235,8 +1274,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         @handle_errors(miss_bad_data)
         def app_func(row):
-            # Pass get_data_row_params to get_data_row()
-            mne_raw = get_data_row(row, preload=False, **get_data_row_params)
+            # Pass get_data_row_params to self._get_data_row()
+            mne_raw = self._get_data_row(row, preload=False, **get_data_row_params)
 
             # Pass extract_events_params to extract_events()
             events, event_id = extract_events(mne_raw)
@@ -1251,7 +1290,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row),
             is_patch=False,
-            result_type='series'
+            result_type='series',
+            execution_mode='thread',
         )
         self.get_shared_attr()['locator'] = new_locator
 
@@ -1285,7 +1325,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         @handle_errors(miss_bad_data)
         def app_func(row):
             # Pass get_data_row_params to get_data_row
-            mne_raw = get_data_row(row, **get_data_row_params)
+            mne_raw = self._get_data_row(row, **get_data_row_params)
 
             units = {}
 
@@ -1306,7 +1346,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row),
             is_patch=False,
-            result_type='series'
+            result_type='series',
+            execution_mode='thread',
         )
 
         self.get_shared_attr()['locator'] = new_locator
@@ -1342,7 +1383,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         @handle_errors(miss_bad_data)
         def app_func(row):
             # Pass get_data_row_params to get_data_row to ensure seamless integration
-            raw_data = get_data_row(row, **get_data_row_params)
+            raw_data = self._get_data_row(row, **get_data_row_params)
             if method == 'shady':
                 scores = compute_quality_scores_shady(raw_data)
                 score = np.mean(scores)
@@ -1354,7 +1395,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         results = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
-            app_func, is_patch=True, result_type="value")
+            app_func, is_patch=True, result_type="value",
+            execution_mode='process')
         self.set_metadata(save_name, results)
 
     def replace_paths(self, old_prefix, new_prefix):
@@ -1385,7 +1427,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             return row
 
         # Process the dataset, applying the path replacement function to each row
-        updated_locator = self.batch_process(lambda row: True, replace_func, is_patch=False, result_type='series')
+        updated_locator = self.batch_process(lambda row: True, replace_func, is_patch=False, result_type='series',
+                                             execution_mode=None)
 
         self.set_shared_attr({'locator': updated_locator})
         return None
@@ -1393,26 +1436,19 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
     def export_h5Dataset(self, output_path: str, name: str = 'EEGUnity_export',
                          get_data_row_params: Dict = None, miss_bad_data: bool = False) -> None:
         """
-        Export the dataset in HDF5 format to the specified output path, use in this large brain model project:
-        https://github.com/935963004/LaBraM;
-        Reference: W.-B. Jiang, L.-M. Zhao, and B.-L. Lu, "Large brain model for learning generic representations with
-        tremendous EEG data in BCI," Proc. The 12th Int. Conf. Learning Representations, 2024. [Online]. Available:
-        https://openreview.net/forum?id=QzTpTRVtrP.
+        Export the dataset in HDF5 format to the specified output path.
+
+        This export format is used by large-brain-model pipelines such as
+        `LaBraM <https://github.com/935963004/LaBraM>`_.
 
         This function processes all files in the dataset, ensuring that each file
         is stored in a separate group with its own dataset and attributes.
 
-        The exported HDF5 file will have the following structure:
-
-        - A root group named after the provided `name` (default: 'EEGUnity_export').
-        - Each file in the dataset is stored as a separate group within the root group.
-          - The group name is derived from the basename of the file path (e.g., 'file1.fif').
-          - Within each group:
-            - A dataset named 'eeg' contains the EEG data (stored as a NumPy array).
-            - A dataset named 'info' contains additional metadata about the EEG data, serialized as a uint8 array (using pickle).
-            - Attributes for each dataset:
-              - 'rsFreq': The sampling rate of the EEG data for the specific file.
-              - 'chOrder': The list of channel names in the order they appear in the EEG data.
+        The exported HDF5 file contains a root group named by ``name``
+        (default ``"EEGUnity_export"``). Each source file is stored as one
+        subgroup (group name = source basename). Every subgroup contains:
+        dataset ``"eeg"``, dataset ``"info"``, and ``"eeg"`` attributes
+        ``"rsFreq"`` and ``"chOrder"``.
 
         Parameters
         ----------
@@ -1464,55 +1500,36 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         # Create the HDF5 file handler
         dataset = h5Dataset(Path(output_path), name)
 
-        num_workers = self.get_shared_attr().get('num_workers', 0)
+        # Parallel read; sequential HDF5 write in the main thread.
+        # batch_process with execution_mode='thread' handles the sequential
+        # fallback automatically when num_workers <= 0.
+        @handle_errors(miss_bad_data=miss_bad_data)
+        @log_processing
+        def app_func(row):
+            raw = self._get_data_row(row, **get_data_row_params)
+            current_channels = list(raw.info.get('ch_names', []))
+            current_sf = int(float(raw.info.get('sfreq', row['Sampling Rate'])))
+            eeg_data = raw.get_data()
+            info_bytes = pickle.dumps(raw.info)
+            info_array = np.frombuffer(info_bytes, dtype='uint8')
+            file_name = os.path.basename(row['File Path'])
+            return (file_name, eeg_data, info_array, current_sf, current_channels)
 
-        if num_workers > 0:
-            # Parallel read + sequential write for thread safety
-            @handle_errors(miss_bad_data=miss_bad_data)
-            @log_processing
-            def app_func(row):
-                current_channels = [channel.strip() for channel in row['Channel Names'].split(',')]
-                current_sf = int(float(row['Sampling Rate']))
-                raw = get_data_row(row, **get_data_row_params)
-                eeg_data = raw.get_data()
-                info_bytes = pickle.dumps(raw.info)
-                info_array = np.frombuffer(info_bytes, dtype='uint8')
-                file_name = os.path.basename(row['File Path'])
-                return (file_name, eeg_data, info_array, current_sf, current_channels)
+        results = self.batch_process(
+            lambda row: row['Completeness Check'] != 'Unavailable',
+            app_func, is_patch=False, result_type='value',
+            execution_mode='thread')
 
-            results = self.batch_process(
-                lambda row: row['Completeness Check'] != 'Unavailable',
-                app_func, is_patch=False, result_type='value')
-
-            # Sequential HDF5 write in main thread
-            for item in results:
-                if item is None:
-                    continue
-                file_name, eeg_data, info_array, current_sf, current_channels = item
-                grp = dataset.addGroup(grpName=file_name)
-                dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
-                dataset.addAttributes(dset, 'rsFreq', current_sf)
-                dataset.addAttributes(dset, 'chOrder', current_channels)
-                dataset.addDataset(grp, 'info', info_array, chunks=None)
-        else:
-            @handle_errors(miss_bad_data=miss_bad_data)
-            @log_processing
-            def app_func(row):
-                current_channels = [channel.strip() for channel in row['Channel Names'].split(',')]
-                current_sf = int(float(row['Sampling Rate']))
-                raw = get_data_row(row, **get_data_row_params)
-                eeg_data = raw.get_data()
-                grp = dataset.addGroup(grpName=os.path.basename(row['File Path']))
-                dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
-                dataset.addAttributes(dset, 'rsFreq', current_sf)
-                dataset.addAttributes(dset, 'chOrder', current_channels)
-                info_bytes = pickle.dumps(raw.info)
-                info_array = np.frombuffer(info_bytes, dtype='uint8')
-                dataset.addDataset(grp, 'info', info_array, chunks=None)
-                return None
-
-            self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable',
-                               app_func, is_patch=False, result_type=None)
+        # Sequential HDF5 write - must not be concurrent (shared file handle)
+        for item in results:
+            if item is None:
+                continue
+            file_name, eeg_data, info_array, current_sf, current_channels = item
+            grp = dataset.addGroup(grpName=file_name)
+            dset = dataset.addDataset(grp, 'eeg', eeg_data, chunks=eeg_data.shape)
+            dataset.addAttributes(dset, 'rsFreq', current_sf)
+            dataset.addAttributes(dset, 'chOrder', current_channels)
+            dataset.addDataset(grp, 'info', info_array, chunks=None)
 
         # Save the dataset to disk
         dataset.save()
@@ -1581,60 +1598,240 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         # Use batch_process to apply the function to each row
         results = self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable', app_func, is_patch=True,
-                                     result_type="value")
+                                     result_type="value", execution_mode=None)
 
         # Update the 'Domain Tag' column with the new values
         self.set_metadata("Domain Tag", results)
 
-    def get_file_hashes(self) -> None:
+    def get_file_hashes(self, data_stream: bool = False) -> None:
+        """Generate and store unique file identifiers for EEG data files.
+
+        Two hashing modes are supported, selected by *data_stream*:
+
+        **File mode** (``data_stream=False``, default)
+            Computes SHA-256 over the raw bytes of each file on disk.  The
+            digest is format-dependent: the same EEG signal stored in two
+            different formats will produce different hashes.  Results are
+            written to the ``"Source Hash"`` column.
+
+        **Data-stream mode** (``data_stream=True``)
+            Computes SHA-256 over a format-independent fingerprint of the
+            decoded EEG signal, intended to detect recordings that have been
+            re-published across different datasets or under different file
+            formats.
+
+            Fingerprint construction:
+
+            1. Load the EEG signal via :func:`get_data_row` (MNE Raw, SI units
+               [V]).
+            2. Sort channel names alphabetically and reorder the data matrix
+               accordingly, so that channel-order differences do not affect the
+               hash.
+            3. Extract three fixed-length blocks of the signal matrix:
+               the *head* (first ``block_sec`` seconds), the *mid* (centred
+               block), and the *tail* (last ``block_sec`` seconds), where
+               ``block_sec = 5``.  If the recording is shorter than
+               ``3 x block_sec`` the entire matrix is used.
+            4. Round each sample to six decimal places to absorb minor
+               floating-point conversion differences between formats.
+            5. Compute SHA-256 over the raw bytes of the resulting NumPy
+               array.
+
+            Files whose data stream cannot be loaded (unsupported format,
+            missing file, etc.) are represented by ``None``.  Results are
+            written to the ``"Data Hash"`` column.
+
+        Parameters
+        ----------
+        data_stream : bool, optional
+            When ``False`` (default) hash raw file bytes and write to
+            ``"Source Hash"``.  When ``True`` hash the decoded EEG signal
+            fingerprint and write to ``"Data Hash"``.
+
+        Returns
+        -------
+        None
+            Results are written in-place to the locator via
+            :meth:`set_metadata`.
+
+        Raises
+        ------
+        FileNotFoundError
+            File mode only: raised when the file at ``row['File Path']`` does
+            not exist.
+        IOError
+            File mode only: raised when the file cannot be read.
+
+        Examples
+        --------
+        >>> u_ds.eeg_batch.get_file_hashes()                  # file hash
+        >>> u_ds.eeg_batch.get_file_hashes(data_stream=True)  # signal hash
         """
-        Generate and store unique file identifiers for EEG data files.
 
-        This method processes each row in the dataset by reading the file at the
-        specified path and computing its SHA-256 hash. The hash serves as a unique
-        identifier for the file, which is then stored in the metadata under the
-        key "Source Hash".
+        if not data_stream:
+            # ------------------------------------------------------------------
+            # File mode: SHA-256 over raw file bytes -> "Source Hash"
+            # ------------------------------------------------------------------
+            def app_func(row):
+                """Compute the SHA-256 hash of a file's raw bytes.
 
-        The method uses `batch_process` to apply the hash function to all rows,
-        and updates the metadata using `set_metadata`.
+                Parameters
+                ----------
+                row : dict
+                    Locator row; must contain the key ``'File Path'``.
 
-        Raises:
-            FileNotFoundError: If a file at the specified path cannot be found.
-            IOError: If a file cannot be read due to permission or corruption issues.
+                Returns
+                -------
+                str
+                    Hex-encoded SHA-256 digest.
+                """
+                file_path = row['File Path']
+                sha256_hash = hashlib.sha256()
+                try:
+                    with open(file_path, "rb") as f:
+                        for chunk in iter(lambda: f.read(8192), b""):
+                            sha256_hash.update(chunk)
+                except FileNotFoundError:
+                    raise FileNotFoundError(f"File not found: {file_path}")
+                except IOError as e:
+                    raise IOError(f"Cannot read file {file_path}: {e}")
+                return sha256_hash.hexdigest()
+
+            results = self.batch_process(
+                lambda row: True,
+                app_func,
+                is_patch=True,
+                result_type="value",
+                execution_mode='thread',
+            )
+            self.set_metadata("Source Hash", results)
+
+        else:
+            # ------------------------------------------------------------------
+            # Data-stream mode: signal fingerprint -> "Data Hash"
+            # ------------------------------------------------------------------
+            _BLOCK_SEC = 5  # seconds per head/mid/tail block
+
+            def app_func(row):
+                """Compute a format-independent SHA-256 fingerprint of the EEG signal.
+
+                Parameters
+                ----------
+                row : dict
+                    Locator row passed by :meth:`batch_process`.
+
+                Returns
+                -------
+                str or None
+                    Hex-encoded SHA-256 digest of the signal fingerprint, or
+                    ``None`` if the data stream could not be loaded.
+                """
+                try:
+                    raw = self._get_data_row(row, preload=True)
+                except Exception:
+                    return None
+
+                try:
+                    # Sort channels alphabetically to be order-independent
+                    sorted_chs = sorted(raw.ch_names)
+                    data = raw.get_data(picks=sorted_chs)  # (n_ch, n_samples)
+
+                    n_samples = data.shape[1]
+                    sfreq = raw.info['sfreq']
+                    block = min(int(_BLOCK_SEC * sfreq), max(1, n_samples // 4))
+
+                    if n_samples < 3 * block:
+                        fingerprint = data
+                    else:
+                        mid_start = (n_samples - block) // 2
+                        fingerprint = np.concatenate([
+                            data[:, :block],
+                            data[:, mid_start: mid_start + block],
+                            data[:, -block:],
+                        ], axis=1)
+
+                    fingerprint = np.round(fingerprint, decimals=6)
+                    digest = hashlib.sha256(fingerprint.tobytes()).hexdigest()
+                    return digest
+                except Exception:
+                    return None
+
+            results = self.batch_process(
+                lambda row: True,
+                app_func,
+                is_patch=True,
+                result_type="value",
+                execution_mode='process',
+            )
+            self.set_metadata("Data Hash", results)
+
+    def get_file_sizes(self) -> None:
+        """Compute and store the on-disk size of each EEG data file in the locator.
+
+        For every row in the locator (regardless of ``Completeness Check``
+        status), the size of the file at ``File Path`` is retrieved via a
+        single ``os.stat()`` call and written to the ``"File Size"`` column
+        as an integer number of bytes.  Files that cannot be found or accessed
+        are represented by ``-1``.
+
+        The method delegates row-level iteration and optional parallelism to
+        :meth:`batch_process`, so the global ``num_workers`` setting of the
+        parent :class:`~eegunity.UnifiedDataset` is honoured automatically.
+        Using multiple workers is beneficial when the dataset is stored on a
+        network-mounted filesystem where each ``stat()`` incurs network
+        latency.
+
+        Returns
+        -------
+        None
+            Results are written in-place to the ``"File Size"`` column of the
+            shared locator.
+
+        Notes
+        -----
+        File sizes are reported in **bytes** (``int``).  A value of ``-1``
+        indicates that the file was not found or could not be stat-ed.
+
+        To convert units in pandas after calling this method::
+
+            df = u_ds.get_locator()
+            df["File Size KB"] = df["File Size"] / 1_024
+            df["File Size MB"] = df["File Size"] / 1_024 ** 2
+            df["File Size GB"] = df["File Size"] / 1_024 ** 3
+
+        Examples
+        --------
+        >>> from eegunity import UnifiedDataset
+        >>> u_ds = UnifiedDataset(dataset_path="/path/to/dataset")
+        >>> u_ds.eeg_batch.get_file_sizes()
+        >>> locator = u_ds.get_locator()
+        >>> print(locator[["File Path", "File Size"]].head())
         """
 
         def app_func(row):
+            """Return the byte size of the file, or -1 if it cannot be accessed.
+
+            Parameters
+            ----------
+            row : pandas.Series
+                A single locator row; must contain the key ``"File Path"``.
+
+            Returns
+            -------
+            int
+                File size in bytes, or ``-1`` on failure.
             """
-            Compute the SHA-256 hash of a file's content.
-
-            Args:
-                row (dict): A dictionary containing file metadata, must include
-                            the key 'File path' with the path to the file.
-
-            Returns:
-                str: The SHA-256 hash of the file content as a hexadecimal string.
-            """
-            file_path = row['File Path']
-
-            sha256_hash = hashlib.sha256()
             try:
-                with open(file_path, "rb") as f:
-                    for chunk in iter(lambda: f.read(8192), b""):
-                        sha256_hash.update(chunk)
-            except FileNotFoundError:
-                raise FileNotFoundError(f"File not found: {file_path}")
-            except IOError as e:
-                raise IOError(f"Cannot read file {file_path}: {e}")
+                return os.path.getsize(row['File Path'])
+            except OSError:
+                return -1
 
-            return sha256_hash.hexdigest()
-
-        # Apply the app_func to each row and collect the resulting hash values
         results = self.batch_process(
-            lambda row: True,  # Process all rows
+            lambda row: True,
             app_func,
             is_patch=True,
-            result_type="value"
+            result_type="value",
+            execution_mode='thread',
         )
 
-        # Store the results in the metadata under the key "Source Hash"
-        self.set_metadata("Source Hash", results)
+        self.set_metadata("File Size", results)

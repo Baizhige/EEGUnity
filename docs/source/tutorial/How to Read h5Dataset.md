@@ -1,78 +1,75 @@
-# Reading EEGUnity HDF5 Files: A Guide
+﻿# Reading EEGUnity HDF5 Files
 
-## 1. Introduction
-This tutorial provides a step-by-step guide for reading EEG data stored in HDF5 files exported by the EEGUnity library (`UnifiedDataset.EEGBatch.export_h5Dataset`).
-You'll learn what HDF5 files are, why certain attributes are stored redundantly, and how to read the data in Python.
+This tutorial explains how to read `.hdf5` files exported by `UnifiedDataset.eeg_batch.export_h5Dataset`.
 
-## 2. What is HDF5?
-HDF5 (Hierarchical Data Format version 5) is a widely-used file format for storing large amounts of structured data.
-With a tree-like structure, HDF5 allows for grouping data and storing metadata (attributes) alongside datasets.
-To learn more, visit the [HDF Group official website](https://www.hdfgroup.org/solutions/hdf5/).
+## HDF5 Layout Used by EEGUnity
 
-## 3. Understanding Data Saving in HDF5
-In EEGUnity files, HDF5 is used to store both EEG data and related metadata. Common attributes such as `rsFreq` (sampling frequency) and `chOrder` (channel order) are stored in two places:
-1) as HDF5 attributes for easy access, and 2) within the `info` dataset for more details..
-This redundancy aims to ensure interoperability and ease of data access across project [LaBraM](https://github.com/935963004/LaBraM)
+For each EEG file, EEGUnity creates one HDF5 group at the root level:
 
-## 4. Sample Script to Read HDF5 Files
+- `<group_name>/eeg`: EEG array (`n_channels`, `n_samples`)
+- `<group_name>/info`: pickled `mne.Info` bytes (`uint8` array)
+- Attributes on `<group_name>/eeg`:
+  - `rsFreq`: sampling rate
+  - `chOrder`: channel order
 
-Below is an example script for reading HDF5 files created by EEGUnity. This script opens the file, retrieves EEG data, and extracts important attributes like `rsFreq` and `chOrder`. It also reads and parses the `info` dataset, where additional metadata is stored, such as events.
+## Example Script
 
 ```python
 import h5py
 import pickle
 
-# Define the file path (replace 'your/file/path.hdf5' with your actual path)
-file_path = 'your/file/path.hdf5'
+file_path = r"path/to/EEGUnity_export.hdf5"
 
-# Open the HDF5 file and read specified fields
-with h5py.File(file_path, 'r') as f:
-    # Retrieve all groups
+with h5py.File(file_path, "r") as f:
     group_names = list(f.keys())
+    print("Number of groups:", len(group_names))
 
     for i, grp_name in enumerate(group_names):
-        print(f"\n=== Group {i} - {grp_name} ===")
         grp = f[grp_name]
+        print(f"\n=== Group {i}: {grp_name} ===")
 
-        # Read EEG dataset
-        if 'eeg' in grp:
-            eeg_data = grp['eeg'][:]
-            print(f"EEG Data Shape: {eeg_data.shape}")
+        if "eeg" not in grp:
+            print("Missing dataset: eeg")
+            continue
+
+        eeg_dset = grp["eeg"]
+        eeg_data = eeg_dset[:]
+        rs_freq = eeg_dset.attrs.get("rsFreq", None)
+        ch_order = eeg_dset.attrs.get("chOrder", None)
+
+        print("EEG shape:", eeg_data.shape)
+        print("Sampling rate:", rs_freq)
+        print("Channel order:", ch_order)
+
+        if "info" in grp:
+            info_bytes = grp["info"][()].tobytes()
+            mne_info = pickle.loads(info_bytes)
+            print("MNE info keys:", list(mne_info.keys())[:10])
         else:
-            print("EEG dataset not found.")
-
-        # Get the EEG dataset
-        dset = grp['eeg']
-
-        # Read 'rsFreq' attribute (sampling rate)
-        if 'rsFreq' in dset.attrs:
-            rs_freq = dset.attrs['rsFreq']
-            print(f"Sampling Rate (rsFreq): {rs_freq}")
-        else:
-            print("Sampling rate (rsFreq) attribute not found.")
-
-        # Read 'chOrder' attribute (channel order)
-        if 'chOrder' in dset.attrs:
-            ch_order = dset.attrs['chOrder']
-            print(f"Channel Order (chOrder): {ch_order}")
-        else:
-            print("Channel order (chOrder) attribute not found.")
-
-        # Read and parse the 'info' dataset
-        if 'info' in grp:
-            info_array = grp['info'][()]
-            info_bytes = info_array.tobytes()
-            raw_info = pickle.loads(info_bytes)
-            print(raw_info)
-        else:
-            print("Info dataset not found.")
-
-        print("\n" + "=" * 30)
+            print("Missing dataset: info")
 ```
 
-**Note:** Replace `'your/file/path.hdf5'` with the path to your HDF5 file.
+## Optional: Load Only Metadata
 
----
+If you only need metadata without loading full EEG arrays:
 
-This script provides a basic framework for loading EEG data and metadata from HDF5 files. It prints key information from each group within the file, including EEG data shape, sampling rate (`rsFreq`), channel order (`chOrder`), and other metadata stored in `info`. You can expand or modify the script to suit specific analysis needs.
+```python
+import h5py
 
+file_path = r"path/to/EEGUnity_export.hdf5"
+
+with h5py.File(file_path, "r") as f:
+    for grp_name in f.keys():
+        eeg_dset = f[grp_name]["eeg"]
+        print(
+            grp_name,
+            eeg_dset.shape,
+            eeg_dset.attrs.get("rsFreq", None),
+        )
+```
+
+## Notes
+
+- `info` is serialized with Python `pickle`; load only files from trusted sources.
+- `chOrder` should be used together with EEG array rows when feeding models.
+- If you need random access at scale, iterate by group and avoid loading all groups into memory at once.

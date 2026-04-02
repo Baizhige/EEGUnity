@@ -1,50 +1,62 @@
-import os
+﻿"""Run local EEGUnity CI scripts with the current Python interpreter."""
+
+from __future__ import annotations
+
 import subprocess
-def run_tests(directory=None):
-    # Use the provided directory if given, otherwise use the current directory
-    if directory:
-        if not os.path.isdir(directory):
-            print(f"Error: {directory} is not a valid directory.")
-            return
-        current_dir = directory
-    else:
-        current_dir = os.getcwd()
+import sys
+from pathlib import Path
 
-    # Get all .py files in the directory, excluding this script itself
-    current_script = os.path.basename(__file__)
-    py_files = [f for f in os.listdir(current_dir) if f.endswith('.py') and f != current_script]
-    print(py_files)
-    failed_tests = []
 
-    # Execute each .py file
-    for py_file in py_files:
-        print(f"Running test: {py_file}")
-        try:
-            # Execute the .py script and capture the output
-            result = subprocess.run(['/gpfs/work/int/chengxuanqin21/conda_envs/EEG/bin/python', os.path.join(current_dir, py_file)], capture_output=True, text=True)
+def _collect_scripts(ci_dir: Path) -> list[str]:
+    """Collect scripts in deterministic order for local CI execution."""
+    batch_scripts = sorted(p.name for p in ci_dir.glob("eeg_batch_*.py"))
+    scripts = [
+        "import_testing.py",
+        "eeg_parser_generate_locator.py",
+        *batch_scripts,
+        "eeg_kernel_test.py",
+    ]
 
-            # If the script returns a non-zero exit code, consider it a failure
-            if result.returncode != 0:
-                print(f"Test failed: {py_file}")
+    return [name for name in scripts if (ci_dir / name).exists()]
+
+
+def run_tests() -> int:
+    """Execute CI scripts and return process exit code."""
+    ci_dir = Path(__file__).resolve().parent
+    scripts = _collect_scripts(ci_dir)
+    failed: list[str] = []
+
+    print("[run_all_CI_test] Scripts:", scripts)
+
+    for script_name in scripts:
+        script_path = ci_dir / script_name
+        print(f"[run_all_CI_test] Running: {script_name}")
+        result = subprocess.run(
+            [sys.executable, str(script_path)],
+            cwd=str(ci_dir),
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode != 0:
+            failed.append(script_name)
+            print(f"[run_all_CI_test] FAILED: {script_name}")
+            print(result.stdout)
+            print(result.stderr)
+        else:
+            print(f"[run_all_CI_test] PASSED: {script_name}")
+            if result.stdout.strip():
                 print(result.stdout)
-                print(result.stderr)
-                failed_tests.append(py_file)
-            else:
-                print(f"Test passed: {py_file}")
 
-        except Exception as e:
-            print(f"Error running {py_file}: {e}")
-            failed_tests.append(py_file)
+    if failed:
+        print("\n[run_all_CI_test] Failed scripts:")
+        for name in failed:
+            print(name)
+        return 1
 
-    # Summary of failed tests
-    if failed_tests:
-        print("\nSummary of failed tests:")
-        for failed_test in failed_tests:
-            print(failed_test)
-    else:
-        print("\nAll tests passed successfully!")
+    print("\n[run_all_CI_test] All scripts passed.")
+    return 0
+
 
 if __name__ == "__main__":
-    # Specify the test directory, or press Enter to use the current directory
-    test_directory = '/gpfs/work/int/chengxuanqin21/science_works/EEGUnity_V0/CI'
-    run_tests(test_directory if test_directory.strip() else None)
+    raise SystemExit(run_tests())

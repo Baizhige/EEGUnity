@@ -1,78 +1,51 @@
-import json
-import os
-import sys
-# Get the parent directory of the script
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+﻿"""CI test for save_as_other."""
 
-# Add parent directory to sys.path
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-from eegunity.unifieddataset import UnifiedDataset
+from __future__ import annotations
 
-# Obtain base config from file
-with open('CI_config.json', 'r') as config_file:
-    config = json.load(config_file)
+from ci_runtime import dataset_from_locator, domains, load_ci_config, output_dir
 
-remain_list = config['test_data_list']
-locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']+"/save_as_other"
 
-# Test function with different parameter combinations
-for folder_name in remain_list:
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
+def main() -> None:
+    """Validate save_as_other success and expected error paths."""
+    config = load_ci_config()
+    out_dir = output_dir(config, "save_as_other")
 
-    # Test saving in 'fif' format (default)
-    try:
-        unified_dataset.eeg_batch.save_as_other(output_path=CI_output_path, format='fif')
-        print(f"Test with default format (fif) for {folder_name} completed.")
-    except FileNotFoundError as e:
-        print(f"FileNotFoundError encountered for {folder_name}: {str(e)}")
-    except ValueError as e:
-        print(f"ValueError encountered for {folder_name}: {str(e)}")
+    for domain in domains(config):
+        # valid fif
+        u_ds = dataset_from_locator(config, domain)
+        u_ds.eeg_batch.save_as_other(output_path=str(out_dir), format="fif", miss_bad_data=True)
 
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
+        # valid csv
+        u_ds = dataset_from_locator(config, domain)
+        u_ds.eeg_batch.save_as_other(output_path=str(out_dir), format="csv", miss_bad_data=True)
 
-    # Test saving in 'csv' format
-    try:
-        unified_dataset.eeg_batch.save_as_other(output_path=CI_output_path, format='csv')
-        print(f"Test with csv format for {folder_name} completed.")
-    except FileNotFoundError as e:
-        print(f"FileNotFoundError encountered for {folder_name}: {str(e)}")
-    except ValueError as e:
-        print(f"ValueError encountered for {folder_name}: {str(e)}")
+        # with explicit domain tag
+        u_ds = dataset_from_locator(config, domain)
+        u_ds.eeg_batch.save_as_other(
+            output_path=str(out_dir),
+            domain_tag=domain,
+            format="fif",
+            miss_bad_data=True,
+        )
 
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
+        # invalid format should raise
+        u_ds = dataset_from_locator(config, domain)
+        try:
+            u_ds.eeg_batch.save_as_other(output_path=str(out_dir), format="unsupported_format")
+            raise AssertionError("Expected ValueError for unsupported format")
+        except ValueError:
+            pass
 
-    # Test saving with domain_tag specified
-    try:
-        unified_dataset.eeg_batch.save_as_other(output_path=CI_output_path, domain_tag=folder_name, format='fif')
-        print(f"Test with domain_tag={folder_name} for {folder_name} completed.")
-    except FileNotFoundError as e:
-        print(f"FileNotFoundError encountered for {folder_name} with domain_tag: {str(e)}")
-    except ValueError as e:
-        print(f"ValueError encountered for {folder_name} with domain_tag: {str(e)}")
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
-    # Test invalid format
-    try:
-        unified_dataset.eeg_batch.save_as_other(output_path=CI_output_path, format='unsupported_format')
-    except ValueError as e:
-        print(f"Correctly caught ValueError for unsupported format for {folder_name}: {str(e)}")
+        # invalid output path should raise
+        u_ds = dataset_from_locator(config, domain)
+        try:
+            u_ds.eeg_batch.save_as_other(output_path="Z:/__definitely_missing__/", format="fif")
+            raise AssertionError("Expected FileNotFoundError for invalid output path")
+        except FileNotFoundError:
+            pass
 
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
-    # Test with invalid output path
-    try:
-        unified_dataset.eeg_batch.save_as_other(output_path='/invalid/path', format='fif')
-    except FileNotFoundError as e:
-        print(f"Correctly caught FileNotFoundError for invalid path for {folder_name}: {str(e)}")
+        print(f"[eeg_batch_save_as_other] {domain}: completed")
 
-print("Successfully completed all save_as_other tests.")
+
+if __name__ == "__main__":
+    main()

@@ -1,12 +1,12 @@
-{
+﻿{
   "test_data_list": [
     "bcic_iv_2a"
   ],
-  "locator_base_path": ".",
-  "CI_output_path": "../../EEGUnity_CI",
+  "data_root_path": "H:/",
+  "locator_base_path": "H:/AACache/EEGUnity_CI/locators",
+  "CI_output_path": "H:/AACache/EEGUnity_CI/output",
+  "max_rows_per_test": 1,
   "kernel_spec_map": {
-    "bcic_iv_2a": "./kernels/bcic_iv_2a.py",
-    "figshare_largemi": "./kernels/figshare_largemi.py",
-    "figshare_meng2019": "./kernels/figshare_meng2019.py"
+    "bcic_iv_2a": "./kernels/bcic_iv_2a.py"
   }
 }

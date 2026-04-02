@@ -1,6 +1,7 @@
 import numpy as np
 import mne
 from eegunity.modules.parser.eeg_parser import set_montage_any
+from eegunity.utils.label_channel import misc_channel_indices, stim_channel_indices
 
 
 def channel_align_raw(mne_raw, channel_order, min_matched_channel=1):
@@ -11,19 +12,27 @@ def channel_align_raw(mne_raw, channel_order, min_matched_channel=1):
     according to the specified `channel_order`. If some channels from `channel_order`
     are missing in the raw data, they will be added with zero values and later interpolated.
 
+    ``misc`` label channels and ``stim`` trigger channels are temporarily
+    removed before alignment so they do not interfere with EEG-specific
+    operations (montage fitting, bad-channel interpolation). They are
+    re-appended at the end of the channel list after alignment is complete.
+
     Parameters
     ----------
     mne_raw : mne.io.Raw
         The raw EEG/MEG data in an MNE Raw object.
     channel_order : list of str
-        The desired order of channels.
+        The desired order of channels. Should contain only channels to align
+        (typically EEG). ``misc`` and ``stim`` channels are handled separately
+        and must not be listed here.
     min_matched_channel : int, optional
         The minimum required number of matched channels, by default 1.
 
     Returns
     -------
     mne.io.Raw
-        The modified raw object with channels aligned and missing channels interpolated.
+        The modified raw object with channels aligned, missing channels interpolated,
+        and preserved ``misc``/``stim`` channels appended at the end.
 
     Raises
     ------
@@ -36,6 +45,8 @@ def channel_align_raw(mne_raw, channel_order, min_matched_channel=1):
     - If some channels from `channel_order` are missing in `mne_raw`, they are added as zero
       data channels and interpolated.
     - The missing channels are first marked as 'bad' before interpolation.
+    - ``misc``/``stim`` channels are not interpolated and are not included in
+      the alignment order.
 
     Examples
     --------
@@ -44,6 +55,25 @@ def channel_align_raw(mne_raw, channel_order, min_matched_channel=1):
     >>> desired_order = ['Fp1', 'Fp2', 'F3', 'F4', 'C3', 'C4', 'P3', 'P4', 'O1', 'O2']
     >>> aligned_raw = channel_align_raw(raw, desired_order, min_matched_channel=5)
     """
+    # -----------------------------------------------------------------------
+    # Step 1: Extract and remove preserved channels before EEG alignment.
+    # They survive alignment unchanged and are re-appended at the end.
+    # -----------------------------------------------------------------------
+    preserve_idx = sorted(set(misc_channel_indices(mne_raw)) | set(stim_channel_indices(mne_raw)))
+
+    if preserve_idx:
+        mne_raw.load_data()
+        preserve_names = [mne_raw.ch_names[idx] for idx in preserve_idx]
+        preserve_data = mne_raw._data[preserve_idx, :].copy()
+        preserve_types = [mne.channel_type(mne_raw.info, idx) for idx in preserve_idx]
+        # Drop preserved channels so they don't interfere with EEG alignment.
+        align_names = [ch for i, ch in enumerate(mne_raw.ch_names) if i not in preserve_idx]
+        mne_raw.pick_channels(align_names)
+
+    # -----------------------------------------------------------------------
+    # Step 2: Standard EEG channel alignment.
+    # -----------------------------------------------------------------------
+
     # Get existing channels in the raw object
     existing_channels = mne_raw.ch_names
 
@@ -54,7 +84,6 @@ def channel_align_raw(mne_raw, channel_order, min_matched_channel=1):
     if len(matched_channels) < min_matched_channel:
         raise ValueError(
             f"Error: Matched channels ({len(matched_channels)}) are less than the required minimum ({min_matched_channel})")
-
 
     # If there are missing channels in the raw data, handle them
     if len(matched_channels) < len(channel_order):
@@ -82,5 +111,17 @@ def channel_align_raw(mne_raw, channel_order, min_matched_channel=1):
     # Pick the matched channels and ensure the correct order
     mne_raw.pick_channels(matched_channels)
     mne_raw.reorder_channels(matched_channels)  # Ensures the channels are in the specified order
+
+    # -----------------------------------------------------------------------
+    # Step 3: Re-append preserved channels at the end of the channel list.
+    # -----------------------------------------------------------------------
+    if preserve_idx:
+        preserved_info = mne.create_info(
+            preserve_names,
+            sfreq=mne_raw.info['sfreq'],
+            ch_types=preserve_types,
+        )
+        preserved_raw = mne.io.RawArray(preserve_data, preserved_info, verbose=False)
+        mne_raw.add_channels([preserved_raw], force_update_info=True)
 
     return mne_raw

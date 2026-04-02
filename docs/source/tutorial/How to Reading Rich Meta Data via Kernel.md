@@ -1,124 +1,29 @@
-# EEGUnity Kernels: Dataset-Specific In-Memory Preprocessing
+# EEGUnity Kernel Tutorial: Rich Metadata, `misc`, `stim`, and Annotations
 
-## 1. Introduction
+This tutorial explains how to use EEGUnity kernels to inject dataset-specific metadata and channels in memory.
 
-EEGUnity provides a unified interface for parsing, preprocessing, and
-managing EEG datasets. However, many public datasets are not fully
-standardized:
+## 1. Design Principle
 
--   Event markers may be stored in separate `.mat`, `.tsv`, or `.csv`
-    files.
--   Subject metadata may exist in independent tables.
--   Channel naming conventions may vary across releases.
--   Folder structures may differ between mirrors or versions.
+EEGUnity keeps **locator metadata as source of truth**:
 
-To address this variability **without duplicating EEG data**, EEGUnity
-introduces the concept of external kernels.
+- `format_channel_names()` standardizes locator channels as `channel_type:channel_name`.
+- `get_data_row()` uses locator metadata to overwrite raw metadata at load time.
+- Kernels are applied **after** locator-driven metadata patching.
 
-A kernel is a dataset-specific, in-memory preprocessing plugin that runs
-automatically when data is read.
+This allows online metadata maintenance without modifying source files.
 
-------------------------------------------------------------------------
+## 2. What a Kernel Can Do
 
-## 2. Why Use Kernels?
+A kernel can:
 
-Traditional workflows often:
+- add or update `raw.info["description"]`
+- add or adjust multiple `misc` channels
+- add or adjust multiple `stim` channels
+- add/update annotations
 
-1.  Load raw data
-2.  Run dataset-specific preprocessing scripts
-3.  Export a new standardized dataset copy
+Kernel interface:
 
-This approach duplicates EEG arrays and complicates maintenance.
-
-Kernels solve this by:
-
--   Running at read time
--   Updating `mne.io.Raw` objects in memory
--   Attaching metadata and annotations dynamically
--   Leaving the original dataset untouched
-
-------------------------------------------------------------------------
-
-## 3. How Kernels Work
-
-When binding a kernel:
-
-``` python
-from eegunity import UnifiedDataset
-
-ud = UnifiedDataset(
-    dataset_path="/data/openneuro/ds005505",
-    domain_tag="openneuro_ds005505",
-    kernel_spec="/abs/path/openneuro_ds005505_kernel"
-)
-
-raw = ud.eeg_parser.get_data(0)
-```
-
-Internally:
-
-1.  EEGUnity loads the Raw object.
-2.  The external kernel is loaded dynamically.
-3.  The system calls:
-
-``` python
-kernel.apply(udataset, raw, row)
-```
-
-If the kernel fails, EEGUnity emits a warning and returns the unmodified
-raw.
-
-------------------------------------------------------------------------
-
-## 4. Kernel File Requirements
-
-Each kernel file must:
-
-1.  Be a single Python module
-2.  Define exactly one object named:
-
-``` python
-KERNEL = YourKernelClass()
-```
-
-3.  Implement:
-
-``` python
-apply(udataset, raw, row) -> raw
-```
-
-One file equals one kernel. No suffix such as `:KERNEL` is required.
-
-Valid kernel specifications:
-
--   File path (extension optional): "/abs/path/figshare_largemi_kernel"
-
--   Module import path: "my_private_kernels.figshare_largemi_kernel"
-
-------------------------------------------------------------------------
-
-## 5. Recommended Naming Convention
-
-Kernel names should reflect the dataset source:
-
--   figshare_xxxx
--   openneuro_ds005505
--   kaggle_xxxx
--   bcic_iv_2a
-
-Inside the kernel class:
-
-``` python
-KERNEL_ID = "figshare_largemi"
-```
-
-------------------------------------------------------------------------
-
-## 6. Kernel Interface Specification
-
-Required structure:
-
-``` python
+```python
 class SomeKernel:
     def apply(self, udataset, raw, row):
         ...
@@ -127,70 +32,112 @@ class SomeKernel:
 KERNEL = SomeKernel()
 ```
 
-Parameters:
+## 3. Annotation vs `misc` vs `stim`
 
--   udataset: dataset-level context
--   raw: loaded MNE Raw object
--   row: locator row (contains "File Path")
+Use these three mechanisms for different semantics:
 
-Return the modified raw object.
+- `Annotations`: text labels mapped to time segments (`onset`, `duration`, `description`).
+- `misc` channels: continuous values over time (for example probability density, reaction-time trajectory).
+- `stim` channels: integer event codes over time (for example class sequence 1/2/3).
 
-------------------------------------------------------------------------
+For a single scalar value for one segment, fill the covered segment in a `misc` channel.
 
-## 7. Determining Dataset Root
+## 4. Example Kernel with Multiple `misc` and `stim` Channels
 
-If instantiated with dataset_path, use it directly.
-
-If instantiated with locator_path only:
-
-1.  Use udataset.get_shared_attr()\["dataset_path"\] if available.
-2.  Otherwise compute common minimal prefix of all File Path entries.
-3.  Fallback to directory of row\["File Path"\].
-
-------------------------------------------------------------------------
-
-## 8. Writing Robust Kernels
-
-To support dataset variants:
-
--   Avoid hardcoded paths
--   Search recursively for participants or event files
--   Tolerate alternate column names
--   Handle missing metadata gracefully
--   Avoid assuming fixed folder structures
-
-Focus on robust logic. EEGUnity handles exception safety.
-
-------------------------------------------------------------------------
-
-## 9. Minimal Kernel Template
-
-``` python
+```python
 from __future__ import annotations
-import json
 from dataclasses import dataclass
+import numpy as np
 import mne
+
+
+def add_channel(raw: mne.io.BaseRaw, ch_name: str, ch_type: str, values: np.ndarray) -> mne.io.BaseRaw:
+    """Append one channel to raw with explicit MNE channel type."""
+    if values.ndim != 1:
+        raise ValueError("values must be a 1D array")
+    if values.shape[0] != raw.n_times:
+        raise ValueError("values length must equal raw.n_times")
+
+    info = mne.create_info([ch_name], sfreq=raw.info["sfreq"], ch_types=[ch_type])
+    ch_raw = mne.io.RawArray(values[np.newaxis, :], info, verbose=False)
+    raw.add_channels([ch_raw], force_update_info=True)
+    return raw
+
 
 @dataclass
 class ExampleKernel:
-    KERNEL_ID: str = "source_name"
+    KERNEL_ID: str = "example_rich_meta"
 
-    def apply(self, udataset, raw: mne.io.BaseRaw, row) -> mne.io.BaseRaw:
-        description_dict = {
-            "original_description": raw.info.get("description", ""),
-            "eegunity_description": {
-                "source_name": self.KERNEL_ID
-            },
-        }
-        raw.info["description"] = json.dumps(description_dict)
+    def apply(self, udataset, raw: mne.io.BaseRaw, row):
+        n = raw.n_times
+
+        # misc channels (continuous signals)
+        prob_density = np.linspace(0.1, 0.9, n, dtype=float)
+        reaction_time = np.full(n, 0.42, dtype=float)
+        raw = add_channel(raw, "prob_density", "misc", prob_density)
+        raw = add_channel(raw, "reaction_time", "misc", reaction_time)
+
+        # stim channels (integer codes)
+        task_code = np.zeros(n, dtype=float)
+        task_code[n // 4: n // 2] = 1
+        task_code[n // 2: 3 * n // 4] = 2
+        task_code[3 * n // 4:] = 3
+
+        stage_code = np.zeros(n, dtype=float)
+        stage_code[n // 3: 2 * n // 3] = 7
+
+        raw = add_channel(raw, "task_code", "stim", task_code)
+        raw = add_channel(raw, "stage_code", "stim", stage_code)
+
+        # annotation segments (text semantics)
+        ann = mne.Annotations(
+            onset=[0.0, raw.times[n // 2]],
+            duration=[2.0, 2.0],
+            description=["trial_start", "feedback"],
+        )
+        raw.set_annotations(ann)
+
         return raw
+
 
 KERNEL = ExampleKernel()
 ```
 
-------------------------------------------------------------------------
+## 5. Binding and Running
 
-## 10. Summary
+```python
+from eegunity import UnifiedDataset
 
-Kernels allow EEGUnity to remain lightweight, avoid licensing issues,
-and support diverse datasets through dynamic, in-memory preprocessing.
+ud = UnifiedDataset(
+    dataset_path=r"path/to/dataset",
+    domain_tag="my_dataset",
+    kernel_spec=r"path/to/example_kernel.py",
+)
+
+# Parser path
+raw0 = ud.eeg_parser.get_data(0)
+
+# Batch path (kernel is also applied when loading row data in batch methods)
+ud.eeg_batch.get_file_hashes(data_stream=True)
+```
+
+## 6. Channel Type Compatibility
+
+EEGUnity standard prefixes are lowercase MNE-style (`eeg`, `eog`, `emg`, `ecg`, `meg`, `stim`, `misc`, `bio`) and it also accepts explicit MNE channel type strings in locator entries, for example:
+
+- `seeg:LA1`
+- `ecog:G1`
+- `dbs:DBS1`
+- `fnirs_od:S1_D1_760`
+- `pupil:pupil_left`
+- `misc:prob_density`
+- `stim:task_code`
+
+Legacy uppercase prefixes (`EEG`, `EOG`, `EMG`, `ECG`, `STIM`, `Unknown`) are accepted for backward compatibility.
+
+## 7. Recommended Practice
+
+- Use annotations for semantic event intervals.
+- Use `stim` for integer-coded sequences.
+- Use `misc` for continuous labels.
+- Keep kernel logic dataset-specific and deterministic.

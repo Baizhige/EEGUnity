@@ -1,31 +1,30 @@
 eegunity package
 ================
 
+Core API
+--------
+
+eegunity.unifieddataset module
+------------------------------
+
+.. autoclass:: eegunity.unifieddataset.UnifiedDataset
+   :members:
+   :show-inheritance:
+   :member-order: bysource
+
 Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    eegunity.modules
    eegunity.resources
    eegunity.utils
 
-Submodules
-----------
-
-eegunity.unifieddataset module
-------------------------------
-
-.. automodule:: eegunity.unifieddataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
+Top-level exports
+-----------------
 
 .. automodule:: eegunity
    :members:
-   :undoc-members:
    :show-inheritance:

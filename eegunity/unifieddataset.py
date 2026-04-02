@@ -34,7 +34,8 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         """
 
     def __init__(self, dataset_path: str = None, locator_path: str = None, domain_tag: str = None,
-                 is_unzip: bool = True, verbose: str = 'CRITICAL', num_workers: int = 0 , kernel_spec: str = None):
+                 is_unzip: bool = True, verbose: str = 'CRITICAL', num_workers: int = 0,
+                 kernel_spec: str = None, min_file_size: int = 5 * 1024 * 1024):
         """
         Initialize the class with either dataset_path or locator_path. Only one of
         these parameters should be provided. If dataset_path is provided, domain_tag is required.
@@ -55,6 +56,11 @@ class UnifiedDataset(_UDatasetSharedAttributes):
             Number of worker threads for parallel processing (default is 0).
             0 means sequential execution in the main thread.
             >0 uses a ThreadPoolExecutor with the specified number of workers.
+        kernel_spec : str, optional
+            Specification string for the processing kernel. Defaults to ``None``.
+        min_file_size : int, optional
+            Minimum file size in bytes for CSV/TXT files scanned during dataset
+            parsing. Defaults to ``5 * 1024 * 1024``.
 
         Raises:
         -------
@@ -64,6 +70,7 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         --------
         >>> unified_dataset = UnifiedDataset("path/to/your/dataset")
         >>> unified_dataset_locator = UnifiedDataset(locator_path="path/to/your/locator.csv")
+        >>> unified_dataset_small = UnifiedDataset("path/to/your/dataset", min_file_size=0)
         """
         super().__init__()
 
@@ -88,6 +95,7 @@ class UnifiedDataset(_UDatasetSharedAttributes):
         self.set_shared_attr({'domain_tag': domain_tag})
         self.set_shared_attr({'verbose': verbose})
         self.set_shared_attr({'num_workers': num_workers})
+        self.set_shared_attr({'min_file_size': min_file_size})
         # --- anchor: after set_shared_attr(...) in __init__ ---
         self.set_shared_attr({'kernel_spec': kernel_spec})
         self.set_shared_attr({'kernel': None})

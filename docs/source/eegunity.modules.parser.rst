@@ -1,45 +1,47 @@
 eegunity.modules.parser
-===============================
+=======================
 
 Submodules
 ----------
 
-eegunity.modules.parser.eeg\_parser module
-------------------------------------------
+eegunity.modules.parser.eeg_parser module
+-----------------------------------------
 
 .. automodule:: eegunity.modules.parser.eeg_parser
    :members:
-   :undoc-members:
    :show-inheritance:
 
-eegunity.modules.parser.eeg\_parser\_config module
---------------------------------------------------
+eegunity.modules.parser.eeg_parser_config module
+------------------------------------------------
 
 .. automodule:: eegunity.modules.parser.eeg_parser_config
    :members:
-   :undoc-members:
    :show-inheritance:
 
-eegunity.modules.parser.eeg\_parser\_csv module
------------------------------------------------
+eegunity.modules.parser.eeg_parser_csv module
+---------------------------------------------
 
 .. automodule:: eegunity.modules.parser.eeg_parser_csv
    :members:
-   :undoc-members:
    :show-inheritance:
 
-eegunity.modules.parser.eeg\_parser\_mat module
------------------------------------------------
+eegunity.modules.parser.eeg_parser_mat module
+---------------------------------------------
 
 .. automodule:: eegunity.modules.parser.eeg_parser_mat
    :members:
-   :undoc-members:
    :show-inheritance:
 
-Module contents
+eegunity.modules.parser.eeg_parser_wfdb module
+----------------------------------------------
+
+.. automodule:: eegunity.modules.parser.eeg_parser_wfdb
+   :members:
+   :show-inheritance:
+
+Package exports
 ---------------
 
 .. automodule:: eegunity.modules.parser
    :members:
-   :undoc-members:
    :show-inheritance:

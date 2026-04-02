@@ -1,39 +1,37 @@
 eegunity.modules.batch
-==============================
+======================
 
-Submodules
+Public API
 ----------
 
-eegunity.modules.batch.eeg\_batch module
-----------------------------------------
+eegunity.modules.batch.eeg_batch.EEGBatch class
+------------------------------------------------
 
-.. automodule:: eegunity.modules.batch.eeg_batch
+.. autoclass:: eegunity.modules.batch.eeg_batch.EEGBatch
    :members:
-   :undoc-members:
+   :inherited-members: eegunity.modules.batch.method_mixin_epoch.EEGBatchMixinEpoch
    :show-inheritance:
+   :member-order: bysource
 
-eegunity.modules.batch.eeg\_scores\_modified\_mne module
---------------------------------------------------------
+.. note::
+   ``method_mixin_epoch`` is an internal implementation module and is not
+   listed as a separate top-level API page.
+
+Supporting modules
+------------------
+
+eegunity.modules.batch.eeg_scores_modified_mne module
+------------------------------------------------------
 
 .. automodule:: eegunity.modules.batch.eeg_scores_modified_mne
    :members:
-   :undoc-members:
    :show-inheritance:
 
-eegunity.modules.batch.eeg\_scores\_shady module
-------------------------------------------------
+eegunity.modules.batch.eeg_scores_shady module
+----------------------------------------------
 
 .. automodule:: eegunity.modules.batch.eeg_scores_shady
    :members:
-   :undoc-members:
-   :show-inheritance:
-
-eegunity.modules.batch.method\_mixin\_epoch module
---------------------------------------------------
-
-.. automodule:: eegunity.modules.batch.method_mixin_epoch
-   :members:
-   :undoc-members:
    :show-inheritance:
 
 eegunity.modules.batch.utils module
@@ -41,13 +39,11 @@ eegunity.modules.batch.utils module
 
 .. automodule:: eegunity.modules.batch.utils
    :members:
-   :undoc-members:
    :show-inheritance:
 
-Module contents
+Package exports
 ---------------
 
 .. automodule:: eegunity.modules.batch
    :members:
-   :undoc-members:
    :show-inheritance:

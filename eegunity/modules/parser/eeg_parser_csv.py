@@ -137,7 +137,7 @@ def _process_single_csv_file(file_path):
         return None
 
 
-def process_csv_files(files_locator, num_workers=0):
+def process_csv_files(files_locator, num_workers=0, min_file_size=5 * 1024 * 1024):
     """
     Process CSV files and update a DataFrame with file details.
 
@@ -147,18 +147,27 @@ def process_csv_files(files_locator, num_workers=0):
         A DataFrame containing the metadata of files, including their file paths and other details. The column 'File Path' is expected to contain paths to the files.
     num_workers : int, optional
         Number of worker threads for parallel processing (default is 0, sequential).
+    min_file_size : int, optional
+        Minimum file size in bytes for a CSV/TXT file to be processed (default is 5 MB).
+        Files smaller than this threshold are skipped.
 
     Returns
     -------
     pandas.DataFrame
         Updated DataFrame with additional columns 'File Type', 'Sampling Rate', 'Channel Names', 'Number of Channels', and 'Duration' for each file. If a file cannot be processed, appropriate messages are printed.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> locator = pd.DataFrame([{"File Path": "sample.csv", "File Type": "unknown"}])
+    >>> process_csv_files(locator, num_workers=0, min_file_size=0)  # doctest: +SKIP
     """
     # Collect indices of eligible files
     eligible = []
     for index, row in files_locator.iterrows():
         file_path = row['File Path']
         if (file_path.endswith('.csv') or file_path.endswith('.txt')) and os.path.getsize(
-                file_path) > 5 * 1024 * 1024:
+                file_path) > min_file_size:
             eligible.append((index, file_path))
 
     if not eligible:
@@ -177,7 +186,7 @@ def process_csv_files(files_locator, num_workers=0):
             row = files_locator.loc[idx]
             df_len = result.pop('_df_len', None)
             for key, value in result.items():
-                files_locator.at[idx, key] = value
+                files_locator.at[idx, key] = pd.NA if pd.isna(value) else str(value)
             # Calculate duration using the sampling rate from this result
             if df_len is not None and 'Sampling Rate' in result:
                 sr = row['Sampling Rate']

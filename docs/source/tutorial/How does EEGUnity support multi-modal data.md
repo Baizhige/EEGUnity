@@ -1,44 +1,61 @@
-# EEGUnity: Supporting Multi-Modal Data
+# How to Support Multi-Modal Data in EEGUnity
 
-EEGUnity supports the classification of channels into the following types:
+EEGUnity supports unified channel naming and processing across multiple signal types.
 
-- `EEG` — Electroencephalography  
-- `EOG` — Electrooculography  
-- `EMG` — Electromyography  
-- `MEG` — Magnetoencephalography  
-- `ECG` — Electrocardiography  
-- `Dual` — Bipolar channels (e.g., `CFC5-POz`)  
-- `Unknown` — Unrecognized or custom signal channels (e.g., `1`, `IBS`, `Blood`)
+Supported channel prefixes include:
 
-## Special Notes
+- `eeg` for electroencephalography
+- `eog` for electrooculography
+- `emg` for electromyography
+- `meg` for magnetoencephalography
+- `ecg` for electrocardiography
+- `stim` for stimulation/event channels
+- `bio` for unmatched or generic biological channels
+- `misc` for continuous label channels (for example `misc:reaction_time`)
 
-- **Dual Channels**:  
-  Bipolar channels are marked as `Dual` when EEGUnity is set to **bipolar mode**, which is commonly used in tasks like sleep stage detection. These channels represent differential measurements between two electrode sites.
+EEGUnity also accepts explicit MNE channel type strings in locator entries (for example `seeg:LA1`, `ecog:G1`, `dbs:DBS1`, `fnirs_od:S1_D1_760`).
+Legacy uppercase prefixes (for example `EEG`, `EOG`, `STIM`, `Unknown`) are still accepted for backward compatibility.
 
-- **Unknown Channels**:  
-  Channels that do not match any recognized naming convention are classified as `Unknown`. This includes numeric or custom-named channels (e.g., `1`, `IBS`, `Blood`). By default, they are treated as `Dual`, but users can reassign their types as needed using preprocessing scripts.
+## Recommended Workflow
 
-## Multimodal Support
-
-EEGUnity’s multimodal capabilities are tightly integrated with MNE-Python. The level of multimodal support depends on MNE's ability to handle different channel types. Currently, most built-in EEGUnity functions are optimized for EEG data but are also compatible with signals that have similar data structures (e.g., EOG, EMG).
-
-For modalities that are less standardized or not fully supported by default (e.g., ECG, MEG, fNIRS, or custom physiological sensors), users can still apply EEGUnity’s flexible architecture.
-
-## Custom Batch Processing
-
-For full control over preprocessing and analysis workflows across modalities, EEGUnity provides:
+1. Load dataset metadata with `UnifiedDataset`.
+2. Filter to completed records.
+3. Format channel names into `<Type>:<Name>`.
+4. Apply modality-specific processing with `batch_process`.
 
 ```python
-unified_dataset.eeg_batch.batch_process()
+from eegunity import UnifiedDataset
+
+ud = UnifiedDataset(dataset_path="path/to/dataset", domain_tag="my_dataset")
+ud.eeg_batch.sample_filter(completeness_check="Completed")
+ud.eeg_batch.format_channel_names()
 ```
 
-This function enables users to define **customized processing pipelines** tailored to the specific requirements of their modality, allowing for preprocessing steps, filtering, artifact removal, segmentation, and feature extraction — even on non-EEG data.
+## About `misc:` Label Channels
 
-## Recommendations
+`misc:` channels are useful when a dataset includes continuous labels (for example reaction time or score trajectories) that should stay aligned with EEG samples.
 
-- Ensure all modalities are **properly labeled** in the raw data files or during the channel mapping phase.
-- Use `unified_dataset.map_channel_types()` to automatically classify or manually adjust channel types.
-- For large-scale multimodal projects, consider organizing channels into **modality-specific groups** to simplify downstream analysis.
+When resampling data, prefer EEGUnity helpers that preserve label semantics:
 
-EEGUnity aims to offer **unified, scalable, and reproducible** workflows for diverse neural and physiological signals in research and real-world applications.
-ng to meet their requiqrement
+- `eegunity.utils.label_channel.resample_raw_with_labels`
+- Methods that already call this helper internally, such as epoching and resampling paths in `eeg_batch`
+
+## Custom Processing for Multi-Modal Workloads
+
+For full control, use:
+
+```python
+ud.eeg_batch.batch_process(...)
+```
+
+In newer versions, `batch_process` supports `execution_mode`:
+
+- `execution_mode='thread'` for I/O-heavy tasks
+- `execution_mode='process'` for CPU-heavy tasks
+- `execution_mode=None` for strict sequential execution
+
+## Notes
+
+- Channel naming consistency is the foundation for correct modality handling.
+- If your dataset has custom channel conventions, format and validate the locator first.
+- For dataset-specific metadata injection, see the kernel tutorial.

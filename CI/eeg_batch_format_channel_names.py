@@ -1,38 +1,27 @@
-import json
-import os
-import sys
-# Get the parent directory of the script
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+﻿"""CI test for format_channel_names."""
 
-# Add parent directory to sys.path
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-from eegunity.unifieddataset import UnifiedDataset
+from __future__ import annotations
 
-# Obtain base config from file
-with open('CI_config.json', 'r') as config_file:
-    config = json.load(config_file)
+from ci_runtime import dataset_from_locator, domains, load_ci_config, output_dir
 
-remain_list = config['test_data_list']
-locator_base_path = config['locator_base_path']
-CI_output_path = config['CI_output_path']+"/format_channel_names"
 
-# Test function format_channel_names
-for folder_name in remain_list:
-    unified_dataset = UnifiedDataset(domain_tag=folder_name,
-                                     locator_path=f"{locator_base_path}/{folder_name}.csv",
-                                     is_unzip=False)
-    try:
-        # Test the format_channel_names function
-        unified_dataset.eeg_batch.format_channel_names()
-        print(f"Test format_channel_names for {folder_name} completed successfully.")
+def main() -> None:
+    """Validate channel-name formatting and locator persistence."""
+    config = load_ci_config()
+    out_dir = output_dir(config, "format_channel_names")
 
-        # Check if the 'Channel Names' column is correctly updated
-        channel_names_column = unified_dataset.get_locator().loc[:, 'Channel Names']
-        assert channel_names_column.notnull().all(), "Channel Names column contains null values."
-        print(f"Channel Names column format verification for {folder_name} passed.")
-        unified_dataset.save_locator(CI_output_path+"/CI_ftn.csv")
-    except KeyError as e:
-        print(f"Test failed for {folder_name}: {str(e)}")
+    for domain in domains(config):
+        u_ds = dataset_from_locator(config, domain)
+        u_ds.eeg_batch.format_channel_names()
 
-print("Successfully completed all format_channel_names tests.")
+        channel_names = u_ds.get_locator().loc[:, "Channel Names"]
+        if not channel_names.notnull().all():
+            raise AssertionError(f"Channel Names column contains null values for {domain}")
+
+        out_file = out_dir / f"{domain}_format_channel_names.csv"
+        u_ds.save_locator(str(out_file))
+        print(f"[eeg_batch_format_channel_names] {domain}: saved -> {out_file}")
+
+
+if __name__ == "__main__":
+    main()

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import welch
 from math import ceil, sqrt
-from eegunity.modules.parser.eeg_parser import get_data_row
+from eegunity.modules.parser.eeg_parser import get_data_row, apply_dataset_kernel
 from eegunity._share_attributes import _UDatasetSharedAttributes
 
 
@@ -19,6 +19,30 @@ class EEGCorrection(_UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()
         self._shared_attr = main_instance._shared_attr
+        self.main_instance = main_instance
+
+    def _get_data_row(self, row, **kwargs):
+        """Load one row and apply kernel augmentation if configured.
+
+        Parameters
+        ----------
+        row : pandas.Series
+            Locator row.
+        **kwargs
+            Forwarded to :func:`get_data_row`.
+
+        Returns
+        -------
+        mne.io.BaseRaw
+            Raw data after locator metadata patching and optional kernel
+            application.
+
+        Examples
+        --------
+        >>> # raw = self._get_data_row(row)  # doctest: +SKIP
+        """
+        raw = get_data_row(row, **kwargs)
+        return apply_dataset_kernel(self.main_instance, raw, row)
 
     def report(self):
         """
@@ -89,7 +113,10 @@ class EEGCorrection(_UDatasetSharedAttributes):
                 formatted_count = formatted_channels.sum()
 
                 unknown_channels = data.loc[formatted_channels, 'Channel Names'].apply(
-                    lambda x: [ch for ch in str(x).split(",") if 'unknown' in ch.lower()])
+                    lambda x: [
+                        ch for ch in str(x).split(",")
+                        if ('unknown:' in ch.lower()) or ('bio:' in ch.lower())
+                    ])
 
                 incomplete_files = data[data['Completeness Check'] != 'Completed']['File Path'].tolist()
 
@@ -171,8 +198,10 @@ class EEGCorrection(_UDatasetSharedAttributes):
 
             all_spectra = []
             for _, row in domain_data.iterrows():
-                mne_data = get_data_row(row)
+                mne_data = self._get_data_row(row)
                 if mne_data.info['sfreq'] != new_sfreq:
+                    # If misc label channels are present, prefer
+                    # resample_raw_with_labels() to preserve label semantics.
                     mne_data.resample(new_sfreq)
 
                 data = mne_data.get_data()
@@ -262,7 +291,7 @@ class EEGCorrection(_UDatasetSharedAttributes):
             for j, (_, row) in enumerate(domain_data.iterrows()):
                 if j >= max_sample:
                     break
-                mne_data = get_data_row(row)
+                mne_data = self._get_data_row(row)
                 data = mne_data.get_data()
                 corr_matrix = compute_channel_correlation(data)
 
@@ -281,3 +310,4 @@ class EEGCorrection(_UDatasetSharedAttributes):
             plt.suptitle(f'Channel Correlation for Domain: {domain}')
             plt.tight_layout(rect=[0, 0, 1, 0.97])
             plt.show()
+
