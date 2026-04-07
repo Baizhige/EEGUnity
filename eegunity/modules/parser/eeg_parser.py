@@ -1776,7 +1776,11 @@ def _process_single_mne_file(filepath, verbose):
             except Exception:
                 pass
 
-        print(f"Failed to process file {filepath}: {first_exc}")
+        # These extensions have dedicated downstream processors and always fail
+        # MNE's generic reader — suppress the noisy print to avoid misleading output.
+        _HANDLED_ELSEWHERE = ('.mat', '.hea', '.csv', '.txt')
+        if not filepath.endswith(_HANDLED_ELSEWHERE):
+            print(f"Failed to process file {filepath}: {first_exc}")
         return {
             'File Type': 'unknown',
             'Data Shape': 'error',
