@@ -183,16 +183,13 @@ def process_csv_files(files_locator, num_workers=0, min_file_size=5 * 1024 * 102
 
     for idx, result, file_path in zip(indices, results, file_paths):
         if result is not None:
-            row = files_locator.loc[idx]
             df_len = result.pop('_df_len', None)
             for key, value in result.items():
                 files_locator.at[idx, key] = pd.NA if pd.isna(value) else str(value)
-            # Calculate duration using the sampling rate from this result
+            # Calculate duration from the newly parsed sampling rate (not the old row value)
             if df_len is not None and 'Sampling Rate' in result:
-                sr = row['Sampling Rate']
-                if sr != 'N.A.':
-                    numeric_sampling_rate = pd.to_numeric(sr, errors='coerce')
-                    if pd.notna(numeric_sampling_rate):
-                        files_locator.at[idx, 'Duration'] = df_len / numeric_sampling_rate
+                numeric_sampling_rate = pd.to_numeric(result['Sampling Rate'], errors='coerce')
+                if pd.notna(numeric_sampling_rate) and numeric_sampling_rate > 0:
+                    files_locator.at[idx, 'Duration'] = df_len / numeric_sampling_rate
 
     return files_locator
