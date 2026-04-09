@@ -190,6 +190,6 @@ def process_csv_files(files_locator, num_workers=0, min_file_size=5 * 1024 * 102
             if df_len is not None and 'Sampling Rate' in result:
                 numeric_sampling_rate = pd.to_numeric(result['Sampling Rate'], errors='coerce')
                 if pd.notna(numeric_sampling_rate) and numeric_sampling_rate > 0:
-                    files_locator.at[idx, 'Duration'] = df_len / numeric_sampling_rate
+                    files_locator.at[idx, 'Duration'] = str(df_len / numeric_sampling_rate)
 
     return files_locator
