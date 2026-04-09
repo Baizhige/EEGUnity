@@ -20,17 +20,23 @@ A kernel can:
 - add or adjust multiple `misc` channels
 - add or adjust multiple `stim` channels
 - add/update annotations
+- **build a raw from scratch** for files that EEGUnity's parser cannot read (see Section 7)
 
-Kernel interface:
+### Standard kernel interface
 
 ```python
 class SomeKernel:
+    KERNEL_ID: str = "my-kernel-v1"
+
     def apply(self, udataset, raw, row):
+        # raw is a loaded mne.io.BaseRaw; row is the locator pandas.Series
         ...
         return raw
 
 KERNEL = SomeKernel()
 ```
+
+`apply()` is called for every file whose `Completeness Check` is **not** `Unavailable`.
 
 ## 3. Annotation vs `misc` vs `stim`
 
@@ -135,9 +141,95 @@ EEGUnity standard prefixes are lowercase MNE-style (`eeg`, `eog`, `emg`, `ecg`, 
 
 Legacy uppercase prefixes (`EEG`, `EOG`, `EMG`, `ECG`, `STIM`, `Unknown`) are accepted for backward compatibility.
 
-## 7. Recommended Practice
+## 7. Extended Interface: Handling Unavailable Files
+
+EEGUnity marks files as `Completeness Check = Unavailable` when its built-in
+parser cannot determine the sampling rate (e.g., headerless CSV files, proprietary
+binary formats). By default, kernels are **not** called for Unavailable files.
+
+For datasets where EEGUnity cannot parse the file format at all, a kernel can
+opt in to build the raw from scratch by implementing the **extended interface**:
+
+| Attribute / Method | Required | Description |
+|--------------------|----------|-------------|
+| `HANDLES_UNAVAILABLE = True` | yes | Opt-in flag. Must be set to `True`. |
+| `load(self, row) -> BaseRaw \| None` | yes | Called first for Unavailable files. Build and return a `mne.io.RawArray` from the raw file. Return `None` to skip this file. |
+| `apply(self, udataset, raw, row)` | yes (same as always) | Called after `load()` completes, with the raw returned by `load()`. Use this for annotation injection and metadata enrichment — same as for Completed files. |
+
+### Call sequence for Unavailable files
+
+```
+kernel.load(row)          →  raw   (format parsing, build RawArray)
+kernel.apply(ud, raw, row) →  raw   (enrichment: annotations, description, …)
+```
+
+For **Completed** files the call sequence is unchanged:
+
+```
+EEGUnity parser           →  raw   (standard MNE loader)
+kernel.apply(ud, raw, row) →  raw   (enrichment)
+```
+
+### Example: headerless CSV dataset
+
+```python
+from __future__ import annotations
+import json
+from dataclasses import dataclass
+
+import mne
+import numpy as np
+import pandas as pd
+
+
+_SFREQ = 2048.0
+_CH_NAMES = ["EEG1", "EEG2"]
+
+
+@dataclass
+class HeaderlessCSVKernel:
+    KERNEL_ID: str = "headerless-csv-v1"
+    HANDLES_UNAVAILABLE: bool = True   # opt in
+
+    def load(self, row) -> mne.io.BaseRaw | None:
+        """Build a RawArray from a headerless CSV file."""
+        file_path = row["File Path"]
+        if not file_path.endswith(".csv"):
+            return None  # skip non-CSV files silently
+
+        # Read EEG columns (0-indexed: columns 1 and 2)
+        df = pd.read_csv(file_path, header=None, usecols=[1, 2])
+        eeg = df.to_numpy(dtype=float).T          # (n_ch, n_samples)
+        info = mne.create_info(_CH_NAMES, sfreq=_SFREQ, ch_types=["eeg", "eeg"])
+        return mne.io.RawArray(eeg, info, verbose=False)
+
+    def apply(self, udataset, raw: mne.io.BaseRaw, row) -> mne.io.BaseRaw:
+        """Inject metadata and annotations into the loaded raw."""
+        raw.info["description"] = json.dumps({
+            "eegunity_description": {
+                "amplifier": "unknown", "cap": "unknown",
+                "age": "unknown", "sex": "unknown", "handedness": "unknown",
+            }
+        })
+        # … add annotations here …
+        return raw
+
+
+KERNEL = HeaderlessCSVKernel()
+```
+
+### Backward compatibility
+
+Kernels that do **not** set `HANDLES_UNAVAILABLE = True` are never called for
+Unavailable files — behaviour is identical to before this interface was added.
+Existing kernels require no changes.
+
+## 8. Recommended Practice
 
 - Use annotations for semantic event intervals.
 - Use `stim` for integer-coded sequences.
 - Use `misc` for continuous labels.
 - Keep kernel logic dataset-specific and deterministic.
+- For Unavailable-file support: put raw construction in `load()`, keep
+  annotation/metadata logic in `apply()` so both code paths share the same
+  enrichment step.

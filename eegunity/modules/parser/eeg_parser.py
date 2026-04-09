@@ -352,6 +352,67 @@ def apply_dataset_kernel(udataset, raw_data: mne.io.BaseRaw, row) -> mne.io.Base
         return raw_data
 
 
+def apply_dataset_kernel_unavailable(udataset, row):
+    """Try to build a raw for an *Unavailable* file via the kernel's ``load()`` method.
+
+    This is the entry point for the **Option B** extended kernel interface.
+    For files that EEGUnity's parser cannot handle (``Completeness Check ==
+    'Unavailable'``), a kernel may opt in by setting
+    ``HANDLES_UNAVAILABLE = True`` and implementing a ``load(row)`` method.
+    If ``load()`` returns a non-``None`` :class:`mne.io.BaseRaw`, the normal
+    :func:`apply_dataset_kernel` enrichment step is called on that raw before
+    returning, giving the same two-phase (load → apply) pipeline as for
+    Completed files.
+
+    Parameters
+    ----------
+    udataset : object
+        UnifiedDataset-like object exposing ``get_shared_attr()``.
+    row : pandas.Series
+        Locator row for the Unavailable file.
+
+    Returns
+    -------
+    mne.io.BaseRaw or None
+        Fully processed raw (after load + apply), or ``None`` if the kernel
+        does not support this file or ``load()`` returns ``None``.
+    """
+    if udataset is None:
+        return None
+
+    try:
+        shared_attr = udataset.get_shared_attr()
+    except Exception:
+        return None
+
+    kernel = shared_attr.get('kernel', None)
+    if kernel is None:
+        return None
+
+    if not getattr(kernel, 'HANDLES_UNAVAILABLE', False):
+        return None
+
+    load_fn = getattr(kernel, 'load', None)
+    if load_fn is None:
+        return None
+
+    try:
+        raw = load_fn(row)
+    except Exception as e:
+        kid = getattr(kernel, "KERNEL_ID", kernel.__class__.__name__)
+        file_path = row.get("File Path", "unknown")
+        warnings.warn(
+            f"Kernel '{kid}' load() failed for Unavailable file '{file_path}': {e}"
+        )
+        return None
+
+    if raw is None:
+        return None
+
+    # apply() enrichment phase — same as for Completed files.
+    return apply_dataset_kernel(udataset, raw, row)
+
+
 class EEGParser(_UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()

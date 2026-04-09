@@ -97,13 +97,13 @@ def _process_single_mat_file(file_path):
         print(f"    [eeg_parser_mat] Skipping {file_path}: cannot parse MAT file.")
         return None
     channel_name = _find_variables_by_condition(data, _condition_sampling_channel_name,
-                                                max_depth=5, max_width=20)
+                                                max_depth=10, max_width=50)
     sampling_rate = _find_variables_by_condition(data, _condition_sampling_rate,
-                                                 max_depth=5, max_width=20)
+                                                 max_depth=10, max_width=50)
     source_data = _find_variables_by_condition(data, _condition_source_data,
-                                               max_depth=5, max_width=20)
+                                               max_depth=10, max_width=50)
     source_data_3d = _find_variables_by_condition(data, _condition_source_data_3d,
-                                                  max_depth=5, max_width=20)
+                                                  max_depth=10, max_width=50)
 
     result = {}
     if isinstance(source_data[1], ndarray):

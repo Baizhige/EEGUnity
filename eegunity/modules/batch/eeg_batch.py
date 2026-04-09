@@ -16,6 +16,7 @@ from eegunity.modules.parser.eeg_parser import (
     extract_events,
     infer_channel_unit,
     apply_dataset_kernel,
+    apply_dataset_kernel_unavailable,
 )
 from eegunity._share_attributes import _UDatasetSharedAttributes
 from eegunity.utils.h5 import h5Dataset
@@ -1272,22 +1273,95 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         if get_data_row_params is None:
             get_data_row_params = {}
 
+        kernel = self.get_shared_attr().get('kernel', None)
+        kernel_handles_unavailable = kernel is not None and getattr(kernel, 'HANDLES_UNAVAILABLE', False)
+
+        def _con_func(row):
+            if row['Completeness Check'] != 'Unavailable':
+                return True
+            return kernel_handles_unavailable
+
         @handle_errors(miss_bad_data)
         def app_func(row):
-            # Pass get_data_row_params to self._get_data_row()
-            mne_raw = self._get_data_row(row, preload=False, **get_data_row_params)
+            if row['Completeness Check'] == 'Unavailable':
+                mne_raw = apply_dataset_kernel_unavailable(self.main_instance, row)
+                if mne_raw is None:
+                    return row
+            else:
+                mne_raw = self._get_data_row(row, preload=False, **get_data_row_params)
 
-            # Pass extract_events_params to extract_events()
             events, event_id = extract_events(mne_raw)
-
             row["event_id"] = str(event_id)
             event_id_num = {key: sum(events[:, 2] == val) for key, val in event_id.items()}
             row["event_id_num"] = str(event_id_num)
             return row
 
-        # Process all rows and update the locator attribute
         new_locator = self.batch_process(
-            lambda row: row['Completeness Check'] != 'Unavailable',
+            _con_func,
+            lambda row: app_func(row),
+            is_patch=False,
+            result_type='series',
+            execution_mode='thread',
+        )
+        self.get_shared_attr()['locator'] = new_locator
+
+    def get_meta(self, miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
+        r"""Extract events AND kernel-written metadata (description, channel names) in one pass.
+
+        This method extends :meth:`get_events` by also persisting two additional
+        columns back into the locator after the kernel has been applied:
+
+        * ``description`` — the full ``raw.info["description"]`` string, which
+          kernels use to store ``eegunity_description`` JSON (age, sex, device …).
+        * ``Channel Names`` — post-kernel channel name list (kernels may rename
+          channels, so this overrides the pre-kernel names stored during directory
+          scan).
+
+        Use this method instead of calling :meth:`get_events` followed by a
+        separate per-file reload for subject metadata extraction.
+
+        Parameters
+        ----------
+        miss_bad_data : bool, optional
+            Whether to skip the current file and continue processing the next one
+            if an error occurs.  Defaults to ``False``.
+        get_data_row_params : dict, optional
+            Additional parameters forwarded to ``_get_data_row()``.
+        """
+        if get_data_row_params is None:
+            get_data_row_params = {}
+
+        kernel = self.get_shared_attr().get('kernel', None)
+        kernel_handles_unavailable = kernel is not None and getattr(kernel, 'HANDLES_UNAVAILABLE', False)
+
+        def _con_func(row):
+            if row['Completeness Check'] != 'Unavailable':
+                return True
+            return kernel_handles_unavailable
+
+        @handle_errors(miss_bad_data)
+        def app_func(row):
+            if row['Completeness Check'] == 'Unavailable':
+                mne_raw = apply_dataset_kernel_unavailable(self.main_instance, row)
+                if mne_raw is None:
+                    return row
+            else:
+                mne_raw = self._get_data_row(row, preload=False, **get_data_row_params)
+
+            # Events (same as get_events)
+            events, event_id = extract_events(mne_raw)
+            row["event_id"] = str(event_id)
+            event_id_num = {key: sum(events[:, 2] == val) for key, val in event_id.items()}
+            row["event_id_num"] = str(event_id_num)
+
+            # Kernel-written metadata — captured here so callers avoid a second
+            # full file reload just to read raw.info["description"].
+            row["description"] = mne_raw.info.get("description", "")
+            row["Channel Names"] = ", ".join(mne_raw.ch_names)
+            return row
+
+        new_locator = self.batch_process(
+            _con_func,
             lambda row: app_func(row),
             is_patch=False,
             result_type='series',
