@@ -125,45 +125,49 @@ class h5Dataset:
 
 class h5EpochDatasetV2:
     """
-    EEGUnity v2 epoch HDF5 format writer.
+    EEGUnity v2 epoch HDF5 format writer (v2.1 schema).
 
     Flat-array layout optimised for PyTorch random access:
 
     Structure
     ---------
     / (root)
-      attrs: version, sfreq, ch_names (JSON), n_channels, n_times,
-             label_map (JSON: code->event_name), n_epochs_total, created_by, created_at
+      attrs: version ("2.1"), sfreq, ch_names (JSON), n_channels, n_times,
+             label_map (JSON: code->event_name), n_epochs_total,
+             info_fields (JSON list[str]; v2.1),
+             created_by, created_at
     ├── data          (N, n_ch, n_times)  float32
     │                 chunk=(1, n_ch, n_times), gzip level-1
     ├── epoch_meta/
     │   ├── source_group  (N,)  variable-length UTF-8 string
     │   └── event_code    (N,)  int16
+    ├── misc_meta/                                              (v2.1, optional)
+    │   ├── {misc_channel_name}  (N,) float32
+    │   └── attrs.names: JSON list[str]
     └── source_meta/
         └── {group_name}/
               attrs: file_path, n_epochs_in_source, sfreq,
-                     ch_names (JSON), age, gender, amplifier, cap, handedness
+                     ch_names (JSON), age, gender, amplifier, cap, handedness,
+                     <any additional participants.tsv columns>
               └── info  (uint8)  pickled mne.Info bytes
+
+    Backward compat
+    ---------------
+    Readers of v2.0 can still open v2.1 files if they ignore /misc_meta/ and the
+    extra source attrs. The dataset_api in eeg_kernel_agent accepts both "2.0"
+    and "2.1" as valid version strings.
 
     Usage
     -----
     writer = h5EpochDatasetV2(output_dir, "MyDataset")
     writer.add_epochs(group_name, event_name, epoch_array_float32,
-                      info_bytes, source_attrs, sfreq, ch_names)
+                      info_bytes, source_attrs, sfreq, ch_names,
+                      misc_values={"accuracy": np.array([1, 0, 1])})   # v2.1
     writer.save()
 
     Reading in PyTorch
     ------------------
-    with h5py.File(path, 'r') as f:
-        label_map = json.loads(f.attrs['label_map'])   # {code: event_name}
-        x = f['data'][i]                               # (n_ch, n_times)
-        y = f['epoch_meta/event_code'][i]              # int16
-        grp = f['epoch_meta/source_group'][i]          # bytes/str
-
-    Splitting by source file
-    ------------------------
-    groups = f['epoch_meta/source_group'][:].astype(str)
-    idx = np.where(groups == 'A01T')[0]
+    Use eeg_kernel_agent.dataset_api.{EventDataset, MISCDataset, InfoDataset}.
     """
 
     def __init__(self, path: Path, name: str) -> None:
@@ -184,6 +188,8 @@ class h5EpochDatasetV2:
         self._n_ch: int = None
         self._n_times: int = None
         self._source_epoch_counts: dict = {}  # group_name -> cumulative count
+        self._info_fields: set = set()        # v2.1: non-canonical source attr keys
+        self._misc_names: list = []           # v2.1: preserves insertion order
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -197,7 +203,7 @@ class h5EpochDatasetV2:
         self._n_times = n_times
         self._f = h5py.File(self._tmp_path, 'w')
 
-        self._f.attrs['version'] = '2.0'
+        self._f.attrs['version'] = '2.1'
         self._f.attrs['sfreq'] = float(sfreq)
         self._f.attrs['ch_names'] = json.dumps(list(ch_names))
         self._f.attrs['n_channels'] = int(n_ch)
@@ -246,6 +252,10 @@ class h5EpochDatasetV2:
     # Public API
     # ------------------------------------------------------------------
 
+    _CANONICAL_SOURCE_ATTRS = (
+        'file_path', 'age', 'gender', 'amplifier', 'cap', 'handedness',
+    )
+
     def add_epochs(
         self,
         group_name: str,
@@ -255,6 +265,7 @@ class h5EpochDatasetV2:
         source_attrs: dict,
         sfreq: float,
         ch_names,
+        misc_values: dict = None,
     ) -> None:
         """
         Append epochs for one (source_file, event) pair.
@@ -271,12 +282,18 @@ class h5EpochDatasetV2:
             ``pickle.dumps(raw.info)`` from the source file.
         source_attrs : dict
             Scalar metadata stored as HDF5 attrs on the source_meta group.
-            Expected keys (all optional): file_path, age, gender, amplifier,
-            cap, handedness.
+            Canonical keys (optional): file_path, age, gender, amplifier,
+            cap, handedness. Any additional keys (e.g. participants.tsv
+            columns like ``p_factor``) are stored verbatim and their names
+            recorded in the root ``info_fields`` attr.
         sfreq : float
             Sampling frequency (used only during lazy initialisation).
         ch_names : list[str]
             Channel names (used only during lazy initialisation).
+        misc_values : dict, optional
+            Mapping ``{misc_channel_name: array-like of length n}`` for v2.1
+            per-epoch misc values (e.g. reaction_time, accuracy). Stored
+            under ``/misc_meta/<name>`` as float32.
         """
         n, n_ch, n_times = epoch_data.shape
         if n == 0:
@@ -302,9 +319,17 @@ class h5EpochDatasetV2:
             )
             grp.attrs['sfreq'] = float(sfreq)
             grp.attrs['ch_names'] = json.dumps(list(ch_names))
-            for key in ('file_path', 'age', 'gender', 'amplifier', 'cap', 'handedness'):
+            for key in self._CANONICAL_SOURCE_ATTRS:
                 val = source_attrs.get(key, 'unknown')
                 grp.attrs[key] = str(val) if val is not None else 'unknown'
+            # v2.1: persist arbitrary extra attrs (participants.tsv columns etc.)
+            for key, val in source_attrs.items():
+                if key in self._CANONICAL_SOURCE_ATTRS:
+                    continue
+                if val is None:
+                    continue
+                grp.attrs[key] = str(val)
+                self._info_fields.add(key)
 
         # ---- Append epoch data ----
         old_size = self._f['data'].shape[0]
@@ -316,10 +341,55 @@ class h5EpochDatasetV2:
         self._append_1d('epoch_meta/source_group', np.array([group_name] * n, dtype=object))
         self._append_1d('epoch_meta/event_code', np.full(n, code, dtype='int16'))
 
+        # ---- Append misc_meta (v2.1) ----
+        # Always call if *any* misc channel has been registered, so newly-added
+        # channels get NaN padding for all prior epochs.
+        if misc_values or self._misc_names:
+            self._append_misc(misc_values or {}, n, group_name, event_name)
+
         # ---- Update per-source epoch count ----
         self._source_epoch_counts[group_name] = (
             self._source_epoch_counts.get(group_name, 0) + n
         )
+
+    def _append_misc(self, misc_values: dict, n: int,
+                     group_name: str, event_name: str) -> None:
+        if 'misc_meta' not in self._f:
+            self._f.create_group('misc_meta')
+        mm = self._f['misc_meta']
+        current_total = self._f['data'].shape[0]  # already resized
+        old_total = current_total - n
+
+        for name, values in misc_values.items():
+            arr = np.asarray(values, dtype='float32')
+            if arr.shape != (n,):
+                raise ValueError(
+                    f"misc_values['{name}'] length {arr.shape} does not match "
+                    f"epoch count {n} for group '{group_name}', event '{event_name}'."
+                )
+            if name not in mm:
+                mm.create_dataset(
+                    name,
+                    shape=(old_total,), maxshape=(None,),
+                    dtype='float32',
+                    fillvalue=float('nan'),
+                )
+                self._misc_names.append(name)
+            ds = mm[name]
+            # Pad any prior epochs that lacked this misc channel with NaN.
+            if ds.shape[0] < old_total:
+                ds.resize(old_total, axis=0)
+            ds.resize(old_total + n, axis=0)
+            ds[old_total:old_total + n] = arr
+
+        # Other misc channels not supplied this call: extend with NaN so the
+        # final array length stays aligned with /data.
+        for name in self._misc_names:
+            if name in misc_values:
+                continue
+            ds = mm[name]
+            if ds.shape[0] < old_total + n:
+                ds.resize(old_total + n, axis=0)
 
     def save(self) -> None:
         """Finalise the tmp file, then atomically rename it to the final path."""
@@ -330,12 +400,18 @@ class h5EpochDatasetV2:
         reverse_map = {int(v): k for k, v in self._label_map.items()}
         self._f.attrs['label_map'] = json.dumps(reverse_map)
         self._f.attrs['n_epochs_total'] = int(self._f['data'].shape[0])
+        # v2.1: non-canonical source attr keys (participants.tsv columns etc.)
+        self._f.attrs['info_fields'] = json.dumps(sorted(self._info_fields))
 
         # Persist per-source epoch counts into source_meta attrs
         sm = self._f['source_meta']
         for grp_name, count in self._source_epoch_counts.items():
             if grp_name in sm:
                 sm[grp_name].attrs['n_epochs_in_source'] = int(count)
+
+        # v2.1: persist misc channel order on /misc_meta
+        if 'misc_meta' in self._f:
+            self._f['misc_meta'].attrs['names'] = json.dumps(self._misc_names)
 
         self._f.close()
         self._f = None
