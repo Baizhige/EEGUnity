@@ -352,6 +352,67 @@ def apply_dataset_kernel(udataset, raw_data: mne.io.BaseRaw, row) -> mne.io.Base
         return raw_data
 
 
+def apply_dataset_kernel_unavailable(udataset, row):
+    """Try to build a raw for an *Unavailable* file via the kernel's ``load()`` method.
+
+    This is the entry point for the **Option B** extended kernel interface.
+    For files that EEGUnity's parser cannot handle (``Completeness Check ==
+    'Unavailable'``), a kernel may opt in by setting
+    ``HANDLES_UNAVAILABLE = True`` and implementing a ``load(row)`` method.
+    If ``load()`` returns a non-``None`` :class:`mne.io.BaseRaw`, the normal
+    :func:`apply_dataset_kernel` enrichment step is called on that raw before
+    returning, giving the same two-phase (load → apply) pipeline as for
+    Completed files.
+
+    Parameters
+    ----------
+    udataset : object
+        UnifiedDataset-like object exposing ``get_shared_attr()``.
+    row : pandas.Series
+        Locator row for the Unavailable file.
+
+    Returns
+    -------
+    mne.io.BaseRaw or None
+        Fully processed raw (after load + apply), or ``None`` if the kernel
+        does not support this file or ``load()`` returns ``None``.
+    """
+    if udataset is None:
+        return None
+
+    try:
+        shared_attr = udataset.get_shared_attr()
+    except Exception:
+        return None
+
+    kernel = shared_attr.get('kernel', None)
+    if kernel is None:
+        return None
+
+    if not getattr(kernel, 'HANDLES_UNAVAILABLE', False):
+        return None
+
+    load_fn = getattr(kernel, 'load', None)
+    if load_fn is None:
+        return None
+
+    try:
+        raw = load_fn(row)
+    except Exception as e:
+        kid = getattr(kernel, "KERNEL_ID", kernel.__class__.__name__)
+        file_path = row.get("File Path", "unknown")
+        warnings.warn(
+            f"Kernel '{kid}' load() failed for Unavailable file '{file_path}': {e}"
+        )
+        return None
+
+    if raw is None:
+        return None
+
+    # apply() enrichment phase — same as for Completed files.
+    return apply_dataset_kernel(udataset, raw, row)
+
+
 class EEGParser(_UDatasetSharedAttributes):
     def __init__(self, main_instance):
         super().__init__()
@@ -474,6 +535,8 @@ class EEGParser(_UDatasetSharedAttributes):
         """
         # --- anchor: EEGParser.get_data kernel hook ---
         row = self.get_shared_attr()['locator'].iloc[data_idx]
+        if self.get_shared_attr().get('kernel', None) is not None:
+            kwargs.setdefault('use_locator_channel_metadata', False)
         raw = get_data_row(row, **kwargs)
         return apply_dataset_kernel(self.main_instance, raw, row)
 
@@ -554,7 +617,7 @@ class EEGParser(_UDatasetSharedAttributes):
                 calculated_duration = max(dimensions) / float(sampling_rate)
                 if abs(calculated_duration - float(duration)) >= 1:
                     return ["Incorrect duration calculation"]
-            except ValueError:
+            except (ValueError, ZeroDivisionError):
                 return ["Duration or sampling rate format error"]
             return []
 
@@ -766,7 +829,8 @@ def get_data_row(row: dict,
                  unit_convert: str = None,
                  read_raw_params: dict = None,
                  handle_nonstandard_params: dict = None,
-                 preload: bool = True) -> mne.io.BaseRaw:
+                 preload: bool = True,
+                 use_locator_channel_metadata: bool = True) -> mne.io.BaseRaw:
     """
     Process and return raw EEG data based on the input row information.
 
@@ -798,6 +862,12 @@ def get_data_row(row: dict,
         Additional parameters to pass to `handle_nonstandard_data()` for non-standard data loading.
     preload : bool, optional
         Whether to preload the data into memory. Defaults to True.
+    use_locator_channel_metadata : bool, optional
+        Whether to use the locator's ``Channel Names`` field to validate and
+        rename channels immediately after loading the raw file. Defaults to
+        True. Set to False when a dataset kernel is active and the locator may
+        already describe the post-kernel Raw object rather than the on-disk
+        file.
 
     Returns
     -------
@@ -851,11 +921,12 @@ def get_data_row(row: dict,
                 raw_data = _read_edf_with_patched_header(filepath, verbose=_verbose, preload=preload)
         else:
             raw_data = mne.io.read_raw(filepath, verbose=_verbose, preload=preload, **read_raw_kwargs)
-        channel_names = [name.strip() for name in row.get('Channel Names', '').split(',')]
-        if len(channel_names) != len(raw_data.info['ch_names']):
-            raise ValueError(f"The number of channels in the locator file does not match metadata: {filepath}")
-        channel_mapping = {original: new for original, new in zip(raw_data.info['ch_names'], channel_names)}
-        raw_data.rename_channels(channel_mapping)
+        if use_locator_channel_metadata:
+            channel_names = [name.strip() for name in row.get('Channel Names', '').split(',')]
+            if len(channel_names) != len(raw_data.info['ch_names']):
+                raise ValueError(f"The number of channels in the locator file does not match metadata: {filepath}")
+            channel_mapping = {original: new for original, new in zip(raw_data.info['ch_names'], channel_names)}
+            raw_data.rename_channels(channel_mapping)
     else:  # Handle non-standard data loading
         raw_data = handle_nonstandard_data(
             row,
@@ -869,8 +940,13 @@ def get_data_row(row: dict,
         warnings.warn("When `pick_types` is not None, set `is_set_channel_type=True`.")
 
     # Set channel types if specified
-    is_formated = _is_typed_channel_string(row['Channel Names'])
-    if (is_set_channel_type is None and is_formated) or bool(is_set_channel_type):
+    is_formated = (
+        use_locator_channel_metadata
+        and _is_typed_channel_string(row['Channel Names'])
+    )
+    if use_locator_channel_metadata and (
+        (is_set_channel_type is None and is_formated) or bool(is_set_channel_type)
+    ):
         raw_data = set_channel_type(raw_data, row['Channel Names'])
 
     # Apply pick types if provided
@@ -1776,7 +1852,11 @@ def _process_single_mne_file(filepath, verbose):
             except Exception:
                 pass
 
-        print(f"Failed to process file {filepath}: {first_exc}")
+        # These extensions have dedicated downstream processors and always fail
+        # MNE's generic reader — suppress the noisy print to avoid misleading output.
+        _HANDLED_ELSEWHERE = ('.mat', '.hea', '.csv', '.txt')
+        if not filepath.endswith(_HANDLED_ELSEWHERE):
+            print(f"Failed to process file {filepath}: {first_exc}")
         return {
             'File Type': 'unknown',
             'Data Shape': 'error',

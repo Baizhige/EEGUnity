@@ -3,8 +3,8 @@
     "bcic_iv_2a"
   ],
   "data_root_path": "H:/",
-  "locator_base_path": "H:/AACache/EEGUnity_CI/locators",
-  "CI_output_path": "H:/AACache/EEGUnity_CI/output",
+  "locator_base_path": "E:/tmp/EEGUnity_CI/locators",
+  "CI_output_path": "E:/tmp/EEGUnity_CI/output",
   "max_rows_per_test": 1,
   "kernel_spec_map": {
     "bcic_iv_2a": "./kernels/bcic_iv_2a.py"
