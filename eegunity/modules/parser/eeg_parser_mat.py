@@ -12,6 +12,19 @@ def _is_numeric(s):
     return bool(re.match(pattern, s))
 
 
+def _safe_duration(data_shape, sampling_rate_text):
+    """Return duration seconds, or an empty string when sampling rate is invalid."""
+    if not _is_numeric(str(sampling_rate_text)):
+        return ''
+    try:
+        sampling_rate = float(sampling_rate_text)
+    except (TypeError, ValueError):
+        return ''
+    if not np.isfinite(sampling_rate) or sampling_rate <= 0:
+        return ''
+    return str(max(data_shape) / sampling_rate)
+
+
 def _load_mat_h5py(file_path):
     """Read a MATLAB v7.3 (HDF5) ``.mat`` file using ``h5py``.
 
@@ -112,10 +125,7 @@ def _process_single_mat_file(file_path):
             result['Channel Names'] = ','.join(str(x) for x in channel_name[1])
         result['Number of Channels'] = str(min(source_data[1].shape))
         result['Data Shape'] = str(source_data[1].shape)
-        if _is_numeric(result['Sampling Rate']):
-            result['Duration'] = str(max(source_data[1].shape) / float(result['Sampling Rate']))
-        else:
-            result['Duration'] = ''
+        result['Duration'] = _safe_duration(source_data[1].shape, result['Sampling Rate'])
         result['File Type'] = "matRawData:" + str(source_data[0])
         return result
     elif isinstance(source_data_3d[1], ndarray):
@@ -125,14 +135,20 @@ def _process_single_mat_file(file_path):
             result['Channel Names'] = ','.join(str(x) for x in channel_name[1])
         result['Number of Channels'] = str(len(channel_name[1]))
         result['Data Shape'] = str(source_data_3d[1].shape)
-        if _is_numeric(result['Sampling Rate']):
-            result['Duration'] = str(max(source_data_3d[1].shape) / float(result['Sampling Rate']))
-        else:
-            result['Duration'] = ''
+        result['Duration'] = _safe_duration(source_data_3d[1].shape, result['Sampling Rate'])
         result['File Type'] = "matEpochData:" + str(source_data_3d[0])
         return result
     else:
         return None
+
+
+def _process_single_mat_file_safe(file_path):
+    """Process one MAT file without letting one bad file abort a directory scan."""
+    try:
+        return _process_single_mat_file(file_path)
+    except Exception as exc:
+        print(f"    [eeg_parser_mat] Skipping {file_path}: {exc}")
+        return {'File Type': 'unknown', 'Error': f'mat parser failed: {exc}'}
 
 
 def process_hdf5_set_files(files_locator, num_workers=0):
@@ -388,9 +404,9 @@ def process_mat_files(files_locator, num_workers=0):
 
     if num_workers > 0:
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            results = list(executor.map(_process_single_mat_file, file_paths))
+            results = list(executor.map(_process_single_mat_file_safe, file_paths))
     else:
-        results = [_process_single_mat_file(fp) for fp in file_paths]
+        results = [_process_single_mat_file_safe(fp) for fp in file_paths]
 
     for idx, result in zip(indices, results):
         if result is not None:
@@ -594,4 +610,3 @@ def _search_data(data, path, condition_func, satisfying_variables, current_depth
         satisfying_variables.append((path, data))
     elif not isinstance(data, (ndarray, dict)) and debug:
         print(f"Non-target type (not ndarray or dict), stopping search. Current path: {path}")
-
