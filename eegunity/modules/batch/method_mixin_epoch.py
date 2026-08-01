@@ -9,15 +9,100 @@ from typing import Callable, Dict, List, Optional
 import pickle
 from eegunity.modules.parser.eeg_parser import extract_events
 from eegunity.utils.h5 import h5Dataset, h5EpochDatasetV2
+from eegunity.utils.h5_v23 import h5EpochDatasetV23
 from eegunity.utils.handle_errors import handle_errors
 from eegunity.utils.log_processing import log_processing
 from eegunity.utils.label_channel import resample_raw_with_labels
 
 _V1_DEPRECATION_MSG = (
     "format_version='v1' is deprecated and will be removed in a future release. "
-    "Use format_version='v2' (default) for better IO performance, smaller file size, "
-    "and PyTorch-friendly random access."
+    "Use format_version='v2.3' (default) for training-first IO, smaller files, "
+    "and source-safe metadata."
 )
+
+_V2_DEPRECATION_MSG = (
+    "format_version='v2' writes the legacy v2.1 schema. "
+    "Use format_version='v2.3' for training-first IO and source-safe metadata."
+)
+
+
+def _make_epoch_writer(
+    format_version: str,
+    output_path: str,
+    name: str,
+    root_attrs: Optional[Dict] = None,
+):
+    version = str(format_version).lower().lstrip("v")
+    if version in {"2.3", "23"}:
+        return h5EpochDatasetV23(
+            Path(output_path), name=name, root_attrs=root_attrs)
+    if version in {"2", "2.0", "2.1"}:
+        warnings.warn(_V2_DEPRECATION_MSG, FutureWarning, stacklevel=3)
+        return h5EpochDatasetV2(Path(output_path), name=name)
+    raise ValueError("format_version must be 'v2.3', 'v2', or deprecated 'v1'.")
+
+
+def _source_start_samples(epochs_obj, raw_data):
+    sfreq = float(raw_data.info["sfreq"])
+    return np.rint(
+        np.asarray(epochs_obj.events[:, 0], dtype=np.float64)
+        - int(getattr(raw_data, "first_samp", 0))
+        + float(epochs_obj.tmin) * sfreq
+    ).astype(np.int64)
+
+
+def _segmentation_geometry(raw_data, segment_length, overlap):
+    """Return exact-sample window onsets and MNE's inclusive ``tmax``."""
+    sfreq = float(raw_data.info["sfreq"])
+    segment_length = float(segment_length)
+    overlap = float(overlap)
+    if not np.isfinite(segment_length) or segment_length <= 0:
+        raise ValueError("segment_length must be a positive finite number.")
+    if not np.isfinite(overlap) or not 0.0 <= overlap < 1.0:
+        raise ValueError("overlap must satisfy 0.0 <= overlap < 1.0.")
+    window_size = int(round(segment_length * sfreq))
+    if window_size <= 0:
+        raise ValueError("segment_length is shorter than one sample.")
+    step_size = int(round(window_size * (1.0 - overlap)))
+    if step_size <= 0:
+        raise ValueError("overlap produces a step shorter than one sample.")
+    if raw_data.n_times < window_size:
+        raise ValueError(
+            f"Recording has {raw_data.n_times} samples, fewer than the "
+            f"requested window size {window_size}."
+        )
+    onsets = np.arange(0, raw_data.n_times - window_size + 1, step_size)
+    return onsets, (window_size - 1) / sfreq
+
+
+def _write_epoch_block(
+    dataset,
+    *,
+    source_name,
+    event_name,
+    epoch_data,
+    epochs_obj,
+    raw_data,
+    info_bytes,
+    source_attrs,
+):
+    kwargs = {
+        "group_name": source_name,
+        "event_name": event_name,
+        "epoch_data": epoch_data,
+        "info_bytes": info_bytes,
+        "source_attrs": source_attrs,
+        "sfreq": raw_data.info["sfreq"],
+        "ch_names": raw_data.info["ch_names"],
+    }
+    if isinstance(dataset, h5EpochDatasetV23):
+        kwargs.update(
+            ch_types=raw_data.get_channel_types(),
+            source_start_samples=_source_start_samples(epochs_obj, raw_data),
+        )
+    dataset.add_epochs(**kwargs)
+
+
 class EEGBatchMixinEpoch:
     def epoch_by_event(self, *args, **kwargs) -> None:
         """
@@ -161,22 +246,24 @@ class EEGBatchMixinEpoch:
                             file_name_prefix: str = "EpochData",
                             miss_bad_data: bool = False,
                             include_events: Optional[List[str]] = None,
-                            format_version: str = 'v2',
+                            format_version: str = 'v2.3',
                             get_data_row_params: Dict = None,
                             resample_params: Dict = None,
                             epoch_params: Dict = None,
-                            pipeline: Optional[Callable] = None) -> None:
+                            pipeline: Optional[Callable] = None,
+                            root_attrs: Optional[Dict] = None) -> None:
         """
         Batch process EEG data to create epochs based on events and save as HDF5.
 
-        **v2 format (default)** — flat array layout optimised for PyTorch random
+        **v2.3 format (default)** — materialisation-shard layout optimised for PyTorch random
         access and storage efficiency:
 
-        - ``data`` array: ``(N, n_ch, n_times)`` float32, gzip-1, chunk per epoch.
-        - ``epoch_meta/source_group``: source file name for each epoch.
-        - ``epoch_meta/event_code``: integer class code for each epoch.
-        - ``source_meta/{group}/``: per-file attrs + pickled ``mne.Info``.
-        - Root attrs include ``label_map`` (JSON: code → event name).
+        - ``/data``: ``(N, C, T)`` float32 with time-window chunks.
+        - ``/epochs``: integer source IDs, event codes, sample offsets and MISC values.
+        - ``/sources``: stable source UIDs, file paths, Info fields and pickled ``mne.Info``.
+        - ``/channels`` and ``/channel_masks``: canonical channel metadata.
+        - Root attrs include ``state``, ``storage_profile`` and provenance fingerprints.
+        - ``h5EpochReaderV23`` reads channel/time windows without loading full epochs.
 
         **v1 format** — legacy file-per-group layout (deprecated, will be removed
         in a future release).
@@ -195,7 +282,8 @@ class EEGBatchMixinEpoch:
             Whitelist of event names to include. If ``None``, all events are
             saved. Use this to exclude noise events (e.g. ``'Start of a trial'``).
         format_version : str, optional
-            ``'v2'`` (default, recommended) or ``'v1'`` (deprecated).
+            ``'v2.3'`` (default, recommended), legacy ``'v2'`` (v2.1), or
+            ``'v1'`` (deprecated).
         get_data_row_params : dict, optional
             Additional parameters passed to ``get_data_row()``.
         resample_params : dict, optional
@@ -240,7 +328,8 @@ class EEGBatchMixinEpoch:
         # ---- v2 path ----
         _check_channel_consistency(self)
 
-        dataset = h5EpochDatasetV2(Path(output_path), name=file_name_prefix)
+        dataset = _make_epoch_writer(
+            format_version, output_path, file_name_prefix, root_attrs)
 
         @handle_errors(miss_bad_data)
         @log_processing
@@ -264,17 +353,19 @@ class EEGBatchMixinEpoch:
                 if include_events is not None and event not in include_events:
                     continue
                 try:
-                    epoch_data = epochs[event].get_data()
+                    event_epochs = epochs[event]
+                    epoch_data = event_epochs.get_data()
                     if epoch_data.ndim != 3 or epoch_data.shape[0] == 0:
                         continue
-                    dataset.add_epochs(
-                        group_name=file_name,
+                    _write_epoch_block(
+                        dataset,
+                        source_name=file_name,
                         event_name=event,
                         epoch_data=epoch_data,
+                        epochs_obj=event_epochs,
+                        raw_data=raw_data,
                         info_bytes=info_bytes,
                         source_attrs=source_attrs,
-                        sfreq=raw_data.info['sfreq'],
-                        ch_names=raw_data.info['ch_names'],
                     )
                     print(f"  [{file_name}] event='{event}' n={epoch_data.shape[0]}")
                 except Exception as e:
@@ -289,7 +380,7 @@ class EEGBatchMixinEpoch:
         )
 
         dataset.save()
-        print(f"v2 HDF5 saved to {output_path}/{file_name_prefix}.hdf5")
+        print(f"{format_version} HDF5 saved to {output_path}/{file_name_prefix}.hdf5")
 
     def _epoch_by_event_hdf5_v1(self, output_path, exclude_bad, file_name_prefix,
                                  miss_bad_data, get_data_row_params,
@@ -341,12 +432,13 @@ class EEGBatchMixinEpoch:
                                    exclude_bad: bool = True,
                                    file_name_prefix: str = "EpochData",
                                    miss_bad_data: bool = False,
-                                   format_version: str = 'v2',
+                                   format_version: str = 'v2.3',
                                    get_data_row_params: Dict = None,
                                    resample_params: Dict = None,
                                    segment_params: Dict = None,
                                    epoch_params: Dict = None,
-                                   pipeline: Optional[Callable] = None) -> None:
+                                   pipeline: Optional[Callable] = None,
+                                   root_attrs: Optional[Dict] = None) -> None:
         """
         Batch process EEG data to create epochs by sliding-window segmentation
         and save as HDF5.
@@ -364,7 +456,8 @@ class EEGBatchMixinEpoch:
         miss_bad_data : bool, optional
             Whether to skip files with processing errors. Default is ``False``.
         format_version : str, optional
-            ``'v2'`` (default, recommended) or ``'v1'`` (deprecated).
+            ``'v2.3'`` (default, recommended), legacy ``'v2'`` (v2.1), or
+            ``'v1'`` (deprecated).
         get_data_row_params : dict, optional
             Additional parameters passed to ``get_data_row()``.
         resample_params : dict, optional
@@ -409,7 +502,8 @@ class EEGBatchMixinEpoch:
         # ---- v2 path ----
         _check_channel_consistency(self)
 
-        dataset = h5EpochDatasetV2(Path(output_path), name=file_name_prefix)
+        dataset = _make_epoch_writer(
+            format_version, output_path, file_name_prefix, root_attrs)
 
         @handle_errors(miss_bad_data)
         @log_processing
@@ -420,12 +514,8 @@ class EEGBatchMixinEpoch:
             if 'sfreq' in resample_params:
                 resample_raw_with_labels(raw_data, **resample_params)
 
-            sfreq = raw_data.info['sfreq']
-            segment_length = segment_params['segment_length']
-            overlap = segment_params['overlap']
-            window_size = int(segment_length * sfreq)
-            step_size = int(window_size * (1 - overlap))
-            onset_samples = np.arange(0, raw_data.n_times - window_size + 1, step_size)
+            onset_samples, inclusive_tmax = _segmentation_geometry(
+                raw_data, segment_params['segment_length'], segment_params['overlap'])
             n_segments = len(onset_samples)
 
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
@@ -436,8 +526,8 @@ class EEGBatchMixinEpoch:
             events[:, 2] = 1
             epoch_id = {segment_event_name: 1}
 
-            epochs = mne.Epochs(raw_data, events, epoch_id,
-                                tmin=0, tmax=segment_length, **epoch_params)
+            epochs = mne.Epochs(raw_data, events, epoch_id, tmin=0,
+                                tmax=inclusive_tmax, **epoch_params)
             if exclude_bad:
                 epochs.drop_bad()
 
@@ -447,14 +537,15 @@ class EEGBatchMixinEpoch:
 
             info_bytes = pickle.dumps(raw_data.info)
             source_attrs = _extract_source_attrs(raw_data, row)
-            dataset.add_epochs(
-                group_name=file_name,
+            _write_epoch_block(
+                dataset,
+                source_name=file_name,
                 event_name=segment_event_name,
                 epoch_data=epoch_data,
+                epochs_obj=epochs,
+                raw_data=raw_data,
                 info_bytes=info_bytes,
                 source_attrs=source_attrs,
-                sfreq=sfreq,
-                ch_names=raw_data.info['ch_names'],
             )
             print(f"  [{file_name}] {epoch_data.shape[0]} segments saved")
 
@@ -463,7 +554,7 @@ class EEGBatchMixinEpoch:
             is_patch=False, result_type=None, execution_mode=None,
         )
         dataset.save()
-        print(f"v2 HDF5 saved to {output_path}/{file_name_prefix}.hdf5")
+        print(f"{format_version} HDF5 saved to {output_path}/{file_name_prefix}.hdf5")
 
     def _epoch_by_segmentation_hdf5_v1(self, output_path, exclude_bad,
                                         file_name_prefix, miss_bad_data,
@@ -482,11 +573,8 @@ class EEGBatchMixinEpoch:
             if 'sfreq' in resample_params:
                 resample_raw_with_labels(raw_data, **resample_params)
             sfreq = raw_data.info['sfreq']
-            segment_length = segment_params['segment_length']
-            overlap = segment_params['overlap']
-            window_size = int(segment_length * sfreq)
-            step_size = int(window_size * (1 - overlap))
-            onset_samples = np.arange(0, raw_data.n_times - window_size + 1, step_size)
+            onset_samples, inclusive_tmax = _segmentation_geometry(
+                raw_data, segment_params['segment_length'], segment_params['overlap'])
             n_segments = len(onset_samples)
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
             segment_event_name = f"{file_name}_Segment"
@@ -494,8 +582,8 @@ class EEGBatchMixinEpoch:
             events[:, 0] = onset_samples
             events[:, 2] = 1
             event_id = {segment_event_name: 1}
-            epochs = mne.Epochs(raw_data, events, event_id,
-                                tmin=0, tmax=segment_length, **epoch_params)
+            epochs = mne.Epochs(raw_data, events, event_id, tmin=0,
+                                tmax=inclusive_tmax, **epoch_params)
             if exclude_bad:
                 epochs.drop_bad()
             grp = dataset.addGroup(grpName=file_name)
@@ -528,11 +616,12 @@ class EEGBatchMixinEpoch:
                                  exclude_bad: bool = True,
                                  miss_bad_data: bool = False,
                                  include_events: Optional[List[str]] = None,
-                                 format_version: str = 'v2',
+                                 format_version: str = 'v2.3',
                                  get_data_row_params: Dict = None,
                                  resample_params: Dict = None,
                                  epoch_params: Dict = None,
-                                 pipeline: Optional[Callable] = None) -> None:
+                                 pipeline: Optional[Callable] = None,
+                                 root_attrs: Optional[Dict] = None) -> None:
         """
         Batch process EEG data to create epochs from long-duration events
         (with overlap) and save as HDF5.
@@ -554,7 +643,8 @@ class EEGBatchMixinEpoch:
         include_events : list of str, optional
             Whitelist of event names to include. ``None`` keeps all events.
         format_version : str, optional
-            ``'v2'`` (default, recommended) or ``'v1'`` (deprecated).
+            ``'v2.3'`` (default, recommended), legacy ``'v2'`` (v2.1), or
+            ``'v1'`` (deprecated).
         get_data_row_params : dict, optional
             Additional parameters passed to ``get_data_row()``.
         resample_params : dict, optional
@@ -595,7 +685,8 @@ class EEGBatchMixinEpoch:
         # ---- v2 path ----
         _check_channel_consistency(self)
 
-        dataset = h5EpochDatasetV2(Path(output_path), name=file_name_prefix)
+        dataset = _make_epoch_writer(
+            format_version, output_path, file_name_prefix, root_attrs)
 
         @handle_errors(miss_bad_data)
         def process_file(row):
@@ -644,17 +735,19 @@ class EEGBatchMixinEpoch:
                 if include_events is not None and description not in include_events:
                     continue
                 try:
-                    epoch_data = epochs[description].get_data()
+                    event_epochs = epochs[description]
+                    epoch_data = event_epochs.get_data()
                     if epoch_data.ndim != 3 or epoch_data.shape[0] == 0:
                         continue
-                    dataset.add_epochs(
-                        group_name=file_name,
+                    _write_epoch_block(
+                        dataset,
+                        source_name=file_name,
                         event_name=description,
                         epoch_data=epoch_data,
+                        epochs_obj=event_epochs,
+                        raw_data=raw_data,
                         info_bytes=info_bytes,
                         source_attrs=source_attrs,
-                        sfreq=raw_data.info['sfreq'],
-                        ch_names=raw_data.info['ch_names'],
                     )
                     print(f"  [{file_name}] event='{description}' n={epoch_data.shape[0]}")
                 except Exception as e:
@@ -666,7 +759,7 @@ class EEGBatchMixinEpoch:
             is_patch=False, result_type=None, execution_mode=None,
         )
         dataset.save()
-        print(f"v2 HDF5 saved to {output_path}/{file_name_prefix}.hdf5")
+        print(f"{format_version} HDF5 saved to {output_path}/{file_name_prefix}.hdf5")
 
     def _epoch_by_long_event_hdf5_v1(self, output_path, overlap, exclude_bad,
                                       file_name_prefix, miss_bad_data,
@@ -747,7 +840,9 @@ class EEGBatchMixinEpoch:
                        miss_bad_data: bool = False,
                        get_data_row_params: dict = None,
                        resample_params: dict = None,
-                       epoch_params: dict = None) -> None:
+                       epoch_params: dict = None,
+                       format_version: str = 'v2.3',
+                       root_attrs: Optional[Dict] = None) -> None:
         """
         Unified interface for processing epochs.
 
@@ -800,6 +895,8 @@ class EEGBatchMixinEpoch:
             "get_data_row_params": get_data_row_params,
             "resample_params": resample_params,
             "epoch_params": epoch_params,
+            **({"format_version": format_version} if use_hdf5 else {}),
+            **({"root_attrs": root_attrs} if use_hdf5 else {}),
             **({"file_name_prefix": file_name_prefix} if use_hdf5 else {})
         }
 
@@ -836,17 +933,32 @@ def _check_channel_consistency(batch_obj) -> None:
 
 
 def _extract_source_attrs(raw, row) -> dict:
-    """Extract scalar metadata from a raw object and locator row."""
-    attrs = {'file_path': str(row.get('File Path', 'unknown'))}
+    """Extract every kernel-provided Info field plus canonical aliases."""
+    attrs = {"file_path": str(row.get("File Path", "unknown"))}
     try:
-        desc = json.loads(raw.info.get('description', '{}'))
-        eu = desc.get('eegunity_description', {})
-        attrs['age'] = eu.get('age', 'unknown')
-        attrs['gender'] = eu.get('sex', 'unknown')
-        attrs['amplifier'] = eu.get('amplifier', 'unknown')
-        attrs['cap'] = eu.get('cap', 'unknown')
-        attrs['handedness'] = eu.get('handedness', 'unknown')
+        description = json.loads(raw.info.get("description", "{}"))
+        eegunity_description = description.get("eegunity_description", {})
+        if not isinstance(eegunity_description, dict):
+            raise TypeError("eegunity_description must be a mapping")
+        for key, value in eegunity_description.items():
+            if value is None:
+                attrs[str(key)] = "unknown"
+            elif isinstance(value, (dict, list, tuple)):
+                attrs[str(key)] = json.dumps(
+                    value, ensure_ascii=False, sort_keys=True, default=str
+                )
+            else:
+                attrs[str(key)] = str(value)
+        attrs.setdefault("age", "unknown")
+        attrs["gender"] = str(
+            eegunity_description.get(
+                "sex", eegunity_description.get("gender", "unknown")
+            )
+        )
+        attrs.setdefault("amplifier", "unknown")
+        attrs.setdefault("cap", "unknown")
+        attrs.setdefault("handedness", "unknown")
     except Exception:
-        for key in ('age', 'gender', 'amplifier', 'cap', 'handedness'):
-            attrs[key] = 'unknown'
+        for key in ("age", "gender", "amplifier", "cap", "handedness"):
+            attrs[key] = "unknown"
     return attrs

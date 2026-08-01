@@ -1,5 +1,6 @@
 from .con_udatasets import con_udatasets
 from .h5 import h5Dataset
+from .h5_v23 import h5EpochDatasetV23, h5EpochReaderV23
 from .normalize import normalize_mne
 from .parallel import parallel_execute
 from .pipeline import Pipeline
