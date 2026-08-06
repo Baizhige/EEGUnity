@@ -73,6 +73,11 @@ EEG_PREFIXES_SUFFIXES = ["EEG", "REF", "LE", "-", "_", ":", "."]
 # Locator prefix aliases. Values are MNE-compatible channel type strings.
 _CHANNEL_TYPE_ALIASES = {
     'EEG': 'eeg',
+    # Pre-0.5.5 EEGUnity locators used these prefixes for bipolar EEG
+    # derivations. Bipolarity is a referencing property, not an MNE channel
+    # type, so canonicalize both legacy spellings to ordinary EEG.
+    'DUAL': 'eeg',
+    'EEGDUAL': 'eeg',
     'EOG': 'eog',
     'EMG': 'emg',
     'ECG': 'ecg',

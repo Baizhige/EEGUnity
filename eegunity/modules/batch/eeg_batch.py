@@ -1316,6 +1316,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         * ``Channel Names`` — post-kernel channel name list (kernels may rename
           channels, so this overrides the pre-kernel names stored during directory
           scan).
+        * ``Channel Types`` — post-kernel MNE channel types in the same order as
+          ``Channel Names``. Names stay untyped for loader compatibility while
+          metadata consumers can retain kernel channel-type decisions.
 
         Use this method instead of calling :meth:`get_events` followed by a
         separate per-file reload for subject metadata extraction.
@@ -1358,6 +1361,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             # full file reload just to read raw.info["description"].
             row["description"] = mne_raw.info.get("description", "")
             row["Channel Names"] = ", ".join(mne_raw.ch_names)
+            row["Channel Types"] = ", ".join(mne_raw.get_channel_types())
             return row
 
         new_locator = self.batch_process(
