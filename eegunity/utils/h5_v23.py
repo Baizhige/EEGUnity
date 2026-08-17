@@ -17,6 +17,29 @@ UTF8 = h5py.string_dtype(encoding="utf-8")
 VLEN_UINT8 = h5py.vlen_dtype(np.dtype("uint8"))
 
 
+def _fsync_file(path: Path) -> None:
+    """Flush a closed file to durable storage using platform-safe flags."""
+    flags = os.O_RDWR
+    if hasattr(os, "O_BINARY"):
+        flags |= os.O_BINARY
+    descriptor = os.open(path, flags)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _fsync_parent_directory(path: Path) -> None:
+    """Best-effort parent directory fsync for POSIX atomic rename durability."""
+    if os.name == "nt":
+        return
+    descriptor = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def _field_name(value) -> str:
     name = str(value).strip()
     if not name or "/" in name:
@@ -383,6 +406,15 @@ class h5EpochDatasetV23:
         size, n_ch, n_times = data.shape
         if size == 0:
             return
+        data = data.astype("float32", copy=False)
+        if self._validate_data:
+            if not np.isfinite(data).all():
+                source = source_attrs.get("file_path", group_name)
+                raise ValueError(f"Non-finite EEG samples in source {source!r}.")
+            if not np.any(data != 0):
+                source = source_attrs.get("file_path", group_name)
+                raise ValueError(f"All-zero EEG block in source {source!r}.")
+
         self._ensure_initialized(n_ch, n_times, sfreq, ch_names, ch_types)
         if (n_ch, n_times) != (self._n_ch, self._n_times):
             raise ValueError(
@@ -393,14 +425,6 @@ class h5EpochDatasetV23:
             raise ValueError("Channel names/order changed between epoch blocks.")
         if ch_types is not None and list(ch_types) != self._ch_types:
             raise ValueError("Channel types changed between epoch blocks.")
-        data = data.astype("float32", copy=False)
-        if self._validate_data:
-            if not np.isfinite(data).all():
-                source = source_attrs.get("file_path", group_name)
-                raise ValueError(f"Non-finite EEG samples in source {source!r}.")
-            if not np.any(data != 0):
-                source = source_attrs.get("file_path", group_name)
-                raise ValueError(f"All-zero EEG block in source {source!r}.")
 
         source_id = self._register_source(
             group_name, info_bytes, source_attrs, sfreq, channel_mask
@@ -434,38 +458,38 @@ class h5EpochDatasetV23:
         """Finalize, fsync, and atomically publish the v2.3 file."""
         if self._f is None or self._f["data"].shape[0] == 0:
             raise RuntimeError("No epochs were written to the HDF5 export.")
-        event_names = [""] * len(self._label_map)
-        for name, code in self._label_map.items():
-            event_names[code] = name
-        self._f["events"].create_dataset(
-            "name", data=np.asarray(event_names, dtype=object), dtype=UTF8
-        )
-        reverse_map = {int(code): name for name, code in self._label_map.items()}
-        self._f.attrs["label_map"] = json.dumps(reverse_map)
-        self._f.attrs["n_epochs_total"] = int(self._f["data"].shape[0])
-        self._f.attrs["n_sources"] = len(self._source_lookup)
-        self._f.attrs["info_fields"] = json.dumps(
-            sorted(self._f["sources/info"].keys())
-        )
-        self._f.attrs["misc_fields"] = json.dumps(
-            sorted(self._f["epochs/misc"].keys())
-        )
-        self._f.attrs["state"] = "complete"
-        self._f.flush()
-        self._f.close()
-        self._f = None
+        try:
+            event_names = [""] * len(self._label_map)
+            for name, code in self._label_map.items():
+                event_names[code] = name
+            self._f["events"].create_dataset(
+                "name", data=np.asarray(event_names, dtype=object), dtype=UTF8
+            )
+            reverse_map = {int(code): name for name, code in self._label_map.items()}
+            self._f.attrs["label_map"] = json.dumps(reverse_map)
+            self._f.attrs["n_epochs_total"] = int(self._f["data"].shape[0])
+            self._f.attrs["n_sources"] = len(self._source_lookup)
+            self._f.attrs["info_fields"] = json.dumps(
+                sorted(self._f["sources/info"].keys())
+            )
+            self._f.attrs["misc_fields"] = json.dumps(
+                sorted(self._f["epochs/misc"].keys())
+            )
+            self._f.attrs["state"] = "complete"
+            self._f.flush()
+            self._f.close()
+            self._f = None
 
-        descriptor = os.open(self._tmp_path, os.O_RDONLY)
-        try:
-            os.fsync(descriptor)
-        finally:
-            os.close(descriptor)
-        os.replace(self._tmp_path, self._final_path)
-        parent_descriptor = os.open(self._final_path.parent, os.O_RDONLY)
-        try:
-            os.fsync(parent_descriptor)
-        finally:
-            os.close(parent_descriptor)
+            _fsync_file(self._tmp_path)
+            os.replace(self._tmp_path, self._final_path)
+            _fsync_parent_directory(self._final_path)
+        except Exception:
+            if self._f is not None:
+                self._f.close()
+                self._f = None
+            if self._tmp_path.exists():
+                self._tmp_path.unlink()
+            raise
 
     @property
     def name(self) -> str:
