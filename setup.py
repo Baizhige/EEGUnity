@@ -2,7 +2,7 @@ from pathlib import Path
 from setuptools import find_packages, setup
 
 ROOT = Path(__file__).resolve().parent
-README_PATH = ROOT / "readme.md"
+README_PATH = ROOT / "README.md"
 VERSION_PATH = ROOT / "eegunity" / "_version.py"
 
 version_ns = {}
