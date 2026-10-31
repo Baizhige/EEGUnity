@@ -15,12 +15,18 @@ For project background, see the paper:
 
 ### 1. Create a Python Environment
 
-Use Python 3.6 or higher. Python 3.13 is currently not supported due to dependency compatibility limits.
+Use Python 3.7 or higher. Python 3.13 is currently not supported due to dependency compatibility limits.
 
 ### 2. Install EEGUnity
 
 ```bash
 pip install eegunity
+```
+
+Description-file parsing and the generated CSV reader need the optional LLM extra:
+
+```bash
+pip install "eegunity[llm]"
 ```
 
 ### 3. Import EEGUnity
