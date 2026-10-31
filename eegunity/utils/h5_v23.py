@@ -62,6 +62,10 @@ class h5EpochDatasetV23:
         storage_window_samples: int = 800,
         root_attrs: Optional[dict] = None,
         validate_data: bool = True,
+        compression: str = "gzip",
+        compression_opts: Optional[int] = 1,
+        shard_id: str = "part-00000",
+        flush_every: int = 64,
     ) -> None:
         self._final_path = Path(path) / f"{name}.hdf5"
         self._tmp_path = Path(path) / f"{name}.hdf5.tmp"
@@ -74,11 +78,19 @@ class h5EpochDatasetV23:
             self._tmp_path.unlink()
         if int(storage_window_samples) <= 0:
             raise ValueError("storage_window_samples must be positive.")
+        if int(flush_every) <= 0:
+            raise ValueError("flush_every must be positive.")
 
         self._name = str(name)
         self._storage_window_samples = int(storage_window_samples)
         self._root_attrs = dict(root_attrs or {})
         self._validate_data = bool(validate_data)
+        self._compression = compression
+        self._compression_opts = compression_opts
+        self._shard_id = str(shard_id)
+        self._flush_every = int(flush_every)
+        self._data_buffer: List[np.ndarray] = []
+        self._buffered_epochs = 0
         self._f = None
         self._n_ch = None
         self._n_times = None
@@ -155,12 +167,16 @@ class h5EpochDatasetV23:
                 "layout": "materialization-shard",
                 "state": "building",
                 "materialization_id": self._name,
-                "shard_id": "part-00000",
+                "shard_id": self._shard_id,
                 "sfreq": float(sfreq),
                 "n_channels": int(n_ch),
                 "n_times": int(n_times),
                 "data_dtype": "float32",
-                "storage_profile": f"epoch-time{time_chunk}-gzip1-shuffle",
+                "storage_profile": (
+                    f"epoch-time{time_chunk}-{self._compression}"
+                    f"{'' if self._compression_opts is None else self._compression_opts}"
+                    "-shuffle"
+                ),
                 "ch_names": json.dumps(self._ch_names),
                 "ch_types": json.dumps(self._ch_types),
                 "created_by": "EEGUnity",
@@ -180,9 +196,7 @@ class h5EpochDatasetV23:
             maxshape=(None, n_ch, n_times),
             dtype="float32",
             chunks=(1, n_ch, time_chunk),
-            compression="gzip",
-            compression_opts=1,
-            shuffle=True,
+            **self._compression_kwargs(),
         )
         channels = self._f.create_group("channels")
         channels.create_dataset(
@@ -370,10 +384,8 @@ class h5EpochDatasetV23:
                     maxshape=(None,),
                     dtype="float32",
                     chunks=(16384,),
-                    compression="gzip",
-                    compression_opts=1,
-                    shuffle=True,
                     fillvalue=np.nan,
+                    **self._compression_kwargs(),
                 )
                 if old_size:
                     dataset[:] = np.full(old_size, np.nan, dtype="float32")
@@ -381,6 +393,28 @@ class h5EpochDatasetV23:
         for name in self._misc_names:
             array = self._vector(values.get(name), size, "float32", np.nan)
             self._append(group[name], array)
+
+    def _compression_kwargs(self) -> dict:
+        kwargs = {"compression": self._compression, "shuffle": True}
+        if self._compression_opts is not None:
+            kwargs["compression_opts"] = self._compression_opts
+        return kwargs
+
+    def _logical_epoch_count(self) -> int:
+        on_disk = 0 if self._f is None else int(self._f["data"].shape[0])
+        return on_disk + self._buffered_epochs
+
+    def _flush_data(self) -> None:
+        """Resize the signal dataset once for every buffered block."""
+        if not self._data_buffer:
+            return
+        block = np.concatenate(self._data_buffer, axis=0)
+        dataset = self._f["data"]
+        old = int(dataset.shape[0])
+        dataset.resize(old + block.shape[0], axis=0)
+        dataset[old:] = block
+        self._data_buffer.clear()
+        self._buffered_epochs = 0
 
     def add_epochs(
         self,
@@ -432,9 +466,9 @@ class h5EpochDatasetV23:
         source_first = self._source_epoch_counts[source_id]
         starts = self._vector(source_start_samples, size, "int64", -1)
         code = self._event_code(event_name)
-        old_size = self._f["data"].shape[0]
-        self._f["data"].resize(old_size + size, axis=0)
-        self._f["data"][old_size:] = data
+        old_size = self._logical_epoch_count()
+        self._data_buffer.append(data)
+        self._buffered_epochs += size
         self._append(
             self._f["epochs/source_id"],
             np.full(size, source_id, dtype="uint32"),
@@ -453,9 +487,12 @@ class h5EpochDatasetV23:
         self._append_misc(merged_misc, size, old_size)
         self._source_epoch_counts[source_id] += size
         self._f["sources/n_epochs"][source_id] = self._source_epoch_counts[source_id]
+        if self._buffered_epochs >= self._flush_every:
+            self._flush_data()
 
     def save(self) -> None:
         """Finalize, fsync, and atomically publish the v2.3 file."""
+        self._flush_data()
         if self._f is None or self._f["data"].shape[0] == 0:
             raise RuntimeError("No epochs were written to the HDF5 export.")
         try:

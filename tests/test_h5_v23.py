@@ -11,7 +11,7 @@ from eegunity.utils.h5_v23 import h5EpochDatasetV23, h5EpochReaderV23
 
 
 class TestHDF5V23(unittest.TestCase):
-    def _write_fixture(self, root: Path) -> tuple[Path, np.ndarray]:
+    def _write_fixture(self, root: Path, **writer_kwargs) -> tuple[Path, np.ndarray]:
         rng = np.random.default_rng(42)
         first = rng.normal(size=(3, 4, 2400)).astype("float32")
         second = rng.normal(size=(2, 4, 2400)).astype("float32")
@@ -23,6 +23,7 @@ class TestHDF5V23(unittest.TestCase):
                 "dataset_id": "fixture-dataset",
                 "pipeline_fingerprint": "pipeline-test",
             },
+            **writer_kwargs,
         )
         common = {
             "sfreq": 200.0,
@@ -153,6 +154,33 @@ class TestHDF5V23(unittest.TestCase):
                     ch_names=["C3", "C4"],
                     ch_types=["eeg", "eeg"],
                 )
+
+    def test_flush_batches_match_and_shard_compression_are_configurable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            immediate, expected = self._write_fixture(
+                root / "immediate",
+                flush_every=1,
+                shard_id="part-00007",
+            )
+            batched, _ = self._write_fixture(root / "batched", flush_every=4)
+            compressed, _ = self._write_fixture(
+                root / "lzf",
+                flush_every=64,
+                compression="lzf",
+                compression_opts=None,
+            )
+            with h5py.File(immediate, "r") as left, h5py.File(batched, "r") as right:
+                np.testing.assert_array_equal(left["data"][:], expected)
+                np.testing.assert_array_equal(left["data"][:], right["data"][:])
+                np.testing.assert_array_equal(
+                    left["epochs/misc/score"][:],
+                    right["epochs/misc/score"][:],
+                )
+                self.assertEqual(left.attrs["shard_id"], "part-00007")
+            with h5py.File(compressed, "r") as handle:
+                self.assertEqual(handle["data"].compression, "lzf")
+                np.testing.assert_array_equal(handle["data"][:], expected)
 
 
 if __name__ == "__main__":
