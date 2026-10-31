@@ -26,6 +26,48 @@ from eegunity.modules.batch.method_mixin_epoch import EEGBatchMixinEpoch
 from eegunity.utils.label_channel import resample_raw_with_labels
 
 
+def _shape_pair(value):
+    """Parse a locator ``Data Shape`` value into ``(n_channels, n_times)``."""
+    text = str(value).strip()
+    if text.startswith('(') and text.endswith(')'):
+        text = text[1:-1]
+    dims = [int(float(part.strip())) for part in text.split(',') if part.strip()]
+    if len(dims) != 2:
+        raise ValueError(f"Data Shape must have two dimensions, got {value!r}.")
+    return dims[0], dims[1]
+
+
+def _sync_saved_row(row, raw, file_path):
+    """Return a locator row whose signal fields match ``raw`` at ``file_path``."""
+    updated = row.copy()
+    n_channels = int(raw.info['nchan'])
+    n_times = int(raw.n_times)
+    updated['File Path'] = file_path
+    updated['File Type'] = 'standard_data'
+    updated['Data Shape'] = str((n_channels, n_times))
+    updated['Channel Names'] = ', '.join(raw.ch_names)
+    updated['Number of Channels'] = str(n_channels)
+    updated['Sampling Rate'] = str(float(raw.info['sfreq']))
+    updated['Duration'] = str(float(raw.times[-1]) if n_times else 0.0)
+    return updated
+
+
+def _format_parsed_channels(parsed, format_type):
+    """Apply ``EEGUnity`` or ``normal`` formatting to parser output."""
+    normalized = str(format_type).strip().lower()
+    if normalized == 'eegunity':
+        return parsed
+    if normalized != 'normal':
+        raise ValueError("format_type must be 'EEGUnity' or 'normal'.")
+    names = []
+    for part in str(parsed).split(','):
+        part = part.strip()
+        if not part:
+            continue
+        names.append(part.split(':', 1)[1] if ':' in part else part)
+    return ', '.join(names)
+
+
 class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
     """
     This is a key module of `UnifiedDataset` class, with focus on batch processing.
@@ -329,7 +371,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                       preserve_events: bool = True,
                       get_data_row_params: Dict = None,
                       overwrite: bool = False,
-                      miss_bad_data=False) -> 'UnifiedDataset':
+                      miss_bad_data=False) -> None:
         r"""Save data in the specified format ('fif' or 'csv') to the given output path. If you want
         to save as hdf5 file, please use 'export_h5Dataset', because hdf5 file is generally used to
         save the whole dataset.
@@ -393,7 +435,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         def app_func(row):
             raw = self._get_data_row(row, **get_data_row_params)
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-            new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
+            extension = 'fif' if format == 'fif' else 'csv'
+            new_file_path = os.path.join(output_path, f"{file_name}_raw.{extension}")
 
             # Check if file exist
             counter = 1
@@ -424,22 +467,16 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                         event_code = event[2]
                         closest_time_idx = np.argmin(np.abs(times - raw.times[onset_sample]))
                         df.at[closest_time_idx, 'marker'] = event_code
-                    row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
+                    row['Number of Channels'] = str(int(float(row['Number of Channels'])) + 1)
                     row['Channel Names'] += ', marker'
                     row['Channel Names'] = 'timestamp, ' + row['Channel Names']
-                    data_shape = eval(row['Data Shape'])
-                    smaller_shape, larger_shape = min(data_shape), max(data_shape)
-                    updated_shape = f"({smaller_shape + 2}, {larger_shape})" if smaller_shape == data_shape[
-                        0] else f"({larger_shape}, {smaller_shape + 2})"
-                    row['Data Shape'] = updated_shape
+                    n_channels, n_times = _shape_pair(row['Data Shape'])
+                    row['Data Shape'] = str((n_channels + 2, n_times))
                 else:
                     row['Channel Names'] = 'timestamp, ' + ', '.join(channel_names)
-                    row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
-                    data_shape = eval(row['Data Shape'])
-                    smaller_shape, larger_shape = min(data_shape), max(data_shape)
-                    updated_shape = f"({smaller_shape + 1}, {larger_shape})" if smaller_shape == data_shape[
-                        0] else f"({larger_shape}, {smaller_shape + 1})"
-                    row['Data Shape'] = updated_shape
+                    row['Number of Channels'] = str(int(float(row['Number of Channels'])) + 1)
+                    n_channels, n_times = _shape_pair(row['Data Shape'])
+                    row['Data Shape'] = str((n_channels + 1, n_times))
 
                 # Save DataFrame to CSV
                 df.to_csv(new_file_path, index=False)
@@ -458,7 +495,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
     def process_mean_std(self,
                          domain_mean: bool = True,
-                         pick_type_params: dict = {'eeg': True, 'meg': False, 'stim': False, 'eog': False},
+                         pick_type_params: Dict = None,
                          miss_bad_data=False) -> None:
         r"""Process the mean and standard deviation for EEG data across different channels and optionally
         compute domain-level statistics.
@@ -505,6 +542,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         >>> unified_dataset = UnifiedDataset(***)
         >>> unified_dataset.eeg_batch.process_mean_std(domain_mean=True)
         """
+        if pick_type_params is None:
+            pick_type_params = {'eeg': True, 'meg': False, 'stim': False, 'eog': False}
 
         def get_mean_std(data: mne.io.Raw):
             """
@@ -547,18 +586,25 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         results = self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable', app_func, is_patch=False,
                                      result_type="value", execution_mode='process')
+        locator = self.get_shared_attr()['locator']
+        if len(results) != len(locator):
+            raise RuntimeError(
+                f"Mean/std results ({len(results)}) do not match locator rows ({len(locator)})."
+            )
 
         if domain_mean:
             domain_results = {}
-            for index, row in self.get_shared_attr()['locator'].iterrows():
-                domain_tag = row['Domain Tag']
-                if domain_tag not in domain_results:
-                    domain_results[domain_tag] = []
-                domain_results[domain_tag].append(results[index])
+            # batch_process returns one entry per row in iteration order.
+            # Locator labels are not positions: group_by_domain() keeps the parent index.
+            for position, (_, row) in enumerate(locator.iterrows()):
+                value = results[position]
+                if value is None:
+                    continue
+                domain_results.setdefault(row['Domain Tag'], []).append(value)
 
             # Check for channel consistency within each domain
             for domain_tag, res_list in domain_results.items():
-                all_keys_sets = [set(res.keys()) - {'all'} for res in res_list]  # Exclude the 'all' key
+                all_keys_sets = [set(res.keys()) - {'all_eeg'} for res in res_list]
                 if len(set(map(frozenset, all_keys_sets))) != 1:
                     raise ValueError(
                         f"Inconsistent channel names in domain '{domain_tag}', "
@@ -580,9 +626,11 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                 domain_mean_std[domain_tag] = mean_std_dict
 
             new_results = []
-            for index, row in self.get_shared_attr()['locator'].iterrows():
-                domain_tag = row['Domain Tag']
-                new_results.append(domain_mean_std[domain_tag])
+            for position, (_, row) in enumerate(locator.iterrows()):
+                if results[position] is None:
+                    new_results.append(None)
+                else:
+                    new_results.append(domain_mean_std[row['Domain Tag']])
             self.set_metadata("MEAN STD", new_results)
         else:
             self.set_metadata("MEAN STD", results)
@@ -631,17 +679,17 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         >>> unified_dataset.eeg_batch.format_channel_names()
         """
 
+        normalized_format = str(format_type).strip().lower()
+        if normalized_format not in ('eegunity', 'normal'):
+            raise ValueError("format_type must be 'EEGUnity' or 'normal'.")
         cache = {}
 
         @handle_errors(miss_bad_data)
         def app_func(row):
             channel_name = row['Channel Names']
-            if channel_name in cache:
-                return cache[channel_name]
-            else:
-                formatted_channel_name = channel_name_parser(channel_name)
-                cache[channel_name] = formatted_channel_name
-                return formatted_channel_name
+            if channel_name not in cache:
+                cache[channel_name] = channel_name_parser(channel_name)
+            return _format_parsed_channels(cache[channel_name], format_type)
 
         results = self.batch_process(lambda row: True, app_func, is_patch=False, result_type="value",
                                      execution_mode=None)
@@ -752,25 +800,21 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             else:
                 raise ValueError("Invalid filter_type. Must be 'lowpass', 'highpass', 'bandpass', or 'notch'.")
 
-            # Save filtered data
+            # Save filtered data and keep locator columns that a directory rescan would drop.
             mne_raw.save(new_file_path, overwrite=True)
-            row['File Path'] = new_file_path
-
-            return None
+            return _sync_saved_row(row, mne_raw, new_file_path)
 
         # Process the batch
-        self.batch_process(lambda row: True,
+        new_locator = self.batch_process(lambda row: True,
                            lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
                                                 output_path, auto_adjust_h_freq, picks,
                                                 get_data_row_params, filter_params, notch_filter_params),
                            is_patch=False,
-                           result_type=None,
+                           result_type='series',
                            execution_mode='process')
 
-        # Update file paths in the dataset
         self.get_shared_attr()["dataset_path"] = output_path
-        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
-            self.main_instance.eeg_parser._process_directory(output_path))})
+        self.set_shared_attr({'locator': new_locator})
 
     def ica(self, output_path: str, miss_bad_data: bool = False, get_params: Dict = None,
             ica_params: Dict = None, fit_params: Dict = None, apply_params: Dict = None):
@@ -910,31 +954,19 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             # misc: label channels receive nearest-neighbour interpolation.
             resample_raw_with_labels(mne_raw, **resample_params)
 
-            # Save resampled data and update locator
+            # Duration stays in seconds. Do not scale it by the sampling-rate ratio.
             mne_raw.save(new_file_path, overwrite=True)
-            row['File Path'] = new_file_path
-            row['Duration'] = str(
-                float(row['Sampling Rate'].strip()) * float(row['Duration'].strip()) / int(mne_raw.info['sfreq']))
-            row['Sampling Rate'] = str(int(mne_raw.info['sfreq']))
+            return _sync_saved_row(row, mne_raw, new_file_path)
 
-            dimensions = row['Data Shape'].strip('()').split(',')
-            dimensions = [int(dim.strip()) for dim in dimensions]
-            dimensions[dimensions.index(max(dimensions))] = int(
-                float(row['Duration'].strip()) * float(mne_raw.info['sfreq']))
-            row['Data Shape'] = f"({dimensions[0]}, {dimensions[1]})"
-            return row
-
-        self.batch_process(
+        new_locator = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, output_path),
             is_patch=False,
-            result_type=None,
+            result_type='series',
             execution_mode='process',
         )
-        # Update file paths in the dataset
         self.get_shared_attr()["dataset_path"] = output_path
-        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
-            self.main_instance.eeg_parser._process_directory(output_path))})
+        self.set_shared_attr({'locator': new_locator})
 
     def align_channel(self, output_path: str, channel_order: list, min_num_channels: int = 1,
                       miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
