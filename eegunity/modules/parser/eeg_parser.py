@@ -1802,6 +1802,51 @@ def process_brainvision_files(files_locator, verbose, num_workers=0):
     return files_locator
 
 
+_HANDLED_ELSEWHERE = ('.mat', '.hea', '.csv', '.txt')
+
+# Primary files for an MNE reader. Other paths are marked unknown here so the
+# MAT, CSV, and WFDB passes can claim the ones they own, without opening every
+# sidecar and document in the dataset tree.
+_MNE_PRIMARY_SUFFIXES = (
+    '.bdf',
+    '.bdf.gz',
+    '.cdt',
+    '.cnt',
+    '.edf',
+    '.edf.gz',
+    '.eeg',
+    '.egi',
+    '.fif',
+    '.fif.gz',
+    '.gdf',
+    '.gdf.gz',
+    '.lay',
+    '.mff',
+    '.nxe',
+    '.rec',
+    '.set',
+    '.snirf',
+    '.sqd',
+    '.vhdr',
+    '.xdf',
+)
+
+
+def _is_mne_primary_path(filepath: str) -> bool:
+    """Return whether ``filepath`` should be opened with ``mne.io.read_raw``."""
+    lower = str(filepath).lower()
+    return any(lower.endswith(suffix) for suffix in _MNE_PRIMARY_SUFFIXES)
+
+
+def _skipped_mne_result():
+    """Metadata for a path that a later format-specific pass may still read."""
+    return {
+        'File Type': 'unknown',
+        'Data Shape': '',
+        'Error': '',
+    }
+
+
 def _process_single_mne_file(filepath, verbose):
     """
     Process a single file with MNE and return metadata dict.
@@ -1859,7 +1904,6 @@ def _process_single_mne_file(filepath, verbose):
 
         # These extensions have dedicated downstream processors and always fail
         # MNE's generic reader — suppress the noisy print to avoid misleading output.
-        _HANDLED_ELSEWHERE = ('.mat', '.hea', '.csv', '.txt')
         if not filepath.endswith(_HANDLED_ELSEWHERE):
             print(f"Failed to process file {filepath}: {first_exc}")
         return {
@@ -1894,11 +1938,16 @@ def process_mne_files(files_locator, verbose, num_workers=0):
     indices = list(files_locator.index)
     filepaths = [files_locator.at[idx, 'File Path'] for idx in indices]
 
+    def _read(filepath):
+        if not _is_mne_primary_path(filepath):
+            return _skipped_mne_result()
+        return _process_single_mne_file(filepath, verbose)
+
     if num_workers > 0:
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            results = list(executor.map(lambda fp: _process_single_mne_file(fp, verbose), filepaths))
+            results = list(executor.map(_read, filepaths))
     else:
-        results = [_process_single_mne_file(fp, verbose) for fp in filepaths]
+        results = [_read(filepath) for filepath in filepaths]
 
     for idx, result in zip(indices, results):
         for key, value in result.items():

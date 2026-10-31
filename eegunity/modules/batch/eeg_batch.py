@@ -291,36 +291,32 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         >>> unified_dataset.eeg_batch.sample_filter(completeness_check='Completed')
         """
 
-        def con_func(row):
-            if channel_number:
-                min_channels, max_channels = channel_number
-                if not (min_channels <= float(row["Number of Channels"]) <= max_channels):
-                    return False
-            if sampling_rate:
-                min_rate, max_rate = sampling_rate
-                if not (min_rate <= float(row["Sampling Rate"]) <= max_rate):
-                    return False
-            if duration:
-                min_duration, max_duration = duration
-                if not (min_duration <= float(row["Duration"]) <= max_duration):
-                    return False
-            if completeness_check:
-                if row["Completeness Check"].strip().lower() != completeness_check.strip().lower():
-                    return False
-            if domain_tag:
-                if row["Domain Tag"] != domain_tag:
-                    return False
-            if file_type:
-                if row["File Type"] != file_type:
-                    return False
-            return True
+        # Process the dataframe in place. Numeric columns may be strings or
+        # numbers; both are accepted. The locator index is preserved.
+        locator = self.get_shared_attr()['locator']
+        mask = pd.Series(True, index=locator.index)
 
-        # Process the dataframe
-        filtered_locator = self.batch_process(con_func, lambda row: row, is_patch=False, result_type='series',
-                                              execution_mode='thread')
+        def _between(column, bounds):
+            values = pd.to_numeric(locator[column], errors='coerce')
+            if values.isna().any():
+                raise ValueError(f"{column} contains a non-numeric value.")
+            low, high = bounds
+            return values.between(low, high)
 
-        # Update the locator in shared attributes
-        self.set_shared_attr({'locator': filtered_locator})
+        if channel_number:
+            mask &= _between("Number of Channels", channel_number)
+        if sampling_rate:
+            mask &= _between("Sampling Rate", sampling_rate)
+        if duration:
+            mask &= _between("Duration", duration)
+        if completeness_check:
+            actual = locator["Completeness Check"].astype(str).str.strip().str.lower()
+            mask &= actual.eq(completeness_check.strip().lower())
+        if domain_tag:
+            mask &= locator["Domain Tag"].astype(str).eq(domain_tag)
+        if file_type:
+            mask &= locator["File Type"].astype(str).eq(file_type)
+        self.set_shared_attr({'locator': locator.loc[mask].copy()})
 
     def save_as_other(self,
                       output_path: str,
@@ -1495,20 +1491,11 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             This method modifies internal state in-place and does not return any value.
         """
 
-        def replace_func(row):
-            original_path = row['File Path']
-            new_path = original_path
-            # Replace the path prefix based on the provided mapping
-            if original_path.startswith(old_prefix):
-                new_path = original_path.replace(old_prefix, new_prefix, 1)  # Only replace the first occurrence
-            row['File Path'] = new_path
-            return row
-
-        # Process the dataset, applying the path replacement function to each row
-        updated_locator = self.batch_process(lambda row: True, replace_func, is_patch=False, result_type='series',
-                                             execution_mode=None)
-
-        self.set_shared_attr({'locator': updated_locator})
+        locator = self.get_shared_attr()['locator']
+        paths = locator['File Path'].astype(str)
+        matched = paths.str.startswith(old_prefix)
+        locator.loc[matched, 'File Path'] = new_prefix + paths.loc[matched].str.slice(len(old_prefix))
+        self.set_shared_attr({'locator': locator})
         return None
 
     def export_h5Dataset(self, output_path: str, name: str = 'EEGUnity_export',
