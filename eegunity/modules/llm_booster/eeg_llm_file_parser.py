@@ -2,6 +2,8 @@ import os
 import mne
 import pandas as pd
 
+from eegunity.modules.llm_booster._optional import require_optional
+
 
 def llm_boost_parser(file_path: str, client_type: str, client_paras: dict, completion_para: dict, max_iterations: int = 5):
     """
@@ -62,11 +64,9 @@ def llm_boost_parser(file_path: str, client_type: str, client_paras: dict, compl
     else:
         raise ValueError("Unsupported file extension")
     if client_type == "AzureOpenAI":
-        from openai import AzureOpenAI
-        client = AzureOpenAI(**client_paras)
+        client = require_optional("openai", "LLM parsing").AzureOpenAI(**client_paras)
     elif client_type == "OpenAI":
-        from openai import OpenAI
-        client = OpenAI(**client_paras)
+        client = require_optional("openai", "LLM parsing").OpenAI(**client_paras)
     else:
         raise ValueError("Unsupported client_type. Supported types are 'AzureOpenAI' and 'OpenAI'.")
 

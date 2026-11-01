@@ -23,6 +23,12 @@ Use Python 3.6 or higher. Python 3.13 is currently not supported due to dependen
 pip install eegunity
 ```
 
+LLM parsing of non-standard files and PDF descriptions is optional:
+
+```bash
+pip install "eegunity[llm]"
+```
+
 ### 3. Import EEGUnity
 
 ```python
