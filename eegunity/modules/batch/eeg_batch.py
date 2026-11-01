@@ -756,21 +756,22 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             mne_raw.save(new_file_path, overwrite=True)
             row['File Path'] = new_file_path
 
-            return None
+            return row
 
-        # Process the batch
-        self.batch_process(lambda row: True,
+        # Keep the row that was just updated. Rescanning output_path would
+        # rebuild the locator from file headers and drop columns added after
+        # the original scan.
+        new_locator = self.batch_process(lambda row: True,
                            lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
                                                 output_path, auto_adjust_h_freq, picks,
                                                 get_data_row_params, filter_params, notch_filter_params),
                            is_patch=False,
-                           result_type=None,
+                           result_type='series',
                            execution_mode='process')
 
         # Update file paths in the dataset
         self.get_shared_attr()["dataset_path"] = output_path
-        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
-            self.main_instance.eeg_parser._process_directory(output_path))})
+        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(new_locator)})
 
     def ica(self, output_path: str, miss_bad_data: bool = False, get_params: Dict = None,
             ica_params: Dict = None, fit_params: Dict = None, apply_params: Dict = None):
@@ -924,17 +925,16 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             row['Data Shape'] = f"({dimensions[0]}, {dimensions[1]})"
             return row
 
-        self.batch_process(
+        new_locator = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, output_path),
             is_patch=False,
-            result_type=None,
+            result_type='series',
             execution_mode='process',
         )
-        # Update file paths in the dataset
+        # Keep columns that a directory rescan does not know about.
         self.get_shared_attr()["dataset_path"] = output_path
-        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
-            self.main_instance.eeg_parser._process_directory(output_path))})
+        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(new_locator)})
 
     def align_channel(self, output_path: str, channel_order: list, min_num_channels: int = 1,
                       miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
