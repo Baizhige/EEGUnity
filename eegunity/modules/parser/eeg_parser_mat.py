@@ -297,7 +297,7 @@ def read_eeglab_hdf5(filepath, preload=True, verbose='CRITICAL'):
     with h5py.File(filepath, 'r') as hf:
         srate = float(np.squeeze(hf['srate'][()]))
         nbchan = int(np.squeeze(hf['nbchan'][()]))
-        pnts = int(np.squeeze(hf['pnts'][()]))
+        _pnts = int(np.squeeze(hf['pnts'][()]))
 
         # Channel labels: stored as (nchan, 1) object-reference array
         labels = []

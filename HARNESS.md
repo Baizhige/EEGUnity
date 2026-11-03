@@ -43,11 +43,13 @@ Remove-Item "eegunity.egg-info\" -Recurse -Force -ErrorAction SilentlyContinue
 
 ## 4. CI tests
 
+GitHub Actions (`.github/workflows/tests.yml`) runs `pytest tests` on Ubuntu, checks formatting of `tests/` with Ruff, lints `tests/` and `eegunity/`, and runs `CI/pre_release_check.py` after a wheel build. Ruff format is not applied to `eegunity/` yet: that tree is not formatted, and rewriting it would collide with open pull requests. The dataset scripts below still need `CI/CI_config.json` (data root `H:\`, output `E:\tmp\EEGUnity_CI\`).
+
 ```powershell
 & "C:\Users\Cheng\anaconda3\envs\eegunity_release\python.exe" CI/run_all_CI_test.py
 ```
 
-All scripts must pass. CI config: `CI/CI_config.json` (data root `H:\`, output `E:\tmp\EEGUnity_CI\`).
+All scripts must pass.
 
 ---
 

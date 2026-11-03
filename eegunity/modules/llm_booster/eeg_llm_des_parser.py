@@ -212,7 +212,7 @@ def _resolve_sampling_rate_conflict(sampling_rate_list):
     chosen_index = None
     while chosen_index not in range(1, len(sampling_rate_list) + 2):
         try:
-            user_input = input(f"Please select a number for the sample rate information (input format is '1'）: ")
+            user_input = input("Please select a number for the sample rate information (input format is '1'）: ")
             chosen_index = int(user_input)
         except ValueError:
             print("Invalid selection, please re-enter.")
@@ -236,7 +236,7 @@ def _resolve_channel_names_conflict(channel_info_list):
     chosen_index = None
     while chosen_index not in range(1, len(channel_info_list) + 2):
         try:
-            user_input = input(f"Please select a number for the channel name information (input format is '1'): ")
+            user_input = input("Please select a number for the channel name information (input format is '1'): ")
             chosen_index = int(user_input)
         except ValueError:
             print("Invalid selection, please re-enter.")

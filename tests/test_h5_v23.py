@@ -107,12 +107,8 @@ class TestHDF5V23(unittest.TestCase):
                 uids = handle["sources/uid"].asstr()[:].tolist()
                 self.assertEqual(len(set(uids)), 2)
                 self.assertNotIn("source_group", handle["epochs"])
-                self.assertEqual(
-                    handle["sources/info/age"].asstr()[:].tolist(), ["21", "29"]
-                )
-                self.assertEqual(
-                    handle["sources/info/sex"].asstr()[:].tolist(), ["F", "M"]
-                )
+                self.assertEqual(handle["sources/info/age"].asstr()[:].tolist(), ["21", "29"])
+                self.assertEqual(handle["sources/info/sex"].asstr()[:].tolist(), ["F", "M"])
                 score = handle["epochs/misc/score"][:]
                 self.assertTrue(np.isnan(score[3:5]).all())
                 self.assertAlmostEqual(float(score[5]), 0.8, places=6)
@@ -125,17 +121,11 @@ class TestHDF5V23(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path, expected = self._write_fixture(Path(directory))
             with h5EpochReaderV23(path) as reader:
-                actual = reader.read_epoch(
-                    0, channels=["P4", "C3"], start=800, stop=1600
-                )
-                np.testing.assert_allclose(
-                    actual, expected[0, [3, 0], 800:1600]
-                )
+                actual = reader.read_epoch(0, channels=["P4", "C3"], start=800, stop=1600)
+                np.testing.assert_allclose(actual, expected[0, [3, 0], 800:1600])
                 source = reader.resolve_source(reader.source_id_for_epoch(5))
                 self.assertEqual(source["source_id"], 1)
-                self.assertEqual(
-                    source["file_path"], "/raw/site-b/recording.edf"
-                )
+                self.assertEqual(source["file_path"], "/raw/site-b/recording.edf")
 
     def test_non_finite_data_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
