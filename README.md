@@ -15,9 +15,8 @@ For project background, see the paper:
 
 ### 1. Create a Python Environment
 
-EEGUnity keeps its existing Python 3.7+ package metadata for compatibility
-with established environments. Version 0.8.6 is tested on Python 3.11 through
-3.14. Older Python environments may use earlier compatible dependency versions.
+EEGUnity requires Python 3.9 or newer. Version 0.8.6 is tested on Python 3.9
+through 3.14.
 
 ### 2. Install EEGUnity
 
