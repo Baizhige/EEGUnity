@@ -26,6 +26,192 @@ from eegunity.modules.batch.method_mixin_epoch import EEGBatchMixinEpoch
 from eegunity.utils.label_channel import resample_raw_with_labels
 
 
+def _channel_schema_entries(value):
+    """Return normalized channel entries from a locator value.
+
+    Parameters
+    ----------
+    value : object
+        Comma-separated locator channel schema.
+
+    Returns
+    -------
+    list of str
+        Non-empty channel entries with surrounding whitespace removed.
+
+    Examples
+    --------
+    >>> _channel_schema_entries("eeg:C3, stim:event")
+    ['eeg:C3', 'stim:event']
+    """
+    return [part.strip() for part in str(value).split(',') if part.strip()]
+
+
+def _is_typed_channel_schema(value):
+    """Return whether every locator channel uses ``type:name`` syntax.
+
+    Examples
+    --------
+    >>> _is_typed_channel_schema("eeg:C3, stim:event")
+    True
+    >>> _is_typed_channel_schema("C3, event")
+    False
+    """
+    entries = _channel_schema_entries(value)
+    return bool(entries) and all(
+        ':' in entry and all(piece.strip() for piece in entry.split(':', 1))
+        for entry in entries
+    )
+
+
+def _typed_channel_schema(raw):
+    """Return the final Raw channel layout as EEGUnity ``type:name`` entries.
+
+    Examples
+    --------
+    >>> _typed_channel_schema(raw)  # doctest: +SKIP
+    'eeg:C3, stim:event'
+    """
+    return ', '.join(
+        f"{channel_type}:{channel_name}"
+        for channel_type, channel_name in zip(
+            raw.get_channel_types(),
+            raw.ch_names,
+        )
+    )
+
+
+def _derived_channel_schema(row, raw, force_sync=False):
+    """Return the locator channel schema for a derived Raw object.
+
+    The existing locator representation is preserved when its channel suffixes
+    match the final Raw layout. A changed layout is regenerated from MNE channel
+    types so kernel and channel-selection changes remain explicit.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        Source locator row.
+    raw : mne.io.BaseRaw
+        Final Raw object written by the derived operation.
+    force_sync : bool, optional
+        Regenerate a typed schema even when channel names still match.
+
+    Returns
+    -------
+    str
+        Preserved or regenerated channel schema.
+    """
+    original = str(row.get('Channel Names', '')).strip()
+    entries = _channel_schema_entries(original)
+    locator_names = [
+        entry.split(':', 1)[1] if ':' in entry else entry
+        for entry in entries
+    ]
+    raw_names = list(raw.ch_names)
+    if not force_sync and (locator_names == raw_names or entries == raw_names):
+        return original
+    return _typed_channel_schema(raw)
+
+
+def _update_derived_row(row, raw, file_path, file_type='standard_data',
+                        changed_fields=None, force_channel_sync=False):
+    """Build one derived locator row without discarding user metadata.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        Source locator row. Non-signal metadata is copied unchanged.
+    raw : mne.io.BaseRaw
+        Saved recording used as the authoritative signal metadata.
+    file_path : str
+        Path of the saved recording.
+    file_type : str, optional
+        EEGUnity file type for the derived file.
+    changed_fields : collection of str or None, optional
+        Signal metadata fields materially changed by the operation. Supported
+        values are ``Data Shape``, ``Sampling Rate``, and ``Duration``.
+    force_channel_sync : bool, optional
+        Regenerate channel metadata from the final Raw object.
+
+    Returns
+    -------
+    pandas.Series
+        Updated locator row.
+
+    Examples
+    --------
+    >>> updated = _update_derived_row(  # doctest: +SKIP
+    ...     row,
+    ...     raw,
+    ...     "/tmp/demo_raw.fif",
+    ...     changed_fields={"Sampling Rate", "Data Shape", "Duration"},
+    ... )
+    """
+    changed_fields = set(changed_fields or ())
+    updated = row.copy()
+    n_channels = int(raw.info['nchan'])
+    n_times = int(raw.n_times)
+    updated['File Path'] = file_path
+    updated['File Type'] = file_type
+    updated['Completeness Check'] = 'Completed'
+
+    final_schema = _derived_channel_schema(
+        row,
+        raw,
+        force_sync=force_channel_sync,
+    )
+    channel_layout_changed = final_schema != str(row.get('Channel Names', '')).strip()
+    if channel_layout_changed or force_channel_sync:
+        updated['Channel Names'] = final_schema
+        updated['Number of Channels'] = str(n_channels)
+        updated['Data Shape'] = str((n_channels, n_times))
+        if 'Channel Types' in updated.index:
+            updated['Channel Types'] = ', '.join(raw.get_channel_types())
+
+    if 'Data Shape' in changed_fields:
+        updated['Data Shape'] = str((n_channels, n_times))
+    if 'Sampling Rate' in changed_fields:
+        updated['Sampling Rate'] = str(float(raw.info['sfreq']))
+    if 'Duration' in changed_fields:
+        updated['Duration'] = str(float(raw.times[-1]) if n_times else 0.0)
+    return updated
+
+
+def _format_parsed_channels(parsed, format_type):
+    """Apply ``EEGUnity`` or ``normal`` formatting to parser output.
+
+    Parameters
+    ----------
+    parsed : str
+        Comma-separated channel names returned by ``channel_name_parser``.
+    format_type : {'EEGUnity', 'normal'}
+        Keep ``type:name`` prefixes or return plain channel names.
+
+    Returns
+    -------
+    str
+        Formatted comma-separated channel names.
+
+    Examples
+    --------
+    >>> _format_parsed_channels("eeg:C3, stim:marker", "normal")
+    'C3, marker'
+    """
+    normalized = str(format_type).strip().lower()
+    if normalized == 'eegunity':
+        return parsed
+    if normalized != 'normal':
+        raise ValueError("format_type must be 'EEGUnity' or 'normal'.")
+    names = []
+    for part in str(parsed).split(','):
+        part = part.strip()
+        if not part:
+            continue
+        names.append(part.split(':', 1)[1] if ':' in part else part)
+    return ', '.join(names)
+
+
 class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
     """
     This is a key module of `UnifiedDataset` class, with focus on batch processing.
@@ -59,6 +245,33 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         """
         raw = get_data_row(row, **kwargs)
         return apply_dataset_kernel(self.main_instance, raw, row)
+
+    def _commit_derived_locator(self, locator, output_path):
+        """Switch the active dataset to successfully derived files.
+
+        Parameters
+        ----------
+        locator : pandas.DataFrame
+            Locator containing only successfully written derived files.
+        output_path : str or os.PathLike
+            Root directory containing the derived files.
+
+        Notes
+        -----
+        Derived methods use ``is_patch=False``. Consequently,
+        ``miss_bad_data=True`` excludes failed rows from this locator, while
+        ``miss_bad_data=False`` raises before this method is called and leaves
+        the active locator unchanged.
+
+        Examples
+        --------
+        >>> self._commit_derived_locator(new_locator, "/tmp/filtered")  # doctest: +SKIP
+        """
+        self.set_shared_attr({
+            'locator': locator,
+            'dataset_path': str(output_path),
+            'locator_path': None,
+        })
 
     def batch_process(self,
                       con_func: Callable,
@@ -170,9 +383,10 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                 return empty_df
             else:
                 # Combine results into a DataFrame if app_func returns Series
-                combined_results = pd.concat([res for res in results if res is not None], axis=1).T
-                combined_results.reset_index(drop=True, inplace=True)
-                return combined_results
+                combined_results = pd.concat(
+                    [res for res in results if res is not None], axis=1
+                ).T
+                return combined_results.reset_index(drop=True)
         elif result_type == "value":
             # Collect results into a list if app_func returns values
             if is_patch:
@@ -329,7 +543,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                       preserve_events: bool = True,
                       get_data_row_params: Dict = None,
                       overwrite: bool = False,
-                      miss_bad_data=False) -> 'UnifiedDataset':
+                      miss_bad_data=False) -> None:
         r"""Save data in the specified format ('fif' or 'csv') to the given output path. If you want
         to save as hdf5 file, please use 'export_h5Dataset', because hdf5 file is generally used to
         save the whole dataset.
@@ -354,6 +568,10 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             If `True`, existing files with the same name will be overwritten. If `False`, a new
             file name with an incremented suffix (e.g., "_raw(1).fif") will be created to avoid
             overwriting. Defaults to `False`.
+        miss_bad_data : bool, optional
+            If ``False``, any row failure aborts the operation and the active
+            locator remains unchanged. If ``True``, failed rows are omitted
+            from the new derived locator. Defaults to ``False``.
 
         Returns
         -------
@@ -378,9 +596,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         """
         # Set default empty dictionary if parameters are None
         if get_data_row_params is None:
-            get_data_row_params = {'is_set_channel_type': False}
-        else:
-            get_data_row_params.setdefault('is_set_channel_type', False)
+            get_data_row_params = {}
 
         if not os.path.exists(output_path):
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
@@ -393,19 +609,21 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         def app_func(row):
             raw = self._get_data_row(row, **get_data_row_params)
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-            new_file_path = os.path.join(output_path, f"{file_name}_raw.fif")
+            extension = 'fif' if format == 'fif' else 'csv'
+            new_file_path = os.path.join(output_path, f"{file_name}_raw.{extension}")
 
             # Check if file exist
             counter = 1
             while os.path.exists(new_file_path) and not overwrite:
                 print(f"File '{new_file_path}' already exists.")
-                new_file_path = os.path.join(output_path, f"{file_name}({counter})_raw.fif")
+                new_file_path = os.path.join(
+                    output_path, f"{file_name}({counter})_raw.{extension}"
+                )
                 counter += 1
 
             if format == 'fif':
                 raw.save(new_file_path, overwrite=overwrite)
-                row['File Path'] = new_file_path
-                row['File Type'] = "standard_data"
+                row = _update_derived_row(row, raw, new_file_path)
 
             elif format == 'csv':
                 # Extract data and channel names from Raw object
@@ -416,6 +634,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                 df = pd.DataFrame(data.T, columns=channel_names)
                 df.insert(0, 'timestamp', times)  # Add 'timestamp' as the first column
 
+                locator_schema = _derived_channel_schema(row, raw)
+                exported_channel_names = _channel_schema_entries(locator_schema)
+                typed_schema = _is_typed_channel_schema(locator_schema)
                 if preserve_events:
                     events, event_id = extract_events(raw)
                     df['marker'] = np.nan
@@ -424,27 +645,18 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                         event_code = event[2]
                         closest_time_idx = np.argmin(np.abs(times - raw.times[onset_sample]))
                         df.at[closest_time_idx, 'marker'] = event_code
-                    row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
-                    row['Channel Names'] += ', marker'
-                    row['Channel Names'] = 'timestamp, ' + row['Channel Names']
-                    data_shape = eval(row['Data Shape'])
-                    smaller_shape, larger_shape = min(data_shape), max(data_shape)
-                    updated_shape = f"({smaller_shape + 2}, {larger_shape})" if smaller_shape == data_shape[
-                        0] else f"({larger_shape}, {smaller_shape + 2})"
-                    row['Data Shape'] = updated_shape
-                else:
-                    row['Channel Names'] = 'timestamp, ' + ', '.join(channel_names)
-                    row['Number of Channels'] = str(int(row['Number of Channels']) + 1)
-                    data_shape = eval(row['Data Shape'])
-                    smaller_shape, larger_shape = min(data_shape), max(data_shape)
-                    updated_shape = f"({smaller_shape + 1}, {larger_shape})" if smaller_shape == data_shape[
-                        0] else f"({larger_shape}, {smaller_shape + 1})"
-                    row['Data Shape'] = updated_shape
+                    exported_channel_names.append('stim:marker' if typed_schema else 'marker')
 
                 # Save DataFrame to CSV
                 df.to_csv(new_file_path, index=False)
                 row['File Path'] = new_file_path
                 row['File Type'] = "csvData"
+                row['Completeness Check'] = 'Completed'
+                row['Channel Names'] = ', '.join(exported_channel_names)
+                row['Number of Channels'] = str(len(exported_channel_names))
+                row['Data Shape'] = str((len(exported_channel_names), int(raw.n_times)))
+                row['Sampling Rate'] = str(float(raw.info['sfreq']))
+                row['Duration'] = str(float(raw.times[-1]) if raw.n_times else 0.0)
 
             return row
 
@@ -453,12 +665,12 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                                          is_patch=False,
                                          result_type='series',
                                          execution_mode='thread')
-        self.set_shared_attr({'locator': new_locator})
+        self._commit_derived_locator(new_locator, output_path)
         return None
 
     def process_mean_std(self,
                          domain_mean: bool = True,
-                         pick_type_params: dict = {'eeg': True, 'meg': False, 'stim': False, 'eog': False},
+                         pick_type_params: Dict = None,
                          miss_bad_data=False) -> None:
         r"""Process the mean and standard deviation for EEG data across different channels and optionally
         compute domain-level statistics.
@@ -479,7 +691,10 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             Detault is `{'eeg':True, 'meg':False, 'stim':False, 'eog':False}`
 
         miss_bad_data : bool, optional
-            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
+            If ``False``, any row failure aborts the operation before the
+            ``MEAN STD`` column is committed. If ``True``, failed rows remain
+            in the locator with a null ``MEAN STD`` value. Defaults to
+            ``False``.
 
 
         Returns
@@ -505,6 +720,8 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         >>> unified_dataset = UnifiedDataset(***)
         >>> unified_dataset.eeg_batch.process_mean_std(domain_mean=True)
         """
+        if pick_type_params is None:
+            pick_type_params = {'eeg': True, 'meg': False, 'stim': False, 'eog': False}
 
         def get_mean_std(data: mne.io.Raw):
             """
@@ -545,20 +762,27 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             mean_std = get_mean_std(data)
             return mean_std
 
-        results = self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable', app_func, is_patch=False,
+        results = self.batch_process(lambda row: row['Completeness Check'] != 'Unavailable', app_func, is_patch=True,
                                      result_type="value", execution_mode='process')
+        locator = self.get_shared_attr()['locator']
+        if len(results) != len(locator):
+            raise RuntimeError(
+                f"Mean/std results ({len(results)}) do not match locator rows ({len(locator)})."
+            )
 
         if domain_mean:
             domain_results = {}
-            for index, row in self.get_shared_attr()['locator'].iterrows():
-                domain_tag = row['Domain Tag']
-                if domain_tag not in domain_results:
-                    domain_results[domain_tag] = []
-                domain_results[domain_tag].append(results[index])
+            # batch_process returns one entry per row in iteration order.
+            # Locator labels are not positions: group_by_domain() keeps the parent index.
+            for position, (_, row) in enumerate(locator.iterrows()):
+                value = results[position]
+                if value is None:
+                    continue
+                domain_results.setdefault(row['Domain Tag'], []).append(value)
 
             # Check for channel consistency within each domain
             for domain_tag, res_list in domain_results.items():
-                all_keys_sets = [set(res.keys()) - {'all'} for res in res_list]  # Exclude the 'all' key
+                all_keys_sets = [set(res.keys()) - {'all_eeg'} for res in res_list]
                 if len(set(map(frozenset, all_keys_sets))) != 1:
                     raise ValueError(
                         f"Inconsistent channel names in domain '{domain_tag}', "
@@ -580,9 +804,11 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                 domain_mean_std[domain_tag] = mean_std_dict
 
             new_results = []
-            for index, row in self.get_shared_attr()['locator'].iterrows():
-                domain_tag = row['Domain Tag']
-                new_results.append(domain_mean_std[domain_tag])
+            for position, (_, row) in enumerate(locator.iterrows()):
+                if results[position] is None:
+                    new_results.append(None)
+                else:
+                    new_results.append(domain_mean_std[row['Domain Tag']])
             self.set_metadata("MEAN STD", new_results)
         else:
             self.set_metadata("MEAN STD", results)
@@ -607,7 +833,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             channels name are stored, like 'C3', 'Cz', 'stim1'.
 
         miss_bad_data : bool, optional
-            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
+            If ``False``, any row failure aborts the operation and the active
+            locator remains unchanged. If ``True``, failed rows are omitted
+            from the new derived locator. Defaults to ``False``.
         Returns
         -------
         None
@@ -631,17 +859,17 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         >>> unified_dataset.eeg_batch.format_channel_names()
         """
 
+        normalized_format = str(format_type).strip().lower()
+        if normalized_format not in ('eegunity', 'normal'):
+            raise ValueError("format_type must be 'EEGUnity' or 'normal'.")
         cache = {}
 
         @handle_errors(miss_bad_data)
         def app_func(row):
             channel_name = row['Channel Names']
-            if channel_name in cache:
-                return cache[channel_name]
-            else:
-                formatted_channel_name = channel_name_parser(channel_name)
-                cache[channel_name] = formatted_channel_name
-                return formatted_channel_name
+            if channel_name not in cache:
+                cache[channel_name] = channel_name_parser(channel_name)
+            return _format_parsed_channels(cache[channel_name], format_type)
 
         results = self.batch_process(lambda row: True, app_func, is_patch=False, result_type="value",
                                      execution_mode=None)
@@ -679,7 +907,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         picks : str, optional
             Channels to be used for filtering. Defaults to 'all'.
         miss_bad_data : bool, optional
-            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
+            If ``False``, any row failure aborts the operation and the active
+            locator remains unchanged. If ``True``, failed rows are omitted
+            from the new derived locator. Defaults to ``False``.
         get_data_row_params : dict, optional
             Additional parameters passed to `get_data_row()` for data retrieval.
         filter_params : dict, optional
@@ -698,7 +928,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
                      get_data_row_params, filter_params, notch_filter_params):
             # Construct file paths
             file_name = os.path.splitext(os.path.basename(row['File Path']))[0]
-            new_file_path = os.path.join(output_path, f"{file_name}_filter.fif")
+            new_file_path = os.path.join(output_path, f"{file_name}_filter_raw.fif")
 
             # Get the data
             if get_data_row_params is None:
@@ -752,25 +982,20 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             else:
                 raise ValueError("Invalid filter_type. Must be 'lowpass', 'highpass', 'bandpass', or 'notch'.")
 
-            # Save filtered data
+            # Save filtered data and keep locator columns that a directory rescan would drop.
             mne_raw.save(new_file_path, overwrite=True)
-            row['File Path'] = new_file_path
-
-            return None
+            return _update_derived_row(row, mne_raw, new_file_path)
 
         # Process the batch
-        self.batch_process(lambda row: True,
+        new_locator = self.batch_process(lambda row: True,
                            lambda row: app_func(row, l_freq, h_freq, notch_freq, filter_type,
                                                 output_path, auto_adjust_h_freq, picks,
                                                 get_data_row_params, filter_params, notch_filter_params),
                            is_patch=False,
-                           result_type=None,
+                           result_type='series',
                            execution_mode='process')
 
-        # Update file paths in the dataset
-        self.get_shared_attr()["dataset_path"] = output_path
-        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
-            self.main_instance.eeg_parser._process_directory(output_path))})
+        self._commit_derived_locator(new_locator, output_path)
 
     def ica(self, output_path: str, miss_bad_data: bool = False, get_params: Dict = None,
             ica_params: Dict = None, fit_params: Dict = None, apply_params: Dict = None):
@@ -790,7 +1015,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         output_path : str
             Path to save the processed file after applying ICA.
         miss_bad_data : bool, optional
-            Whether to skip bad data files and continue processing the next one. Defaults to `False`.
+            If ``False``, any row failure aborts the operation and the active
+            locator remains unchanged. If ``True``, failed rows are omitted
+            from the new derived locator. Defaults to ``False``.
         get_params : dict, optional
             Additional parameters passed to `eegunity.module_eeg_parser.eeg_parser.get_data_row`,
         ica_params : dict, optional
@@ -839,23 +1066,16 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
             # Save file and update path in locator
             mne_raw.save(new_file_path, overwrite=True)
-            row['File Path'] = new_file_path
+            return _update_derived_row(row, mne_raw, new_file_path)
 
-            return new_file_path
-
-        new_path_list = self.batch_process(
+        new_locator = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, output_path),
             is_patch=False,
-            result_type='value',
+            result_type='series',
             execution_mode='process',
         )
-
-        # Update locator
-        self.set_metadata("File Path", new_path_list)
-        locator_df = self.get_shared_attr()['locator']
-        locator_df = locator_df[locator_df['File Path'] != ""]
-        self.get_shared_attr()['locator'] = locator_df
+        self._commit_derived_locator(new_locator, output_path)
 
     def resample(self, output_path: str, miss_bad_data: bool = False, resample_params: Dict = None,
                  get_data_row_params: Dict = None) -> None:
@@ -866,7 +1086,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         output_path : str
             The path where the resampled file will be saved.
         miss_bad_data : bool, optional
-            Whether to skip the current file and continue processing the next one if an error occurs. Defaults to `False`.
+            If ``False``, any row failure aborts the operation and the active
+            locator remains unchanged. If ``True``, failed rows are omitted
+            from the new derived locator. Defaults to ``False``.
         resample_params : dict, optional
             Additional parameters to be passed to the `mne_raw.resample()` function.
         get_data_row_params : dict, optional
@@ -910,31 +1132,23 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             # misc: label channels receive nearest-neighbour interpolation.
             resample_raw_with_labels(mne_raw, **resample_params)
 
-            # Save resampled data and update locator
+            # Duration stays in seconds. Do not scale it by the sampling-rate ratio.
             mne_raw.save(new_file_path, overwrite=True)
-            row['File Path'] = new_file_path
-            row['Duration'] = str(
-                float(row['Sampling Rate'].strip()) * float(row['Duration'].strip()) / int(mne_raw.info['sfreq']))
-            row['Sampling Rate'] = str(int(mne_raw.info['sfreq']))
+            return _update_derived_row(
+                row,
+                mne_raw,
+                new_file_path,
+                changed_fields={'Data Shape', 'Sampling Rate', 'Duration'},
+            )
 
-            dimensions = row['Data Shape'].strip('()').split(',')
-            dimensions = [int(dim.strip()) for dim in dimensions]
-            dimensions[dimensions.index(max(dimensions))] = int(
-                float(row['Duration'].strip()) * float(mne_raw.info['sfreq']))
-            row['Data Shape'] = f"({dimensions[0]}, {dimensions[1]})"
-            return row
-
-        self.batch_process(
+        new_locator = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
             lambda row: app_func(row, output_path),
             is_patch=False,
-            result_type=None,
+            result_type='series',
             execution_mode='process',
         )
-        # Update file paths in the dataset
-        self.get_shared_attr()["dataset_path"] = output_path
-        self.set_shared_attr({'locator': self.main_instance.eeg_parser.check_locator(
-            self.main_instance.eeg_parser._process_directory(output_path))})
+        self._commit_derived_locator(new_locator, output_path)
 
     def align_channel(self, output_path: str, channel_order: list, min_num_channels: int = 1,
                       miss_bad_data: bool = False, get_data_row_params: Dict = None) -> None:
@@ -954,8 +1168,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         min_num_channels : int, optional
             The minimum number of channels required for alignment. Defaults to 1.
         miss_bad_data : bool, optional
-            Whether to skip the current file and continue processing the next one if an error occurs.
-            Defaults to `False`.
+            If ``False``, any row failure aborts the operation and the active
+            locator remains unchanged. If ``True``, failed rows are omitted
+            from the new derived locator. Defaults to ``False``.
         get_data_row_params : dict, optional
             Additional keyword arguments to be passed to :func:`get_data_row` for data fetching.
             This allows fine-tuning the data retrieval process.
@@ -995,14 +1210,13 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             aligned_raw = channel_align_raw(mne_raw, channel_order, min_matched_channel=min_num_channels)
 
             aligned_raw.save(new_file_path, overwrite=True)
-            row['File Path'] = new_file_path
-            row['Channel Names'] = ', '.join(aligned_raw.info['ch_names'])
-            row['Number of Channels'] = str(len(channel_order))
-            dimensions = row['Data Shape'].strip('()').split(',')
-            dimensions = [int(dim.strip()) for dim in dimensions]
-            dimensions[dimensions.index(min(dimensions))] = len(channel_order)
-            row['Data Shape'] = f"({dimensions[0]}, {dimensions[1]})"
-            return row
+            return _update_derived_row(
+                row,
+                aligned_raw,
+                new_file_path,
+                changed_fields={'Data Shape'},
+                force_channel_sync=True,
+            )
 
         new_locator = self.batch_process(
             lambda row: row['Completeness Check'] != 'Unavailable',
@@ -1011,7 +1225,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             result_type='series',
             execution_mode='process',
         )
-        self.get_shared_attr()['locator'] = new_locator
+        self._commit_derived_locator(new_locator, output_path)
 
     def normalize(self, output_path: str, norm_type: str = 'sample-wise', miss_bad_data: bool = False,
                   domain_mean: bool = True, get_data_row_params: Dict = None) -> None:
@@ -1029,8 +1243,9 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             - 'channel-wise': Normalize each channel individually based on its mean and standard deviation.
             - 'sample-wise': Normalize all channels based on a common mean and standard deviation.
         miss_bad_data : bool, optional
-            Whether to skip the current file and continue processing the next one if an error occurs.
-            Defaults to `False`.
+            If ``False``, any row failure aborts the operation and the active
+            locator remains unchanged. If ``True``, failed rows are omitted
+            from the new derived locator. Defaults to ``False``.
         domain_mean : bool, optional
             If True (default), the function aggregates the results by domain tags. Each domain contains the
             mean and standard deviation across all related EEG channels. If False, the function calculates
@@ -1065,10 +1280,14 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         if get_data_row_params is None:
             get_data_row_params = {}
 
-        # Check if 'MEAN STD' column exists, if not process mean and std
-        locator = self.get_shared_attr()['locator']
-        if 'MEAN STD' not in locator.columns:
-            self.process_mean_std(domain_mean=domain_mean)
+        # Mean/std preparation is metadata-only, but the derived locator is
+        # committed transactionally with the normalized files below.
+        original_locator = self.get_shared_attr()['locator'].copy(deep=True)
+        if 'MEAN STD' not in original_locator.columns:
+            self.process_mean_std(
+                domain_mean=domain_mean,
+                miss_bad_data=miss_bad_data,
+            )
 
         @handle_errors(miss_bad_data)
         def app_func(row, norm_type, output_path):
@@ -1081,18 +1300,20 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
             mne_raw = self._get_data_row(row, **get_data_row_params_with_norm)
             mne_raw.save(new_file_path, overwrite=True)
-            row['File Path'] = new_file_path
-            row['File Type'] = "standard_data"
-            return row
+            return _update_derived_row(row, mne_raw, new_file_path)
 
-        new_locator = self.batch_process(
-            lambda row: row['Completeness Check'] != 'Unavailable',
-            lambda row: app_func(row, norm_type, output_path),
-            is_patch=False,
-            result_type='series',
-            execution_mode='process',
-        )
-        self.get_shared_attr()['locator'] = new_locator
+        try:
+            new_locator = self.batch_process(
+                lambda row: row['Completeness Check'] != 'Unavailable',
+                lambda row: app_func(row, norm_type, output_path),
+                is_patch=False,
+                result_type='series',
+                execution_mode='process',
+            )
+        except Exception:
+            self.set_shared_attr({'locator': original_locator})
+            raise
+        self._commit_derived_locator(new_locator, output_path)
 
     def epoch_for_pretraining(self,
                               output_path: str,
@@ -1313,12 +1534,12 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
 
         * ``description`` — the full ``raw.info["description"]`` string, which
           kernels use to store ``eegunity_description`` JSON (age, sex, device …).
-        * ``Channel Names`` — post-kernel channel name list (kernels may rename
-          channels, so this overrides the pre-kernel names stored during directory
-          scan).
+        * ``Channel Names`` — post-kernel MNE-compatible ``type:name`` schema
+          (kernels may rename or retype channels, so this overrides the
+          pre-kernel names stored during directory scan).
         * ``Channel Types`` — post-kernel MNE channel types in the same order as
-          ``Channel Names``. Names stay untyped for loader compatibility while
-          metadata consumers can retain kernel channel-type decisions.
+          ``Channel Names``. This remains as a redundant validation column for
+          metadata consumers.
 
         Use this method instead of calling :meth:`get_events` followed by a
         separate per-file reload for subject metadata extraction.
@@ -1360,7 +1581,7 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
             # Kernel-written metadata — captured here so callers avoid a second
             # full file reload just to read raw.info["description"].
             row["description"] = mne_raw.info.get("description", "")
-            row["Channel Names"] = ", ".join(mne_raw.ch_names)
+            row["Channel Names"] = _typed_channel_schema(mne_raw)
             row["Channel Types"] = ", ".join(mne_raw.get_channel_types())
             return row
 

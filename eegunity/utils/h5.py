@@ -6,14 +6,13 @@ from pathlib import Path
 
 
 class h5Dataset:
-    """
-   Handle HDF5 file operations in a format compatible with h5py.
+    """Handle HDF5 file operations in a format compatible with h5py.
 
     This class is adapted from:
     https://github.com/935963004/LaBraM/blob/main/dataset_maker/shock/utils/h5.py#L8.
 
-    Atomic write
-    ------------
+    Notes
+    -----
     Data is written to ``<name>.hdf5.tmp`` and only renamed to
     ``<name>.hdf5`` when :meth:`save` is called successfully.
     If the final ``.hdf5`` file already exists, ``FileExistsError``
@@ -124,50 +123,59 @@ class h5Dataset:
 
 
 class h5EpochDatasetV2:
-    """
-    EEGUnity v2 epoch HDF5 format writer (v2.1 schema).
+    """Write EEGUnity epoch data using the v2.1 HDF5 schema.
 
-    Flat-array layout optimised for PyTorch random access:
+    The flat-array layout is optimized for PyTorch random access.
 
-    Structure
-    ---------
-    / (root)
-      attrs: version ("2.1"), sfreq, ch_names (JSON), n_channels, n_times,
-             label_map (JSON: code->event_name), n_epochs_total,
-             info_fields (JSON list[str]; v2.1),
-             created_by, created_at
-    ├── data          (N, n_ch, n_times)  float32
-    │                 chunk=(1, n_ch, n_times), gzip level-1
-    ├── epoch_meta/
-    │   ├── source_group  (N,)  variable-length UTF-8 string
-    │   └── event_code    (N,)  int16
-    ├── misc_meta/                                              (v2.1, optional)
-    │   ├── {misc_channel_name}  (N,) float32
-    │   └── attrs.names: JSON list[str]
-    └── source_meta/
-        └── {group_name}/
-              attrs: file_path, n_epochs_in_source, sfreq,
-                     ch_names (JSON), age, gender, amplifier, cap, handedness,
-                     <any additional participants.tsv columns>
-              └── info  (uint8)  pickled mne.Info bytes
-
-    Backward compat
-    ---------------
-    Readers of v2.0 can still open v2.1 files if they ignore /misc_meta/ and the
-    extra source attrs. The dataset_api in eeg_kernel_agent accepts both "2.0"
-    and "2.1" as valid version strings.
-
-    Usage
+    Notes
     -----
-    writer = h5EpochDatasetV2(output_dir, "MyDataset")
-    writer.add_epochs(group_name, event_name, epoch_array_float32,
-                      info_bytes, source_attrs, sfreq, ch_names,
-                      misc_values={"accuracy": np.array([1, 0, 1])})   # v2.1
-    writer.save()
+    The generated file has the following structure::
 
-    Reading in PyTorch
-    ------------------
-    Use eeg_kernel_agent.dataset_api.{EventDataset, MISCDataset, InfoDataset}.
+        / (root)
+          attrs: version ("2.1"), sfreq, ch_names (JSON), n_channels,
+                 n_times, label_map (JSON), n_epochs_total,
+                 info_fields (JSON), created_by, created_at
+          data
+            shape: (n_epochs, n_channels, n_times)
+            dtype: float32
+            chunks: (1, n_channels, n_times)
+          epoch_meta/
+            source_group: (n_epochs,) variable-length UTF-8 string
+            event_code: (n_epochs,) int16
+          misc_meta/ (optional)
+            <misc_channel_name>: (n_epochs,) float32
+            attrs.names: JSON list of channel names
+          source_meta/
+            <group_name>/
+              attrs: file_path, n_epochs_in_source, sfreq, ch_names,
+                     age, gender, amplifier, cap, handedness, and any
+                     additional participant fields
+              info: uint8 array containing pickled mne.Info bytes
+
+    Readers that support v2.0 can open v2.1 files when they ignore
+    ``misc_meta`` and additional source attributes. The
+    ``eeg_kernel_agent.dataset_api`` module accepts both versions.
+
+    Examples
+    --------
+    >>> writer = h5EpochDatasetV2(output_dir, "MyDataset")  # doctest: +SKIP
+    >>> writer.add_epochs(  # doctest: +SKIP
+    ...     group_name,
+    ...     event_name,
+    ...     epoch_array_float32,
+    ...     info_bytes,
+    ...     source_attrs,
+    ...     sfreq,
+    ...     ch_names,
+    ...     misc_values={"accuracy": np.array([1, 0, 1])},
+    ... )
+    >>> writer.save()  # doctest: +SKIP
+
+    See Also
+    --------
+    eeg_kernel_agent.dataset_api.EventDataset
+    eeg_kernel_agent.dataset_api.MISCDataset
+    eeg_kernel_agent.dataset_api.InfoDataset
     """
 
     def __init__(self, path: Path, name: str) -> None:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,11 +22,35 @@ def _collect_scripts(ci_dir: Path) -> list[str]:
     return [name for name in scripts if (ci_dir / name).exists()]
 
 
-def run_tests() -> int:
-    """Execute CI scripts and return process exit code."""
+def run_tests(config_path: Path | None = None) -> int:
+    """Execute CI scripts and return their combined process exit code.
+
+    Parameters
+    ----------
+    config_path : pathlib.Path or None
+        Optional machine-local configuration passed to every CI script.
+
+    Returns
+    -------
+    int
+        Zero when every script passes, otherwise one.
+
+    Examples
+    --------
+    >>> run_tests(Path("local_ci_config.json"))  # doctest: +SKIP
+    0
+    """
     ci_dir = Path(__file__).resolve().parent
     scripts = _collect_scripts(ci_dir)
     failed: list[str] = []
+    child_env = os.environ.copy()
+
+    if config_path is not None:
+        resolved_config = config_path.resolve()
+        if not resolved_config.is_file():
+            raise FileNotFoundError(f"CI config not found: {resolved_config}")
+        child_env["EEGUNITY_CI_CONFIG"] = str(resolved_config)
+        print(f"[run_all_CI_test] Config: {resolved_config}")
 
     print("[run_all_CI_test] Scripts:", scripts)
 
@@ -36,6 +62,7 @@ def run_tests() -> int:
             cwd=str(ci_dir),
             capture_output=True,
             text=True,
+            env=child_env,
         )
 
         if result.returncode != 0:
@@ -58,5 +85,16 @@ def run_tests() -> int:
     return 0
 
 
+def _parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for the local CI runner."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="Path to a machine-local CI JSON configuration.",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    raise SystemExit(run_tests())
+    raise SystemExit(run_tests(_parse_args().config))
