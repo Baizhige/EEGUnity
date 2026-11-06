@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -16,8 +17,20 @@ from eegunity.unifieddataset import UnifiedDataset
 
 
 def load_ci_config() -> dict:
-    """Load CI configuration and validate required fields."""
-    config_path = CI_DIR / "CI_config.json"
+    """Load the selected CI configuration and validate required fields.
+
+    The ``EEGUNITY_CI_CONFIG`` environment variable can select a machine-local
+    configuration without modifying the repository default.
+
+    Examples
+    --------
+    >>> config = load_ci_config()  # doctest: +SKIP
+    >>> "test_data_list" in config
+    True
+    """
+    config_path = Path(os.environ.get("EEGUNITY_CI_CONFIG", CI_DIR / "CI_config.json"))
+    if not config_path.is_file():
+        raise FileNotFoundError(f"CI config not found: {config_path}")
     with config_path.open("r", encoding="utf-8-sig") as f:
         config = json.load(f)
 
