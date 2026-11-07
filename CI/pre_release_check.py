@@ -6,8 +6,8 @@ Run this before every PyPI upload:
 Checks performed:
 1. Every eegunity subpackage directory contains __init__.py.
 2. find_packages() discovers all expected packages.
-3. The newest wheel in dist/ contains every discovered package.
-4. twine check passes on all dist/ artifacts.
+3. The wheel for the current project version contains every discovered package.
+4. twine check passes on the current version's dist/ artifacts.
 """
 
 from __future__ import annotations
@@ -20,6 +20,20 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 PACKAGE_ROOT = PROJECT_ROOT / "eegunity"
 DIST_DIR = PROJECT_ROOT / "dist"
+VERSION_FILE = PACKAGE_ROOT / "_version.py"
+
+
+def _project_version() -> str:
+    """Return the version declared in ``eegunity/_version.py``."""
+    namespace: dict[str, str] = {}
+    exec(VERSION_FILE.read_text(encoding="utf-8"), namespace)
+    return namespace["__version__"]
+
+
+def _current_artifacts() -> list[Path]:
+    """Return distribution files matching the declared project version."""
+    version = _project_version()
+    return sorted(DIST_DIR.glob(f"eegunity-{version}*"))
 
 
 def _all_package_dirs() -> list[Path]:
@@ -55,10 +69,11 @@ def check_find_packages() -> tuple[list[str], list[str]]:
 
 
 def check_wheel_contents(found_packages: list[str]) -> list[str]:
-    """Verify the newest wheel contains every package discovered by find_packages."""
-    wheels = sorted(DIST_DIR.glob("*.whl"), key=lambda p: p.stat().st_mtime, reverse=True)
+    """Verify the current wheel contains every package found by ``find_packages``."""
+    wheels = [path for path in _current_artifacts() if path.suffix == ".whl"]
     if not wheels:
-        return ["No wheel found in dist/ — run 'python -m build' first."]
+        version = _project_version()
+        return [f"No wheel found for version {version} — run 'python -m build' first."]
 
     wheel = wheels[0]
     print(f"  Checking wheel: {wheel.name}")
@@ -78,10 +93,11 @@ def check_wheel_contents(found_packages: list[str]) -> list[str]:
 
 
 def check_twine() -> list[str]:
-    """Run twine check on all dist/ artifacts."""
-    artifacts = list(DIST_DIR.glob("*"))
+    """Run ``twine check`` on the current version's distribution files."""
+    artifacts = _current_artifacts()
     if not artifacts:
-        return ["No artifacts in dist/ to check."]
+        version = _project_version()
+        return [f"No artifacts found for version {version}."]
 
     result = subprocess.run(
         [sys.executable, "-m", "twine", "check"] + [str(a) for a in artifacts],
