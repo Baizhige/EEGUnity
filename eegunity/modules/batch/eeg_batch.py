@@ -22,6 +22,7 @@ from eegunity._share_attributes import _UDatasetSharedAttributes
 from eegunity.utils.h5 import h5Dataset
 from eegunity.utils.handle_errors import handle_errors
 from eegunity.utils.log_processing import log_processing
+from eegunity.modules.batch.in_memory import apply_raw_steps, output_fif_path, sync_saved_row
 from eegunity.modules.batch.method_mixin_epoch import EEGBatchMixinEpoch
 from eegunity.utils.label_channel import resample_raw_with_labels
 
@@ -2131,3 +2132,72 @@ class EEGBatch(_UDatasetSharedAttributes, EEGBatchMixinEpoch):
         )
 
         self.set_metadata("File Size", results)
+
+    def process_steps(self,
+                      output_path: str,
+                      steps: List[Callable],
+                      suffix: str = "processed",
+                      miss_bad_data: bool = False,
+                      get_data_row_params: Dict = None,
+                      domain_tag: Union[str, None] = None) -> None:
+        """Load each recording once, apply ``steps``, and write one FIF file.
+
+        ``filter``, ``resample``, ``align_channel`` and ``normalize`` each
+        read a recording and write a new FIF file. This method runs every
+        step on the in-memory Raw object and writes only the final result.
+        The same ``apply_raw_steps`` helper can be passed as the ``pipeline``
+        argument of the HDF5 epoch writers and ``export_h5Dataset``.
+
+        Parameters
+        ----------
+        output_path : str
+            Directory for the written FIF files. Created if missing.
+        steps : list of callable
+            Functions applied left to right. Each accepts a Raw object and
+            may return a Raw object or ``None`` after in-place modification.
+        suffix : str, optional
+            Token included in the output filename. Defaults to ``processed``.
+        miss_bad_data : bool, optional
+            When ``True``, a failed recording is omitted from the updated
+            locator. When ``False``, the exception propagates.
+        get_data_row_params : dict, optional
+            Extra arguments for :func:`get_data_row`.
+        domain_tag : str, optional
+            When set, only rows with this domain tag are processed.
+
+        Returns
+        -------
+        None
+            The locator is replaced with the rows that were written. Signal
+            columns are refreshed from the saved Raw object. Other columns
+            are copied from the input row.
+        """
+        if get_data_row_params is None:
+            get_data_row_params = {}
+        os.makedirs(output_path, exist_ok=True)
+        prepared_steps = list(steps)
+
+        @handle_errors(miss_bad_data)
+        def app_func(row):
+            raw = self._get_data_row(row, **get_data_row_params)
+            raw = apply_raw_steps(raw, prepared_steps)
+            new_file_path = output_fif_path(output_path, row["File Path"], suffix)
+            raw.save(new_file_path, overwrite=True)
+            return sync_saved_row(row, raw, new_file_path)
+
+        def con_func(row):
+            if row["Completeness Check"] == "Unavailable":
+                return False
+            if domain_tag is not None and row["Domain Tag"] != domain_tag:
+                return False
+            return True
+
+        new_locator = self.batch_process(
+            con_func,
+            app_func,
+            is_patch=False,
+            result_type="series",
+            execution_mode="process",
+        )
+        self.get_shared_attr()["dataset_path"] = output_path
+        self.set_shared_attr({"locator": new_locator})
