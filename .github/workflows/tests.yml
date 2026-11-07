@@ -10,12 +10,12 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  unit-tests:
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     env:
       MPLBACKEND: Agg
     steps:
@@ -23,12 +23,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install
-        run: |
-          python -m pip install -e .
-          python -m pip install pytest
-      - name: Test
-        run: pytest tests -q
+      - name: Install package and tests
+        run: python -m pip install -e . pytest
+      - name: Run unit tests
+        run: python -m pytest tests -q
 
   lint:
     runs-on: ubuntu-latest
@@ -50,10 +48,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - name: Build
+          python-version: "3.13"
+      - name: Build package
         run: |
-          python -m pip install build twine
+          python -m pip install build twine setuptools
           python -m build
-      - name: Pre-release check
+      - name: Check package contents
         run: python CI/pre_release_check.py

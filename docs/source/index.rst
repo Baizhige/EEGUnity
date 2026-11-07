@@ -11,6 +11,7 @@ EEGUnity documentation
    :caption: Contents:
 
    modules
+   batch_processing_contract
    tutorials
 
 

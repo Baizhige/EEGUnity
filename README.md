@@ -15,7 +15,8 @@ For project background, see the paper:
 
 ### 1. Create a Python Environment
 
-Use Python 3.6 or higher. Python 3.13 is currently not supported due to dependency compatibility limits.
+EEGUnity requires Python 3.9 or newer. Version 0.8.6 is tested on Python 3.9
+through 3.14.
 
 ### 2. Install EEGUnity
 

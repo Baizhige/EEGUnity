@@ -14,14 +14,14 @@ AI-readable checklist for every PyPI release. Work through each section in order
 ## 2. Packaging integrity (run script)
 
 ```powershell
-& "C:\Users\Cheng\anaconda3\envs\eegunity_release\python.exe" CI/pre_release_check.py
+& "E:\anaconda3\envs\eegunity_release\python.exe" CI/pre_release_check.py
 ```
 
 This script verifies:
 - Every subpackage directory under `eegunity/` has an `__init__.py` (missing `__init__.py` silently drops the package from the wheel — this caused the 0.8.1 `kernel` incident).
 - `setuptools.find_packages()` discovers all expected packages.
 - The built wheel contains every discovered package.
-- `twine check` passes.
+- `twine check` passes for artifacts matching the version in `eegunity/_version.py`.
 
 **Do not upload if this script reports any errors.**
 
@@ -36,20 +36,42 @@ Remove-Item "build\" -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item "eegunity.egg-info\" -Recurse -Force -ErrorAction SilentlyContinue
 
 # Build
-& "C:\Users\Cheng\anaconda3\envs\eegunity_release\python.exe" -m build
+& "E:\anaconda3\envs\eegunity_release\python.exe" -m build
 ```
 
 ---
 
 ## 4. CI tests
 
-GitHub Actions (`.github/workflows/tests.yml`) runs `pytest tests` on Ubuntu, checks formatting of `tests/` with Ruff, lints `tests/` and `eegunity/`, and runs `CI/pre_release_check.py` after a wheel build. Ruff format is not applied to `eegunity/` yet: that tree is not formatted, and rewriting it would collide with open pull requests. The dataset scripts below still need `CI/CI_config.json` (data root `H:\`, output `E:\tmp\EEGUnity_CI\`).
+GitHub Actions (`.github/workflows/tests.yml`) runs `pytest tests` on Python 3.9–3.14, checks formatting of `tests/` with Ruff, lints `tests/` and `eegunity/`, and runs `CI/pre_release_check.py` after a wheel build. Ruff format is not applied to `eegunity/` yet: that tree is not formatted, and rewriting it would collide with open pull requests.
 
 ```powershell
-& "C:\Users\Cheng\anaconda3\envs\eegunity_release\python.exe" CI/run_all_CI_test.py
+& "E:\anaconda3\envs\eegunity_release\python.exe" CI/run_all_CI_test.py
 ```
 
-All scripts must pass.
+All scripts must pass. CI config: `CI/CI_config.json` (data root `H:\`, output `E:\tmp\EEGUnity_CI\`).
+Use `--config <path>` to run against a machine-local JSON config without editing the repository default.
+
+### Batch behavior contract
+
+Batch behavior must follow `docs/source/batch_processing_contract.md`.
+
+- Derived-dataset operations create new EEG files, replace the active locator from copied source rows, and update `dataset_path`.
+- Metadata operations update locator columns without replacing files or changing `dataset_path`.
+- Locator-selection operations only select rows.
+- Export-only operations create downstream artifacts without replacing the active locator.
+- Derived locators must never be rebuilt by rescanning an output directory.
+- Existing `type:name` channel schemas must survive operations that do not change the channel layout.
+- Channel-changing operations must regenerate MNE-compatible `type:name` entries.
+- CSV timestamps are not signal channels, and event columns use `stim`, for example `stim:marker`.
+
+Run the locator regression tests explicitly:
+
+```powershell
+& "E:\anaconda3\envs\eegunity_release\python.exe" -m pytest tests/test_batch_locator.py -q
+```
+
+**Do not release while any batch contract regression test fails.**
 
 ---
 
@@ -57,7 +79,9 @@ All scripts must pass.
 
 ```powershell
 $env:PYTHONUTF8 = "1"
-& "C:\Users\Cheng\anaconda3\envs\eegunity_release\python.exe" -m twine upload --disable-progress-bar dist/*
+$version = & "E:\anaconda3\envs\eegunity_release\python.exe" -c "from eegunity import __version__; print(__version__)"
+$artifacts = Get-ChildItem "dist\eegunity-$version*" | ForEach-Object { $_.FullName }
+& "E:\anaconda3\envs\eegunity_release\python.exe" -m twine upload --disable-progress-bar $artifacts
 ```
 
 Credentials are read from `~/.pypirc`. On Windows the `--disable-progress-bar` flag is required to avoid a GBK encoding crash in twine's rich progress renderer.
