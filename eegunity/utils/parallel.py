@@ -24,40 +24,21 @@ import cloudpickle
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Any, Callable, List, Optional, Tuple
 
+_WORKER_FUNC = None
 
-def _cloudpickle_worker(pickled_func: bytes, task: Tuple) -> Any:
-    """Deserialise and invoke *pickled_func* on a single task row.
 
-    This function is intentionally defined at **module level** so that it
-    is picklable by the standard multiprocessing serialiser used internally
-    by :class:`~concurrent.futures.ProcessPoolExecutor`.  The actual
-    callable (which may be a closure or a locally-defined function) is
-    carried as a *cloudpickle* byte string rather than being passed
-    directly, which avoids the serialisation limitations of the default
-    :mod:`pickle`.
+def _init_process_worker(pickled_func: bytes) -> None:
+    """Unpickle ``app_func`` once when a worker process starts."""
+    global _WORKER_FUNC
+    _WORKER_FUNC = cloudpickle.loads(pickled_func)
 
-    Parameters
-    ----------
-    pickled_func : bytes
-        cloudpickle-serialised representation of the ``app_func`` to
-        invoke.
-    task : tuple
-        A ``(index, row, should_apply)`` triple as produced by
-        :func:`parallel_execute`.  When *should_apply* is ``False`` this
-        function returns ``None`` immediately without deserialising the
-        callable.
 
-    Returns
-    -------
-    Any
-        The return value of the deserialised callable when invoked with the
-        row, or ``None`` when *should_apply* is ``False``.
-    """
+def _process_task(task: Tuple) -> Any:
+    """Invoke the worker-local function on one applicable task."""
     _, row, should_apply = task
     if not should_apply:
         return None
-    func = cloudpickle.loads(pickled_func)
-    return func(row)
+    return _WORKER_FUNC(row)
 
 
 def parallel_execute(
@@ -111,11 +92,10 @@ def parallel_execute(
         ``'process'``
             Concurrent execution via
             :class:`~concurrent.futures.ProcessPoolExecutor`.  Each
-            worker runs in a separate OS process, bypassing the GIL for
-            true CPU parallelism.  *app_func* is serialised with
+            worker unpickles ``app_func`` once in its initializer, then
+            runs in a separate OS process.  *app_func* is serialised with
             *cloudpickle* so closures and locally-defined functions are
-            fully supported.  *num_workers* controls the process-pool
-            size.
+            supported.  *num_workers* controls the process-pool size.
 
         ``None``
             Sequential execution on the calling thread, regardless of
@@ -189,16 +169,11 @@ def parallel_execute(
     # ------------------------------------------------------------------
     # Process path
     # ------------------------------------------------------------------
-    # Serialise app_func once; each worker process deserialises its own
-    # copy via cloudpickle, avoiding repeated serialisation overhead.
+    # Unpickle app_func once per worker instead of once per row.
     pickled_func = cloudpickle.dumps(app_func)
 
-    # Pre-fill output list with placeholders; only applicable tasks will
-    # have their entries overwritten with real computed values.
     results: List[Any] = [_placeholder(row) for _, row, _ in tasks]
 
-    # Filter to tasks where should_apply is True, preserving original
-    # indices so results can be merged back into the correct positions.
     applicable = [
         (original_idx, task)
         for original_idx, task in enumerate(tasks)
@@ -207,14 +182,12 @@ def parallel_execute(
 
     if applicable:
         applicable_tasks = [task for _, task in applicable]
-        with ProcessPoolExecutor(max_workers=num_workers) as executor:
-            computed = list(
-                executor.map(
-                    _cloudpickle_worker,
-                    [pickled_func] * len(applicable_tasks),
-                    applicable_tasks,
-                )
-            )
+        with ProcessPoolExecutor(
+            max_workers=num_workers,
+            initializer=_init_process_worker,
+            initargs=(pickled_func,),
+        ) as executor:
+            computed = list(executor.map(_process_task, applicable_tasks))
         for (original_idx, _), value in zip(applicable, computed):
             results[original_idx] = value
 
