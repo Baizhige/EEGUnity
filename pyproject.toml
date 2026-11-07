@@ -1,3 +1,21 @@
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 100
+src = ["eegunity", "tests"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Package __init__ files re-export names for callers.
+"eegunity/**/__init__.py" = ["F401", "F403", "F405"]
+# Imported for annotations and older call sites.
+"eegunity/modules/parser/eeg_parser.py" = ["F401"]
+# Unreachable names after epoch_by_event raises NotImplementedError, and a
+# quoted forward reference to UnifiedDataset.
+"eegunity/modules/batch/method_mixin_epoch.py" = ["F821"]
+"eegunity/modules/batch/eeg_batch.py" = ["F821"]

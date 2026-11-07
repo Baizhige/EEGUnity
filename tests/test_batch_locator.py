@@ -14,10 +14,12 @@ from eegunity.unifieddataset import UnifiedDataset
 
 def _raw(sfreq=100.0, n_times=100):
     info = mne.create_info(["C3", "C4"], sfreq=sfreq, ch_types=["eeg", "eeg"])
-    data = np.vstack([
-        np.sin(np.linspace(0, 8 * np.pi, n_times)),
-        np.cos(np.linspace(0, 6 * np.pi, n_times)),
-    ])
+    data = np.vstack(
+        [
+            np.sin(np.linspace(0, 8 * np.pi, n_times)),
+            np.cos(np.linspace(0, 6 * np.pi, n_times)),
+        ]
+    )
     return mne.io.RawArray(data, info, verbose=False)
 
 
@@ -189,7 +191,9 @@ class TestLocatorMetadata(unittest.TestCase):
             locator = dataset.get_locator()
             self.assertEqual(len(locator), 1)
             self.assertTrue(locator["File Path"].iloc[0].endswith("_filter_raw.fif"))
-            self.assertFalse((output / "already_there_raw.fif").samefile(locator["File Path"].iloc[0]))
+            self.assertFalse(
+                (output / "already_there_raw.fif").samefile(locator["File Path"].iloc[0])
+            )
             self.assertEqual(locator["Note"].iloc[0], "note-0")
             self.assertEqual(locator["Domain Tag"].iloc[0], "demo")
             self.assertEqual(_file_hash(source_path), source_hash)
