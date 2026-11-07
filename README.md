@@ -24,6 +24,12 @@ through 3.14.
 pip install eegunity
 ```
 
+Description-file parsing and the generated CSV reader need the optional LLM extra:
+
+```bash
+pip install "eegunity[llm]"
+```
+
 ### 3. Import EEGUnity
 
 ```python
