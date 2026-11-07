@@ -24,6 +24,12 @@ through 3.14.
 pip install eegunity
 ```
 
+LLM parsing of non-standard files and PDF descriptions is optional:
+
+```bash
+pip install "eegunity[llm]"
+```
+
 ### 3. Import EEGUnity
 
 ```python

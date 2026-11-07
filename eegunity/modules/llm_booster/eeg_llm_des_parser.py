@@ -5,6 +5,8 @@ from scipy.io import loadmat
 import json
 import re
 
+from eegunity.modules.llm_booster._optional import require_optional
+
 
 def _read_files(directory):
     files = []
@@ -35,7 +37,7 @@ def _read_files(directory):
                         files.append({"file_path": file_path, "content": file_content})
                         print(f"read {file} complete")
                     elif file.endswith('.pdf'):
-                        import pdfplumber
+                        pdfplumber = require_optional("pdfplumber", "Reading PDF descriptions")
                         with pdfplumber.open(file_path) as pdf:
                             file_content = "\n".join([page.extract_text() or "" for page in pdf.pages])
                         files.append({"file_path": file_path, "content": file_content})
@@ -69,6 +71,8 @@ def _read_files(directory):
                         files.append({"file_path": file_path, "content": file_content})
                         print(f"read {file} complete, length：{len(file_content)}")
 
+            except ImportError:
+                raise
             except Exception as e:
                 print(f"Error processing.mat file {file_path}：{e}")
     return files
@@ -142,11 +146,9 @@ def _filter_files_with_gpt(files: str, client_paras: dict, client_type: str, com
     processed_files = []
     try:
         if client_type == "AzureOpenAI":
-            from openai import AzureOpenAI
-            client = AzureOpenAI(**client_paras)
+            client = require_optional("openai", "LLM parsing").AzureOpenAI(**client_paras)
         elif client_type == "OpenAI":
-            from openai import OpenAI
-            client = OpenAI(**client_paras)
+            client = require_optional("openai", "LLM parsing").OpenAI(**client_paras)
         else:
             raise ValueError("Unsupported client_type. Supported types are 'AzureOpenAI' and 'OpenAI'.")
 
@@ -194,6 +196,8 @@ def _filter_files_with_gpt(files: str, client_paras: dict, client_type: str, com
 
         return processed_files
 
+    except ImportError:
+        raise
     except Exception as e:
         print(f"Error using GPT to filter files: {e}")
         return processed_files
